@@ -1,0 +1,78 @@
+name: aalumai
+description: "AALUMAI - offline-first personal life management"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  intl: any
+
+  # State management & navigation
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.6.2
+
+  # Persistence
+  drift: ^2.23.1
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  shared_preferences: ^2.3.3
+  flutter_secure_storage: ^9.2.2
+
+  # Utilities
+  collection: ^1.19.0
+  uuid: ^4.5.1
+  crypto: ^3.0.6
+  package_info_plus: ^8.1.2
+  url_launcher: ^6.3.1
+  csv: ^6.0.0
+  archive: ^3.6.1
+
+  # Notifications & alarms
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+  flutter_timezone: ^3.0.1
+  permission_handler: ^11.3.1
+
+  # Media & audio
+  just_audio: ^0.9.42
+  audio_service: ^0.18.15
+  file_picker: ^8.1.6
+
+  # Location & fitness
+  geolocator: ^13.0.2
+
+  # Charts
+  fl_chart: ^0.70.0
+
+  # Learning
+  flutter_tts: ^4.2.0
+  speech_to_text: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.23.1
+  build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.2
+  path_provider_platform_interface: ^2.1.2
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#0B1F3A"
+  adaptive_icon_foreground: "assets/images/logo.png"
