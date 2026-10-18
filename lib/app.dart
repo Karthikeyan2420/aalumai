@@ -7,7 +7,7 @@ import 'core/localization/generated/app_localizations.dart';
 import 'core/providers/providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/settings/language_setup_screen.dart';
+import 'features/landing/landing_screen.dart';
 
 class AalumaiApp extends ConsumerStatefulWidget {
   const AalumaiApp({super.key});
@@ -58,8 +58,8 @@ class _AalumaiAppState extends ConsumerState<AalumaiApp> {
         locale: locale,
         localizationsDelegates: delegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: LanguageSetupScreen(
-          onFinished: () => setState(() => _needsSetup = false),
+        home: LandingScreen(
+          onGetStarted: () => setState(() => _needsSetup = false),
         ),
       );
     }

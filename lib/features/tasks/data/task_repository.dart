@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/services/reminder_scheduler.dart';
 import '../../../core/utils/recurrence.dart';
 
 enum TaskPriority {
@@ -23,9 +24,10 @@ class TaskWithSubtasks {
 }
 
 class TaskRepository {
-  TaskRepository(this._db);
+  TaskRepository(this._db, [this._reminders]);
 
   final AppDatabase _db;
+  final ReminderScheduler? _reminders;
 
   Stream<List<TaskWithSubtasks>> _watchTopLevel() {
     final query =
@@ -61,9 +63,8 @@ class TaskRepository {
     return list
         .where(
           (e) =>
-              e.task.dueDate != null &&
               !e.task.isCompleted &&
-              e.task.dueDate!.isBefore(end),
+              (e.task.dueDate == null || !e.task.dueDate!.isAfter(end)),
         )
         .toList();
   });
@@ -98,8 +99,8 @@ class TaskRepository {
     Recurrence recurrence = Recurrence.none,
     DateTime? reminderAt,
     String tagIds = '',
-  }) {
-    return _db
+  }) async {
+    final id = await _db
         .into(_db.tasks)
         .insert(
           TasksCompanion.insert(
@@ -114,12 +115,20 @@ class TaskRepository {
             tagIds: Value(tagIds),
           ),
         );
+    final task = await getById(id);
+    if (task != null) await _reminders?.syncTask(task);
+    return id;
   }
 
-  Future<void> updateTask(Task task) => _db.update(_db.tasks).replace(task);
+  Future<void> updateTask(Task task) async {
+    await _db.update(_db.tasks).replace(task);
+    await _reminders?.syncTask(task);
+  }
 
-  Future<void> delete(int id) =>
-      (_db.delete(_db.tasks)..where((t) => t.id.equals(id))).go();
+  Future<void> delete(int id) async {
+    await (_db.delete(_db.tasks)..where((t) => t.id.equals(id))).go();
+    await _reminders?.removeTask(id);
+  }
 
   /// Marks a task complete. For recurring tasks a new, future occurrence is
   /// created so occurrences are generated predictably without duplication.
@@ -156,6 +165,17 @@ class TaskRepository {
         }
       }
     });
+    final updated = await getById(task.id);
+    if (updated != null) await _reminders?.syncTask(updated);
+  }
+
+  /// Re-schedules reminders for every stored task. Called on app start.
+  Future<void> reconcileReminders() async {
+    if (_reminders == null) return;
+    final tasks = await _db.select(_db.tasks).get();
+    for (final task in tasks) {
+      await _reminders.syncTask(task);
+    }
   }
 
   Future<void> reschedule(Task task, DateTime newDate) async {
@@ -175,7 +195,10 @@ class TaskRepository {
 }
 
 final taskRepositoryProvider = Provider<TaskRepository>(
-  (ref) => TaskRepository(ref.watch(appDatabaseProvider)),
+  (ref) => TaskRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(reminderSchedulerProvider),
+  ),
 );
 
 final allTasksProvider = StreamProvider<List<TaskWithSubtasks>>(

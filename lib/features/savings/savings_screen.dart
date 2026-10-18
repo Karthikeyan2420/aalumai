@@ -18,9 +18,10 @@ class SavingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.savingsGoals)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'savingsAdd',
         onPressed: () => showSavingsGoalEditor(context, ref),
         icon: const Icon(Icons.add),
-        label: Text(l10n.add),
+        label: Text(l10n.newGoal),
       ),
       body: goals.when(
         loading: () => const LoadingState(),
@@ -127,6 +128,7 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(goal.name)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'savingsDetailAdd',
         onPressed: () => showContributionEditor(context, ref, goal),
         icon: const Icon(Icons.add),
         label: Text(l10n.addContribution),

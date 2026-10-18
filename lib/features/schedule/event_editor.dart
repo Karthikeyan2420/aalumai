@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/database.dart';
+import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/utils/recurrence.dart';
 import 'data/event_repository.dart';
@@ -204,6 +205,19 @@ class _EventEditorState extends ConsumerState<_EventEditor> {
             value: _birthday,
             onChanged: (v) => setState(() => _birthday = v),
           ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.notifications_none),
+            title: Text(l10n.reminder),
+            subtitle: Text(_reminderLabel(l10n, _reminderMinutes)),
+            onTap: () async {
+              final chosen = await _pickReminderMinutes(
+                context,
+                _reminderMinutes,
+              );
+              if (chosen != null) setState(() => _reminderMinutes = chosen);
+            },
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -223,4 +237,32 @@ class _EventEditorState extends ConsumerState<_EventEditor> {
       ),
     );
   }
+}
+
+String _reminderLabel(AppLocalizations l10n, int minutes) {
+  if (minutes < 0) return l10n.none;
+  if (minutes == 0) return l10n.atStart;
+  return l10n.minutesBefore(minutes);
+}
+
+Future<int?> _pickReminderMinutes(BuildContext context, int current) async {
+  const options = [-1, 0, 5, 10, 15, 30, 60];
+  final l10n = context.l10n;
+  return showModalBottomSheet<int>(
+    context: context,
+    builder:
+        (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final minutes in options)
+                ListTile(
+                  title: Text(_reminderLabel(l10n, minutes)),
+                  trailing: minutes == current ? const Icon(Icons.check) : null,
+                  onTap: () => Navigator.pop(context, minutes),
+                ),
+            ],
+          ),
+        ),
+  );
 }

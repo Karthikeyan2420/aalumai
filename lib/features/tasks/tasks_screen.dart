@@ -27,6 +27,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navTasks)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'tasksAddTask',
         onPressed: () => showTaskEditor(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.add),
@@ -68,8 +69,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       switch (_filter) {
                         case 0:
                           return !t.isCompleted &&
-                              t.dueDate != null &&
-                              !t.dueDate!.isAfter(endOfToday);
+                              (t.dueDate == null ||
+                                  !t.dueDate!.isAfter(endOfToday));
                         case 1:
                           return !t.isCompleted &&
                               (t.dueDate == null ||
@@ -88,7 +89,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 if (filtered.isEmpty) {
                   return EmptyState(
                     icon: Icons.checklist_rtl,
-                    message: l10n.emptyTasks,
+                    message: all.isEmpty ? l10n.emptyTasks : l10n.emptyTitle,
                     actionLabel: l10n.add,
                     onAction: () => showTaskEditor(context),
                   );

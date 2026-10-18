@@ -9,6 +9,129 @@ class AppLocalizationsTa extends AppLocalizations {
   AppLocalizationsTa([String locale = 'ta']) : super(locale);
 
   @override
+  String get songs => 'பாடல்கள்';
+
+  @override
+  String get folders => 'கோப்புறைகள்';
+
+  @override
+  String get play => 'இயக்கு';
+
+  @override
+  String get playAll => 'அனைத்தையும் இயக்கு';
+
+  @override
+  String get shuffleAll => 'கலக்கி இயக்கு';
+
+  @override
+  String get addToQueue => 'வரிசையில் சேர்';
+
+  @override
+  String get playNext => 'அடுத்ததாக இயக்கு';
+
+  @override
+  String get removeFromQueue => 'வரிசையிலிருந்து நீக்கு';
+
+  @override
+  String get label => 'லேபிள்';
+
+  @override
+  String get labels => 'லேபிள்கள்';
+
+  @override
+  String get createLabel => 'புதிய லேபிள்';
+
+  @override
+  String get favorite => 'பிடித்தது';
+
+  @override
+  String get album => 'ஆல்பம்';
+
+  @override
+  String get artist => 'கலைஞர்';
+
+  @override
+  String get size => 'அளவு';
+
+  @override
+  String get sortBy => 'வரிசைப்படுத்து';
+
+  @override
+  String get scanDevice => 'சாதனத்தை ஸ்கேன் செய்';
+
+  @override
+  String get scanning => 'ஸ்கேன் செய்கிறது…';
+
+  @override
+  String get grantPermission => 'அனுமதி வழங்கு';
+
+  @override
+  String get openSettings => 'அமைப்புகளைத் திற';
+
+  @override
+  String get selectAll => 'அனைத்தையும் தேர்ந்தெடு';
+
+  @override
+  String get history => 'வரலாறு';
+
+  @override
+  String get clearHistory => 'வரலாற்றை அழி';
+
+  @override
+  String get statistics => 'புள்ளிவிவரங்கள்';
+
+  @override
+  String get mostPlayed => 'அதிகம் இயக்கப்பட்டவை';
+
+  @override
+  String get recentlyAdded => 'சமீபத்தில் சேர்க்கப்பட்டவை';
+
+  @override
+  String get totalSongs => 'பாடல்கள்';
+
+  @override
+  String get duplicates => 'சாத்தியமான நகல்கள்';
+
+  @override
+  String get missingFiles => 'காணாத கோப்புகள்';
+
+  @override
+  String get changeColor => 'நிறம்';
+
+  @override
+  String get coverImage => 'அட்டைப் படம்';
+
+  @override
+  String get noFolders => 'இன்னும் கோப்புறைகள் இல்லை';
+
+  @override
+  String get repeatOff => 'மீள்செயல் அணை';
+
+  @override
+  String get repeatOne => 'ஒன்றை மீள்';
+
+  @override
+  String get repeatAll => 'அனைத்தையும் மீள்';
+
+  @override
+  String get scanComplete => 'ஸ்கேன் முடிந்தது';
+
+  @override
+  String get more => 'மேலும்';
+
+  @override
+  String get playlist => 'பிளேலிஸ்ட்';
+
+  @override
+  String get removeFromPlaylist => 'பிளேலிஸ்ட்டில் இருந்து நீக்கு';
+
+  @override
+  String get thisWeek => 'இந்த வாரம்';
+
+  @override
+  String get earlier => 'முன்பு';
+
+  @override
   String get appName => 'AALUMAI';
 
   @override
@@ -213,15 +336,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get permissionDeniedTitle => 'அனுமதி தேவை';
 
   @override
-  String get permissionDeniedBody =>
-      'இந்த அம்சத்திற்கு மறுக்கப்பட்ட அனுமதி தேவை. வழங்க அமைப்புகளைத் திறக்கவும்.';
+  String get permissionDeniedBody => 'இந்த அம்சத்திற்கு மறுக்கப்பட்ட அனுமதி தேவை. வழங்க அமைப்புகளைத் திறக்கவும்.';
 
   @override
   String get emptyTasks => 'இன்னும் பணிகள் இல்லை. முதல் பணியைச் சேர்க்கவும்.';
 
   @override
-  String get emptyHabits =>
-      'இன்னும் பழக்கங்கள் இல்லை. ஒரு வழக்கத்தை உருவாக்கவும்.';
+  String get emptyHabits => 'இன்னும் பழக்கங்கள் இல்லை. ஒரு வழக்கத்தை உருவாக்கவும்.';
 
   @override
   String get emptyEvents => 'நிகழ்வுகள் எதுவும் திட்டமிடப்படவில்லை.';
@@ -374,16 +495,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get exportCsv => 'CSV ஏற்றுமதி';
 
   @override
-  String get exportCsvDescription =>
-      'ஆதரிக்கப்படும் தரவை CSV கோப்புகளாக ஏற்றுமதி செய்யவும்.';
+  String get exportCsvDescription => 'ஆதரிக்கப்படும் தரவை CSV கோப்புகளாக ஏற்றுமதி செய்யவும்.';
 
   @override
-  String get backupDescription =>
-      'உங்கள் தரவின் முழுமையான உள்ளூர் காப்புப்பிரதியை உருவாக்கவும்.';
+  String get backupDescription => 'உங்கள் தரவின் முழுமையான உள்ளூர் காப்புப்பிரதியை உருவாக்கவும்.';
 
   @override
-  String get restoreWarning =>
-      'மீட்டெடுப்பது தற்போதைய தரவை மேலெழுதும். தொடரவா?';
+  String get restoreWarning => 'மீட்டெடுப்பது தற்போதைய தரவை மேலெழுதும். தொடரவா?';
 
   @override
   String get backupSuccess => 'காப்புப்பிரதி வெற்றிகரமாக உருவாக்கப்பட்டது.';
@@ -395,8 +513,10 @@ class AppLocalizationsTa extends AppLocalizations {
   String get backupFailed => 'காப்புப்பிரதி தோல்வியடைந்தது.';
 
   @override
-  String get restoreFailed =>
-      'மீட்டெடுப்பு தோல்வியடைந்தது. கோப்பு தவறாக இருக்கலாம்.';
+  String get restoreFailed => 'மீட்டெடுப்பு தோல்வியடைந்தது. கோப்பு தவறாக இருக்கலாம்.';
+
+  @override
+  String get restorePartial => 'தரவு மீட்டெடுக்கப்பட்டது, ஆனால் சில அலாரங்கள் அல்லது நினைவூட்டல்களை மீண்டும் அமைக்க முடியவில்லை. அவற்றைச் சரிபார்க்கவும்.';
 
   @override
   String get noBackupFile => 'கோப்பு எதுவும் தேர்ந்தெடுக்கப்படவில்லை.';
@@ -417,12 +537,10 @@ class AppLocalizationsTa extends AppLocalizations {
   String get languageNameKn => 'ಕನ್ನಡ';
 
   @override
-  String get privacyLocalFirst =>
-      'உங்கள் தரவு இயல்பாகவே உங்கள் சாதனத்திலேயே இருக்கும். AALUMAI ஆஃப்லைன்-முதன்மை மற்றும் உங்கள் தனிப்பட்ட தகவலை பதிவேற்றாது.';
+  String get privacyLocalFirst => 'உங்கள் தரவு இயல்பாகவே உங்கள் சாதனத்திலேயே இருக்கும். AALUMAI ஆஃப்லைன்-முதன்மை மற்றும் உங்கள் தனிப்பட்ட தகவலை பதிவேற்றாது.';
 
   @override
-  String get permissionsExplanation =>
-      'ஒரு அம்சத்திற்குத் தேவைப்படும்போது மட்டுமே அனுமதிகள் கேட்கப்படும்.';
+  String get permissionsExplanation => 'ஒரு அம்சத்திற்குத் தேவைப்படும்போது மட்டுமே அனுமதிகள் கேட்கப்படும்.';
 
   @override
   String get aboutPrivacy => 'தனியுரிமைக் கொள்கை';
@@ -431,8 +549,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get aboutLicenses => 'திறந்த மூல உரிமங்கள்';
 
   @override
-  String get aboutDescription =>
-      'AALUMAI என்பது ஆஃப்லைன்-முதன்மை தனிப்பட்ட வாழ்க்கை மேலாண்மை செயலி.';
+  String get aboutDescription => 'AALUMAI என்பது ஆஃப்லைன்-முதன்மை தனிப்பட்ட வாழ்க்கை மேலாண்மை செயலி.';
 
   @override
   String get madeWith => 'அன்றாட வாழ்க்கைக்காக உருவாக்கப்பட்டது.';
@@ -457,6 +574,15 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get everyDay => 'ஒவ்வொரு நாளும்';
+
+  @override
+  String get everyWeek => 'ஒவ்வொரு வாரமும்';
+
+  @override
+  String get everyMonth => 'ஒவ்வொரு மாதமும்';
+
+  @override
+  String get everyYear => 'ஒவ்வொரு ஆண்டும்';
 
   @override
   String get selectedDays => 'தேர்ந்தெடுத்த நாட்கள்';
@@ -588,6 +714,15 @@ class AppLocalizationsTa extends AppLocalizations {
   String get recurring => 'தொடர்';
 
   @override
+  String get addRecurring => 'புதிய தொடர்';
+
+  @override
+  String get dueRecurring => 'நிலுவை தொடர்';
+
+  @override
+  String get frequency => 'அலைவெண்';
+
+  @override
   String get fromAccount => 'இருந்து';
 
   @override
@@ -657,10 +792,68 @@ class AppLocalizationsTa extends AppLocalizations {
   String get emergencyDismiss => 'எப்படியும் நிறுத்து';
 
   @override
+  String get dismissAlarm => 'அலாரத்தை நிறுத்து';
+
+  @override
+  String get memorizeDigits => 'இந்த எண்களை நினைவில் கொள்ளுங்கள்';
+
+  @override
+  String get enterAnswer => 'உங்கள் பதிலை உள்ளிடவும்';
+
+  @override
+  String get wrongAnswer => 'சரியில்லை. மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get passAllChallenges => 'Pass every challenge to dismiss the alarm.';
+
+  @override
+  String challengeStep(int current, int total) {
+    return 'Challenge $current of $total';
+  }
+
+  @override
+  String get addChallenge => 'Add challenge';
+
+  @override
+  String get codeLength => 'Code length';
+
+  @override
+  String codeLengthValue(int count) {
+    return '$count characters';
+  }
+
+  @override
+  String get removeChallenge => 'Remove';
+
+  @override
+  String get moveUp => 'Move up';
+
+  @override
+  String get moveDown => 'Move down';
+
+  @override
+  String get previewAlarm => 'அலாரத்தைச் சோதிக்கவும்';
+
+  @override
   String get music => 'இசை';
 
   @override
   String get playlists => 'பட்டியல்கள்';
+
+  @override
+  String get addToPlaylist => 'பட்டியலில் சேர்';
+
+  @override
+  String get newPlaylist => 'புதிய பட்டியல்';
+
+  @override
+  String get emptyPlaylist => 'காலி பட்டியல்';
+
+  @override
+  String get removeFolder => 'கோப்புறையை நீக்கு';
+
+  @override
+  String get selectFolder => 'கோப்புறையை தேர்வு செய்';
 
   @override
   String get tracks => 'பாடல்கள்';
@@ -694,6 +887,47 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get workoutHistory => 'உடற்பயிற்சி வரலாறு';
+
+  @override
+  String get plans => 'திட்டங்கள்';
+
+  @override
+  String get newPlan => 'புதிய திட்டம்';
+
+  @override
+  String get planName => 'திட்டப் பெயர்';
+
+  @override
+  String get goals => 'இலக்குகள்';
+
+  @override
+  String get newGoal => 'புதிய இலக்கு';
+
+  @override
+  String get metric => 'அளவுகோல்';
+
+  @override
+  String get target => 'இலக்கு அளவு';
+
+  @override
+  String get goalWorkoutsPerWeek => 'இந்த வார பயிற்சிகள்';
+
+  @override
+  String get goalWaterDaily => 'இன்றைய நீர் (மிலி)';
+
+  @override
+  String get goalDistanceWeekly => 'இந்த வார தூரம் (மீ)';
+
+  @override
+  String get addExercise => 'பயிற்சியைச் சேர்';
+
+  @override
+  String setProgress(int index, int total) {
+    return 'தொகுப்பு $index / $total';
+  }
+
+  @override
+  String get workoutComplete => 'பயிற்சி முடிந்தது';
 
   @override
   String get startWorkout => 'உடற்பயிற்சி தொடங்கு';
@@ -732,6 +966,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get steps => 'படிகள்';
 
   @override
+  String get waitingForGps => 'Waiting for GPS…';
+
+  @override
   String get water => 'தண்ணீர்';
 
   @override
@@ -757,6 +994,33 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get bodyweight => 'உடல் எடை';
+
+  @override
+  String get dumbbellWorkouts => 'டம்பெல் பயிற்சிகள்';
+
+  @override
+  String get bodyweightWorkouts => 'உடல் எடை பயிற்சிகள்';
+
+  @override
+  String get stretchingWorkouts => 'நீட்சிப் பயிற்சிகள்';
+
+  @override
+  String get bandWorkouts => 'எதிர்ப்புப் பட்டைப் பயிற்சிகள்';
+
+  @override
+  String get gymWorkouts => 'ஜிம் பயிற்சிகள்';
+
+  @override
+  String get searchExercises => 'பயிற்சிகளைத் தேடுங்கள்';
+
+  @override
+  String get noExercisesMatch => 'உங்கள் வடிகட்டிகளுக்குப் பொருந்தும் பயிற்சிகள் இல்லை.';
+
+  @override
+  String get difficultyLabel => 'கடினத்தன்மை';
+
+  @override
+  String get yourExercises => 'உங்கள் பயிற்சிகள்';
 
   @override
   String get dumbbells => 'டம்பல்';
@@ -855,8 +1119,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get incorrect => 'சரியில்லை';
 
   @override
-  String get microphonePermission =>
-      'பேசிப் பயிற்சி செய்ய மைக்ரோஃபோன் அனுமதி தேவை.';
+  String get microphonePermission => 'பேசிப் பயிற்சி செய்ய மைக்ரோஃபோன் அனுமதி தேவை.';
 
   @override
   String get meals => 'உணவுகள்';
@@ -901,6 +1164,14 @@ class AppLocalizationsTa extends AppLocalizations {
   String get generateList => 'உணவுத் திட்டத்திலிருந்து உருவாக்கு';
 
   @override
+  String get atStart => 'தொடக்க நேரத்தில்';
+
+  @override
+  String minutesBefore(int count) {
+    return '$count நிமிடத்திற்கு முன்';
+  }
+
+  @override
   String get reminderSet => 'நினைவூட்டல் அமைக்கப்பட்டது';
 
   @override
@@ -933,4 +1204,776 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get weightTrend => 'எடை போக்கு';
+
+  @override
+  String get oneTime => 'One-time';
+
+  @override
+  String get repeatDays => 'Repeat';
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get vibrate => 'Vibrate';
+
+  @override
+  String get maxSnoozes => 'Max snoozes';
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String get upcomingAlarms => 'Upcoming alarms';
+
+  @override
+  String get nextRing => 'Next ring';
+
+  @override
+  String get soundClassic => 'Classic beep';
+
+  @override
+  String get soundGentle => 'Gentle chime';
+
+  @override
+  String get soundUrgent => 'Urgent';
+
+  @override
+  String get soundSystem => 'System default';
+
+  @override
+  String get snoozeDuration => 'Snooze length';
+
+  @override
+  String get ringsTomorrow => 'Tomorrow';
+
+  @override
+  String get noUpcomingAlarms => 'No upcoming alarms.';
+
+  @override
+  String get previewSound => 'Preview sound';
+
+  @override
+  String get alarmSoundCustom => 'தனிப்பயன் ஒலி';
+
+  @override
+  String get customSoundFailed => 'அந்த ஒலியைச் சேர்க்க முடியவில்லை. வேறு கோப்பை முயற்சிக்கவும்.';
+
+  @override
+  String get alarmBackground => 'அலாரம் பின்னணி';
+
+  @override
+  String get exactAlarmTitle => 'Allow exact alarms';
+
+  @override
+  String get exactAlarmBody => 'Android is blocking exact alarms, so alarms may ring late. Allow exact alarms in system settings.';
+
+  @override
+  String get exactAlarmAction => 'Allow';
+
+  @override
+  String get alarmScheduleError => 'Alarm could not be scheduled';
+
+  @override
+  String get chooseExercises => 'Choose exercises';
+
+  @override
+  String get newWorkout => 'New workout';
+
+  @override
+  String get elapsed => 'Elapsed';
+
+  @override
+  String get logSet => 'Log set';
+
+  @override
+  String get completeSet => 'Complete set';
+
+  @override
+  String get previousExercise => 'Previous';
+
+  @override
+  String get nextExercise => 'Next';
+
+  @override
+  String get workoutSummary => 'Workout summary';
+
+  @override
+  String get exercisesCompleted => 'Exercises completed';
+
+  @override
+  String get setsCompleted => 'Sets completed';
+
+  @override
+  String get totalReps => 'Total reps';
+
+  @override
+  String get skippedExercises => 'Skipped exercises';
+
+  @override
+  String get restComplete => 'Rest complete';
+
+  @override
+  String get workoutPaused => 'Workout paused';
+
+  @override
+  String get resumeWorkout => 'Resume workout';
+
+  @override
+  String get endWorkout => 'End workout';
+
+  @override
+  String get restartWorkout => 'Restart workout';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get nextUp => 'Next up';
+
+  @override
+  String get workoutInProgress => 'Workout in progress';
+
+  @override
+  String get resumeOrDiscard => 'You have a workout in progress.';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get actualReps => 'Actual reps';
+
+  @override
+  String get weightUsed => 'Weight (kg)';
+
+  @override
+  String get targetReps => 'Target reps';
+
+  @override
+  String get timed => 'Timed';
+
+  @override
+  String get startRest => 'Start rest';
+
+  @override
+  String get setDone => 'Set done';
+
+  @override
+  String get markSetDone => 'Mark set done';
+
+  @override
+  String get completeWorkout => 'Complete workout';
+
+  @override
+  String get workoutSaved => 'Workout saved';
+
+  @override
+  String get totalTime => 'Total time';
+
+  @override
+  String get resting => 'Resting';
+
+  @override
+  String get workSet => 'Work';
+
+  @override
+  String get go => 'Go';
+
+  @override
+  String get resumeLastWorkout => 'Resume last workout';
+
+  @override
+  String get planProgress => 'Plan progress';
+
+  @override
+  String get starterPlans => 'Starter plans';
+
+  @override
+  String get exerciseDetail => 'Exercise';
+
+  @override
+  String get howTo => 'How to do it';
+
+  @override
+  String get reorder => 'Reorder';
+
+  @override
+  String get editItem => 'Edit';
+
+  @override
+  String get musicScanFailed => 'Couldn\'t scan that folder. Check that access is granted and try again.';
+
+  @override
+  String get musicAccessNeeded => 'Choose a folder that contains your music. AALUMAI scans files on your device only.';
+
+  @override
+  String get rescan => 'Rescan folders';
+
+  @override
+  String get noMusicYet => 'No music added yet. Add a folder to get started.';
+
+  @override
+  String get musicAddedCount => 'tracks added';
+
+  @override
+  String get armsLabel => 'Arms';
+
+  @override
+  String get shouldersLabel => 'Shoulders';
+
+  @override
+  String get chestLabel => 'Chest';
+
+  @override
+  String get backLabel => 'Back';
+
+  @override
+  String get legsLabel => 'Legs';
+
+  @override
+  String get coreLabel => 'Core';
+
+  @override
+  String get cardioLabel => 'Cardio';
+
+  @override
+  String get secondsShort => 'sec';
+
+  @override
+  String get exercise => 'Exercise';
+
+  @override
+  String get emptyWorkoutExercises => 'Add or select at least one exercise to start.';
+
+  @override
+  String get newExercise => 'New exercise';
+
+  @override
+  String get timedExercise => 'Timed exercise';
+
+  @override
+  String get noSetsLogged => 'No sets were logged for this workout.';
+
+  @override
+  String get workoutPreferences => 'பயிற்சி விருப்பத்தேர்வுகள்';
+
+  @override
+  String get planStyleLabel => 'திட்டப் பாணி';
+
+  @override
+  String get planStyleBalanced => 'சீரான';
+
+  @override
+  String get planStyleMuscleSplit => 'தசைப் பிரிவு';
+
+  @override
+  String get planStyleFullBody => 'முழு உடல்';
+
+  @override
+  String get planStyleCardioFocus => 'கார்டியோ';
+
+  @override
+  String get fitnessLevelLabel => 'உடற்பயிற்சி நிலை';
+
+  @override
+  String get sessionLengthLabel => 'அமர்வுக் கால அளவு';
+
+  @override
+  String get minutesShort => 'நிமி';
+
+  @override
+  String get trainingDaysLabel => 'பயிற்சிநாட்கள்';
+
+  @override
+  String get restDaysLabel => 'ஓய்வு நாட்கள்';
+
+  @override
+  String get primaryGoalLabel => 'முதன்மை இலக்கு';
+
+  @override
+  String get goalGeneralHealth => 'பொது ஆரோக்கியம்';
+
+  @override
+  String get goalStrength => 'வலிமை';
+
+  @override
+  String get goalEndurance => 'சகிப்புத்தன்மை';
+
+  @override
+  String get goalFlexibility => 'நெகிழ்வு';
+
+  @override
+  String get goalWeightManagement => 'எடை மேலாண்மை';
+
+  @override
+  String get focusMusclesLabel => 'கவனம் செலுத்தும் தசைகள்';
+
+  @override
+  String get availableEquipment => 'கிடைக்கும் உபகரணங்கள்';
+
+  @override
+  String get equipmentHint => 'உபகரணம் சேர்க்கவும்';
+
+  @override
+  String get preferredTimeLabel => 'விருப்பமான நேரம்';
+
+  @override
+  String get anyTime => 'எந்த நேரமும்';
+
+  @override
+  String get clearLabel => 'அழி';
+
+  @override
+  String get safetyGuidanceTitle => 'ஆரோக்கியம் மற்றும் பாதுகாப்பு';
+
+  @override
+  String get safetyGuidanceBody => 'முதலில் சூடாக்கிப் பயிற்சி செய்து, உங்கள் வரம்பிற்குள் செயல்படுங்கள். வலி, தலைசுற்றல் அல்லது மூச்சுத்திணறல் இருந்தால் நிறுத்துங்கள். இந்த வழிகாட்டுதல் 18-64 வயதுள்ள வயதுவந்தோருக்கான WHO உடற்பயிற்சி அறிவுரையை அடிப்படையாகக் கொண்டது; இது மருத்துவ அறிவுரை அல்ல - உடல் நலப் பிரச்சினை இருந்தால் நிபுணரை அணுகவும்.';
+
+  @override
+  String get safetyAcknowledged => 'நான் புரிந்துகொண்டேன், என் வரம்பிற்குள்ளேயே இருப்பேன்';
+
+  @override
+  String get savePreferences => 'விருப்பத்தேர்வுகளைச் சேமி';
+
+  @override
+  String get preferencesSaved => 'விருப்பத்தேர்வுகள் சேமிக்கப்பட்டன';
+
+  @override
+  String get weeklyPlanner => 'வாராந்திரத் திட்டம்';
+
+  @override
+  String get clearUnstarted => 'தொடங்காத நாட்களை அழி';
+
+  @override
+  String get clearUnstartedBody => 'இந்த வாரத்திற்கான திட்டமிடப்பட்ட, தவறிய மற்றும் ஓய்வு நாட்களை நீக்கவும். முடிந்த அமர்வுகள் வைக்கப்படும்.';
+
+  @override
+  String get generateWeek => 'வாரத்தை உருவாக்கு';
+
+  @override
+  String get previous => 'முந்தையது';
+
+  @override
+  String get restore => 'மீட்டமை';
+
+  @override
+  String weekGenerated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count அமர்வுகள் உருவாக்கப்பட்டன',
+      one: '1 அமர்வு உருவாக்கப்பட்டது',
+      zero: 'எந்த அமர்வும் உருவாக்கப்படவில்லை',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekCleared => 'தொடங்காத நாட்கள் அழிக்கப்பட்டன';
+
+  @override
+  String get noPlansYet => 'முதலில் ஒரு பயிற்சித் திட்டத்தை உருவாக்கவும்';
+
+  @override
+  String get selectPlan => 'ஒரு திட்டத்தைத் தேர்வுசெய்க';
+
+  @override
+  String get addSession => 'அமர்வு சேர்';
+
+  @override
+  String get editSession => 'அமர்வைத் திருத்து';
+
+  @override
+  String get sessionTitle => 'அமர்வுத் தலைப்பு';
+
+  @override
+  String get muscleGroupsLabel => 'தசைக் குழுக்கள்';
+
+  @override
+  String get moveToDay => 'வேறு நாளுக்கு நகர்த்து';
+
+  @override
+  String get deleteSessionBody => 'இது திட்டத்திலிருந்து அமர்வை நீக்குகிறது. பதிவு செய்யப்பட்ட பயிற்சி வரலாறு வைக்கப்படும்.';
+
+  @override
+  String get noSessionsThisWeek => 'திட்டமிடப்பட்ட அமர்வுகள் இல்லை';
+
+  @override
+  String get planWarnings => 'திட்டச் சரிபார்ப்பு';
+
+  @override
+  String get warningConsecutiveDays => 'ஒன்றன்பின்ஒன்றாகப் பல பயிற்சி நாட்கள் - ஓய்வு நாளைக் கருத்தில் கொள்ளவும்';
+
+  @override
+  String get warningConsecutiveSameMuscle => 'ஒரே தசைக் குழு அடுத்தடுத்த நாட்களில் தோன்றுகிறது';
+
+  @override
+  String get restDayLabel => 'ஓய்வு நாள்';
+
+  @override
+  String get markRestDay => 'ஓய்வு நாளாகக் குறிக்கவும்';
+
+  @override
+  String get statusPlanned => 'திட்டமிடப்பட்டது';
+
+  @override
+  String get statusCompleted => 'முடிந்தது';
+
+  @override
+  String get statusSkipped => 'தவிர்க்கப்பட்டது';
+
+  @override
+  String get statusMissed => 'தவறியது';
+
+  @override
+  String get getStarted => 'தொடங்குங்கள்';
+
+  @override
+  String get landingBrandLatin => 'AALUMAI';
+
+  @override
+  String get landingBrandNative => 'ஆளுமை';
+
+  @override
+  String get landingTaglineEnglish => 'Your life. Your control.';
+
+  @override
+  String get landingTaglineNative => 'உங்கள் வாழ்க்கை. உங்கள் கட்டுப்பாடு.';
+
+  @override
+  String get featureSmartAlarms => 'ஸ்மார்ட் அலாரங்கள்';
+
+  @override
+  String get featureSmartAlarmsDesc => 'நோக்கத்துடன் விழித்தெழுங்கள்';
+
+  @override
+  String get featureFitness => 'உடற்பயிற்சி & ஒர்க்அவுட்';
+
+  @override
+  String get featureFitnessDesc => 'ஆரோக்கியமாகவும் வலிமையாகவும் இருங்கள்';
+
+  @override
+  String get featureMusic => 'இசை இயக்கி';
+
+  @override
+  String get featureMusicDesc => 'உங்கள் பாடல்கள், உங்கள் மனநிலை';
+
+  @override
+  String get featureHabits => 'பழக்கங்கள் & பணிகள்';
+
+  @override
+  String get featureHabitsDesc => 'சிறந்த வழக்கத்தை உருவாக்குங்கள்';
+
+  @override
+  String get featureExpenses => 'செலவுகள் & சேமிப்பு';
+
+  @override
+  String get featureExpensesDesc => 'கண்காணித்து வளருங்கள்';
+
+  @override
+  String get featureCalendar => 'நாட்காட்டி & குறிப்புகள்';
+
+  @override
+  String get featureCalendarDesc => 'ஒழுங்காக இருங்கள்';
+
+  @override
+  String get formTips => 'படிவக் குறிப்புகள்';
+
+  @override
+  String get commonMistakes => 'பொதுவான தவறுகள்';
+
+  @override
+  String get contraindications => 'தவிர்க்க வேண்டிய நிலைகள்';
+
+  @override
+  String get alternatives => 'மாற்று பயிற்சிகள்';
+
+  @override
+  String get easierAlternative => 'எளிதானது';
+
+  @override
+  String get harderAlternative => 'கடினமானது';
+
+  @override
+  String get typeStrength => 'வலிமை';
+
+  @override
+  String get typeCardio => 'கார்டியோ';
+
+  @override
+  String get typeMobility => 'நெகிழ்வு';
+
+  @override
+  String get typeBalance => 'சமநிலை';
+
+  @override
+  String get readinessCheck => 'தயார்நிலை சரிபார்ப்பு';
+
+  @override
+  String get readinessIntro => 'பயிற்சிக்கு முன் ஒரு விரைவு சரிபார்ப்பு';
+
+  @override
+  String get energyLabel => 'ஆற்றல்';
+
+  @override
+  String get sorenessLabel => 'தசை வலி';
+
+  @override
+  String get sleepLabel => 'தூக்கத் தரம்';
+
+  @override
+  String get lowReadinessHint => 'உங்கள் தயார்நிலை குறைவாக உள்ளது. இலகுவான, குறுகிய அமர்வைக் கருத்தில் கொள்ளவும்.';
+
+  @override
+  String get iAmReady => 'நான் தயார்';
+
+  @override
+  String get mainWork => 'முக்கிய பயிற்சி';
+
+  @override
+  String get lowerIntensityHint => 'இன்று தீவிரத்தைக் குறைக்கவும்.';
+
+  @override
+  String get sessionOutcomePartial => 'பகுதியாக முடிந்தது';
+
+  @override
+  String get sessionOutcomeCancelled => 'முன்கூட்டியே முடிந்தது';
+
+  @override
+  String get activityGuidance => 'செயல்பாட்டு வழிகாட்டுதல்';
+
+  @override
+  String get whoAttribution => 'WHO உடற்பயிற்சி வழிகாட்டுதலால் தூண்டப்பட்டது';
+
+  @override
+  String get dailyWorkout => 'Daily workout';
+
+  @override
+  String get startTodaysWorkout => 'Start today\'s workout';
+
+  @override
+  String get cardioEveryDay => 'Cardio every day';
+
+  @override
+  String get yogaCooldown => 'Yoga cool-down';
+
+  @override
+  String get activeRecoveryDay => 'Active recovery';
+
+  @override
+  String get yogaAfterWorkout => 'Yoga is best after the workout, as a cool-down.';
+
+  @override
+  String get whoAerobicLabel => 'ஏரோபிக் செயல்பாடு';
+
+  @override
+  String get whoStrengthLabel => 'தசை பலப்படுத்துதல்';
+
+  @override
+  String whoAerobicValue(int minutes) {
+    return '$minutes / 150 நிமி';
+  }
+
+  @override
+  String whoStrengthValue(int days) {
+    return '$days / 2 நாட்கள்';
+  }
+
+  @override
+  String get whoAerobicGoal => 'வாரத்திற்கு 150-300 நிமிடங்களை இலக்காகக் கொள்ளுங்கள்';
+
+  @override
+  String get whoStrengthGoal => 'வாரத்திற்கு குறைந்தது 2 நாட்களை இலக்காகக் கொள்ளுங்கள்';
+
+  @override
+  String get whoDisclaimer => 'இது பொதுவான தகவல், மருத்துவ அறிவுரை அல்ல. உடல்நலப் பிரச்சினை இருந்தால் தொடங்குவதற்கு முன் நிபுணர் ஆலோசனையைப் பெறுங்கள்.';
+
+  @override
+  String get whoGoalMet => 'வழிகாட்டு நெறி பூர்த்தி';
+
+  @override
+  String get whoKeepGoing => 'தொடர்ந்து செய்யுங்கள்';
+
+  @override
+  String get whoTips => 'வழிகாட்டுதல் குறிப்புகள்';
+
+  @override
+  String get whoTipProgression => 'படிப்படியாகத் தொடங்கி ஒவ்வொரு வாரமும் சிறிது அதிகரிக்கவும்.';
+
+  @override
+  String get whoTipWalking => 'நடப்பதும் சைக்கிள் ஓட்டுவதும் உங்கள் ஏரோபிக் இலக்கில் கணக்கிடப்படும்.';
+
+  @override
+  String get whoTipStrength => 'பல நாட்களில் ஓய்வுடன் வலிமை நாட்களை வாரம் முழுவதும் பரப்புங்கள்.';
+
+  @override
+  String get whoTipAdapt => 'உங்கள் வயது மற்றும் திறனுக்கேற்ப தீவிரத்தை சரிசெய்து, தேவைப்படும்போது எளிதான மாறுபாடுகளைத் தேர்ந்தெடுக்கவும்.';
+
+  @override
+  String get safetyTemplateNote => 'புஷ்-அப், பிளாங்க் போன்ற பயிற்சிகள் நீங்கள் மாற்றிக்கொள்ளக்கூடிய எடுத்துக்காட்டுகள் - தேவைக்கேற்ப எளிதான மாறுபாடுகளைத் தேர்ந்தெடுக்கவும் அல்லது தவிர்க்கவும்.';
+
+  @override
+  String get alarmSoundAndMotivation => 'அலாரம் ஒலி & ஊக்கம்';
+
+  @override
+  String get alarmMusic => 'அலார இசை';
+
+  @override
+  String get alarmMusicHint => 'அலாரம் ஒலிக்கும்போது இயங்கும்';
+
+  @override
+  String get soundMode => 'ஒலி முறை';
+
+  @override
+  String get soundModeMusicVoice => 'இசை + ஊக்கக் குரல்';
+
+  @override
+  String get soundModeVoiceOnly => 'குரல் மட்டும்';
+
+  @override
+  String get soundModeMusicOnly => 'இசை மட்டும்';
+
+  @override
+  String get motivationalMessage => 'ஊக்கச் செய்தி';
+
+  @override
+  String get motivationalMessageHint => 'அலாரம் ஒலிக்கும்போது பேசப்படும் சிறு செய்தி';
+
+  @override
+  String get useSampleMessage => 'மாதிரி செய்தியைப் பயன்படுத்து';
+
+  @override
+  String get voicePreview => 'குரலை முன்னோட்டம்';
+
+  @override
+  String get voicePreviewing => 'முன்னோட்டம்…';
+
+  @override
+  String get voicePreviewFailed => 'குரல் முன்னோட்டம் கிடைக்கவில்லை. அலாரக் குரல் அமைப்புகளைச் சரிபார்க்கவும்.';
+
+  @override
+  String alarmVoiceLabel(String gender, String language) {
+    return '$gender குரல் · $language';
+  }
+
+  @override
+  String get changeInSettings => 'அமைப்புகளில் மாற்று';
+
+  @override
+  String get musicInterval => 'இசை இடைவெளி';
+
+  @override
+  String get musicIntervalHint => 'அடுத்த செய்திக்கு முன் இசை எவ்வளவு நேரம் இயங்கும்';
+
+  @override
+  String get customInterval => 'தனிப்பயன்';
+
+  @override
+  String get customIntervalSeconds => 'தனிப்பயன் இடைவெளி (விநாடிகள்)';
+
+  @override
+  String customIntervalValue(int count) {
+    return '$count விநாடி';
+  }
+
+  @override
+  String get voiceTiming => 'குரல் நேரம்';
+
+  @override
+  String get voiceTimingBeforeMusic => 'இசை தொடங்கும் முன் பேசு';
+
+  @override
+  String get voiceTimingBetweenSegments => 'இசை பகுதிகளுக்கு இடையே பேசு';
+
+  @override
+  String get voiceTimingOverMusic => 'இசையின் மேல் பேசு';
+
+  @override
+  String get voicePause => 'செய்திகளுக்கு இடையே இடைவெளி';
+
+  @override
+  String get voiceOnlyNeedsMessage => 'செய்தியைச் சேர்க்கவும், அல்லது இசை மட்டும் தேர்ந்தெடுக்கவும்.';
+
+  @override
+  String get invalidInterval => 'பூஜ்ஜியத்தை விட அதிகமான மதிப்பை உள்ளிடவும்.';
+
+  @override
+  String get settingsAlarmVoice => 'அலாரக் குரல்';
+
+  @override
+  String get settingsAlarmVoiceDesc => 'அலாரங்களுக்கான குரல், மொழி, வேகம் மற்றும் சுருதி';
+
+  @override
+  String get alarmVoiceSettings => 'அலாரக் குரல் அமைப்புகள்';
+
+  @override
+  String get voiceLanguage => 'குரல் மொழி';
+
+  @override
+  String get followAppLanguage => 'செயலி மொழியைப் பின்பற்று';
+
+  @override
+  String get voiceSelect => 'குரல்';
+
+  @override
+  String get voiceDeviceDefault => 'சாதன இயல்புநிலை';
+
+  @override
+  String get voiceDeviceDefaultDesc => 'கிடைக்கும் எந்தக் குரலையும் பயன்படுத்து';
+
+  @override
+  String get voiceGender => 'குரல் பாலினம்';
+
+  @override
+  String get genderDefault => 'இயல்புநிலை / எதுவும்';
+
+  @override
+  String get genderFemale => 'பெண்';
+
+  @override
+  String get genderMale => 'ஆண்';
+
+  @override
+  String get speechRate => 'பேச்சு வேகம்';
+
+  @override
+  String get speechPitch => 'சுருதி';
+
+  @override
+  String get speechVolume => 'பேச்சு ஒலி அளவு';
+
+  @override
+  String get resetDefault => 'மீட்டமை';
+
+  @override
+  String get voicesLoading => 'குரல்கள் ஏற்றப்படுகின்றன…';
+
+  @override
+  String get noInstalledVoices => 'நிறுவப்பட்ட குரல்கள் எதுவும் கிடைக்கவில்லை.';
+
+  @override
+  String get voiceLoadFailed => 'நிறுவப்பட்ட குரல்களைப் படிக்க முடியவில்லை.';
+
+  @override
+  String get openTtsSettings => 'TTS அமைப்புகளைத் திற';
+
+  @override
+  String get ttsSettingsUnavailable => 'கணினி TTS அமைப்புகளைத் திறக்க முடியவில்லை.';
+
+  @override
+  String voiceUnavailableForLanguage(String language) {
+    return '$language குரல் நிறுவப்படவில்லை. Android அமைப்புகளில் மொழித் தொகுப்பை நிறுவவும்.';
+  }
+
+  @override
+  String get voiceGenderUnavailable => 'தேர்ந்தெடுத்த பாலினம் இந்தக் குரலுக்குக் கிடைக்கவில்லை; அருகிலுள்ள குரல் பயன்படுத்தப்படுகிறது.';
+
+  @override
+  String get voiceFallbackNote => 'தேர்ந்தெடுத்த குரல் இனி கிடைக்கவில்லை, எனவே சாதன இயல்புநிலை பயன்படுத்தப்படுகிறது.';
+
+  @override
+  String get previewSentence => 'உங்கள் அலாரக் குரல் எவ்வாறு ஒலிக்கும் என்பது இதுதான்.';
 }

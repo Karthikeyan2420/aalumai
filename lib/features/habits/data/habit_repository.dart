@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/services/reminder_scheduler.dart';
 import '../domain/habit_streak.dart';
 
 class HabitRepository {
-  HabitRepository(this._db);
+  HabitRepository(this._db, [this._reminders]);
 
   final AppDatabase _db;
+  final ReminderScheduler? _reminders;
 
   Stream<List<Habit>> watchActive() {
     return (_db.select(_db.habits)
@@ -34,8 +36,8 @@ class HabitRepository {
     double goalValue = 0,
     String unit = '',
     int reminderMinuteOfDay = -1,
-  }) {
-    return _db
+  }) async {
+    final id = await _db
         .into(_db.habits)
         .insert(
           HabitsCompanion.insert(
@@ -50,18 +52,40 @@ class HabitRepository {
             reminderMinuteOfDay: Value(reminderMinuteOfDay),
           ),
         );
+    final habit = await getById(id);
+    if (habit != null) await _reminders?.syncHabit(habit);
+    return id;
   }
 
-  Future<void> updateHabit(Habit habit) =>
-      _db.update(_db.habits).replace(habit);
+  Future<Habit?> getById(int id) =>
+      (_db.select(_db.habits)..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  Future<void> setArchived(int id, bool archived) => (_db.update(_db.habits)
-    ..where(
+  Future<void> updateHabit(Habit habit) async {
+    await _db.update(_db.habits).replace(habit);
+    await _reminders?.syncHabit(habit);
+  }
+
+  Future<void> setArchived(int id, bool archived) async {
+    await (_db.update(_db.habits)..where(
       (t) => t.id.equals(id),
     )).write(HabitsCompanion(isArchived: Value(archived)));
+    final habit = await getById(id);
+    if (habit != null) await _reminders?.syncHabit(habit);
+  }
 
-  Future<void> deleteHabit(int id) =>
-      (_db.delete(_db.habits)..where((t) => t.id.equals(id))).go();
+  Future<void> deleteHabit(int id) async {
+    await (_db.delete(_db.habits)..where((t) => t.id.equals(id))).go();
+    await _reminders?.removeHabit(id);
+  }
+
+  /// Re-schedules reminders for every stored habit. Called on app start.
+  Future<void> reconcileReminders() async {
+    if (_reminders == null) return;
+    final habits = await _db.select(_db.habits).get();
+    for (final habit in habits) {
+      await _reminders.syncHabit(habit);
+    }
+  }
 
   Stream<List<HabitCompletion>> watchCompletionsBetween(
     DateTime from,
@@ -120,7 +144,10 @@ class HabitRepository {
 }
 
 final habitRepositoryProvider = Provider<HabitRepository>(
-  (ref) => HabitRepository(ref.watch(appDatabaseProvider)),
+  (ref) => HabitRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(reminderSchedulerProvider),
+  ),
 );
 
 final activeHabitsProvider = StreamProvider<List<Habit>>(
@@ -134,5 +161,19 @@ final weekHabitCompletionsProvider = StreamProvider<List<HabitCompletion>>((
   final now = DateTime.now();
   final start = HabitStreak.startOfWeek(now);
   final end = start.add(const Duration(days: 6));
+  return ref.watch(habitRepositoryProvider).watchCompletionsBetween(start, end);
+});
+
+/// Completions for the trailing year (up to the current week's end).
+///
+/// Weekly-target habits need history beyond the current week to compute their
+/// streak, so the habits screen uses this instead of the week-only provider.
+final habitStreakCompletionsProvider = StreamProvider<List<HabitCompletion>>((
+  ref,
+) {
+  final now = DateTime.now();
+  final weekStart = HabitStreak.startOfWeek(now);
+  final start = weekStart.subtract(const Duration(days: 371));
+  final end = weekStart.add(const Duration(days: 6));
   return ref.watch(habitRepositoryProvider).watchCompletionsBetween(start, end);
 });

@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- Lets the ringing alarm take over the screen and show above the lock
+         screen, where the OS permits. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
 
     <!-- Music folder scanning -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
@@ -34,6 +37,8 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
@@ -81,6 +86,41 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Alarm ring service: plays the looping tone/vibration/message when an
+             exact alarm fires, so an alarm is audible even if the Flutter engine
+             is not running. Started from the exact-alarm broadcast below, which
+             is an exempted background foreground-service start. -->
+        <service
+            android:name=".AlarmAudioService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Alarm trigger: explicit PendingIntent target for each armed slot. -->
+        <receiver
+            android:name=".AlarmTriggerReceiver"
+            android:exported="false" />
+
+        <!-- Restores the active-alarm notification after a swipe. Android 14+
+             lets the user dismiss ongoing notifications while unlocked, so this
+             re-posts it for as long as the alarm is still ringing. -->
+        <receiver
+            android:name=".AlarmNotificationDismissedReceiver"
+            android:exported="false" />
+
+        <!-- Re-arms the exact triggers after reboot / package update / clock
+             change. Only touches AlarmManager, so it never has to launch a
+             foreground service from BOOT_COMPLETED. -->
+        <receiver
+            android:name=".AlarmBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
     </application>

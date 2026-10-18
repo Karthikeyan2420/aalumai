@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/services/reminder_scheduler.dart';
 import '../../../core/utils/recurrence.dart';
 
 class EventRepository {
-  EventRepository(this._db);
+  EventRepository(this._db, [this._reminders]);
 
   final AppDatabase _db;
+  final ReminderScheduler? _reminders;
 
   Stream<List<Event>> watchAll() =>
       (_db.select(_db.events)
@@ -47,8 +49,8 @@ class EventRepository {
     Recurrence recurrence = Recurrence.none,
     int reminderMinutes = -1,
     bool isBirthday = false,
-  }) {
-    return _db
+  }) async {
+    final id = await _db
         .into(_db.events)
         .insert(
           EventsCompanion.insert(
@@ -63,13 +65,32 @@ class EventRepository {
             isBirthday: Value(isBirthday),
           ),
         );
+    final event = await getById(id);
+    if (event != null) await _reminders?.syncEvent(event);
+    return id;
   }
 
-  Future<void> updateEvent(Event event) =>
-      _db.update(_db.events).replace(event);
+  Future<Event?> getById(int id) =>
+      (_db.select(_db.events)..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  Future<void> delete(int id) =>
-      (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+  Future<void> updateEvent(Event event) async {
+    await _db.update(_db.events).replace(event);
+    await _reminders?.syncEvent(event);
+  }
+
+  Future<void> delete(int id) async {
+    await (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+    await _reminders?.removeEvent(id);
+  }
+
+  /// Re-schedules reminders for every stored event. Called on app start.
+  Future<void> reconcileReminders() async {
+    if (_reminders == null) return;
+    final events = await _db.select(_db.events).get();
+    for (final event in events) {
+      await _reminders.syncEvent(event);
+    }
+  }
 
   Future<void> addException(
     int eventId,
@@ -154,7 +175,10 @@ class EventRepository {
 }
 
 final eventRepositoryProvider = Provider<EventRepository>(
-  (ref) => EventRepository(ref.watch(appDatabaseProvider)),
+  (ref) => EventRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(reminderSchedulerProvider),
+  ),
 );
 
 final allEventsProvider = StreamProvider<List<Event>>(

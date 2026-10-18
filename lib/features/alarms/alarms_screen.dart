@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/database.dart';
+import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
+import '../../core/services/alarm_scheduler.dart';
 import '../../core/utils/alarm_time.dart';
 import '../../core/widgets/common.dart';
+import 'alarm_editor_screen.dart';
+import 'alarm_ringing_screen.dart';
 import 'data/alarm_repository.dart';
 
 class AlarmsScreen extends ConsumerWidget {
@@ -14,61 +18,192 @@ class AlarmsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final alarms = ref.watch(alarmsProvider);
-    final next = ref.watch(nextAlarmProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.alarms)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'alarmsAdd',
         onPressed: () => showAlarmEditor(context, ref),
         icon: const Icon(Icons.add),
-        label: Text(l10n.newAlarm),
+        label: Text(l10n.add),
       ),
-      body: Column(
-        children: [
-          if (next.valueOrNull != null)
-            Card(
-              margin: const EdgeInsets.all(12),
-              child: ListTile(
-                leading: const Icon(Icons.alarm_on),
-                title: Text(l10n.nextAlarm),
-                trailing: Text(
-                  AlarmTime.format(
-                    next.valueOrNull!.hour,
-                    next.valueOrNull!.minute,
-                  ),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ),
-          Expanded(
-            child: alarms.when(
-              loading: () => const LoadingState(),
-              error: (e, _) => ErrorState(message: e.toString()),
-              data: (list) {
-                if (list.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.alarm,
-                    message: l10n.emptyAlarms,
-                    actionLabel: l10n.newAlarm,
-                    onAction: () => showAlarmEditor(context, ref),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 96),
-                  itemCount: list.length,
-                  itemBuilder: (context, i) {
-                    final a = list[i];
-                    return _AlarmTile(alarm: a);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+      body: alarms.when(
+        loading: () => const LoadingState(),
+        error: (e, _) => ErrorState(message: e.toString()),
+        data: (list) {
+          if (list.isEmpty) {
+            return EmptyState(
+              icon: Icons.alarm,
+              message: l10n.emptyAlarms,
+              actionLabel: l10n.newAlarm,
+              onAction: () => showAlarmEditor(context, ref),
+            );
+          }
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 96),
+            children: [
+              const _SchedulingBanner(),
+              const _UpcomingCard(),
+              for (final a in list) _AlarmTile(alarm: a),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
+/// Shows an actionable message when exact alarms are blocked by the OS or the
+/// last scheduling attempt failed, instead of silently swallowing the problem.
+class _SchedulingBanner extends ConsumerStatefulWidget {
+  const _SchedulingBanner();
+
+  @override
+  ConsumerState<_SchedulingBanner> createState() => _SchedulingBannerState();
+}
+
+class _SchedulingBannerState extends ConsumerState<_SchedulingBanner> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(alarmRepositoryProvider).refreshCapability();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final status = ref.watch(alarmRepositoryProvider).status;
+    return ValueListenableBuilder<AlarmSchedulingStatus>(
+      valueListenable: status,
+      builder: (context, value, _) {
+        final children = <Widget>[];
+        if (value.exactAlarmsAllowed == false) {
+          children.add(
+            Card(
+              margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              color: Theme.of(context).colorScheme.errorContainer,
+              child: ListTile(
+                leading: const Icon(Icons.alarm),
+                title: Text(l10n.exactAlarmTitle),
+                subtitle: Text(l10n.exactAlarmBody),
+                trailing: TextButton(
+                  onPressed:
+                      () =>
+                          ref
+                              .read(alarmRepositoryProvider)
+                              .requestExactAlarms(),
+                  child: Text(l10n.exactAlarmAction),
+                ),
+              ),
+            ),
+          );
+        }
+        if (value.lastError != null) {
+          children.add(
+            Card(
+              margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              color: Theme.of(context).colorScheme.errorContainer,
+              child: ListTile(
+                leading: const Icon(Icons.error_outline),
+                title: Text(l10n.alarmScheduleError),
+                subtitle: Text(value.lastError!),
+              ),
+            ),
+          );
+        }
+        if (children.isEmpty) return const SizedBox.shrink();
+        return Column(children: children);
+      },
+    );
+  }
+}
+
+class _UpcomingCard extends ConsumerWidget {
+  const _UpcomingCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final upcoming = ref.watch(upcomingAlarmsProvider).valueOrNull ?? const [];
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 20,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.upcomingAlarms,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            for (final item in upcoming.take(4))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Text(
+                      AlarmTime.format(item.alarm.hour, item.alarm.minute),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item.alarm.label.isEmpty
+                            ? _relativeDay(context, item.next)
+                            : item.alarm.label,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      _relativeDay(context, item.next),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _relativeDay(BuildContext context, DateTime next) {
+    final now = DateTime.now();
+    final days =
+        DateTime(
+          next.year,
+          next.month,
+          next.day,
+        ).difference(DateTime(now.year, now.month, now.day)).inDays;
+    final l10n = context.l10n;
+    return switch (days) {
+      0 => l10n.today,
+      1 => l10n.tomorrow,
+      _ => MaterialLocalizations.of(context).formatMediumDate(next),
+    };
+  }
+}
+
+/// A single alarm: an emphasised card showing the time, which days it fires,
+/// its label and next ring, with preview / enable / overflow controls.
 class _AlarmTile extends ConsumerWidget {
   const _AlarmTile({required this.alarm});
   final Alarm alarm;
@@ -76,202 +211,227 @@ class _AlarmTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final enabled = alarm.isEnabled;
+    final next =
+        enabled ? ref.read(alarmRepositoryProvider).nextRing(alarm) : null;
+    final dim = enabled ? scheme.onSurface : scheme.outline;
+    final muted = enabled ? scheme.onSurfaceVariant : scheme.outline;
+
     return Card(
-      child: ListTile(
-        title: Text(
-          AlarmTime.format(alarm.hour, alarm.minute),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: alarm.isEnabled ? null : Colors.grey,
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      elevation: 0,
+      color:
+          enabled
+              ? scheme.primaryContainer.withValues(alpha: 0.35)
+              : scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color:
+              enabled
+                  ? scheme.secondary.withValues(alpha: 0.4)
+                  : scheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => showAlarmEditor(context, ref, alarm: alarm),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 8, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AlarmTime.format(alarm.hour, alarm.minute),
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w300,
+                        color: dim,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l10n.previewAlarm,
+                    icon: const Icon(Icons.play_circle_outline),
+                    onPressed:
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder:
+                                (_) => AlarmRingingScreen(
+                                  alarm: alarm,
+                                  isPreview: true,
+                                ),
+                          ),
+                        ),
+                  ),
+                  Switch(
+                    value: enabled,
+                    onChanged:
+                        (v) => ref
+                            .read(alarmRepositoryProvider)
+                            .setEnabled(alarm.id, v),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 'edit':
+                          await showAlarmEditor(context, ref, alarm: alarm);
+                        case 'duplicate':
+                          await ref
+                              .read(alarmRepositoryProvider)
+                              .duplicate(alarm.id);
+                        case 'delete':
+                          final ok = await confirmDialog(
+                            context,
+                            title: l10n.deleteConfirmTitle,
+                            body: l10n.deleteConfirmBody,
+                            confirmLabel: l10n.delete,
+                          );
+                          if (ok) {
+                            await ref
+                                .read(alarmRepositoryProvider)
+                                .delete(alarm.id);
+                          }
+                      }
+                    },
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                          PopupMenuItem(
+                            value: 'duplicate',
+                            child: Text(l10n.duplicate),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(l10n.delete),
+                          ),
+                        ],
+                  ),
+                ],
+              ),
+              if (alarm.label.isNotEmpty) ...[
+                Text(
+                  alarm.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: dim,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              if (_showsChips) ...[
+                const SizedBox(height: 8),
+                _DayChips(mask: alarm.repeatDaysMask, active: enabled),
+              ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.repeat, size: 14, color: muted),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      _repeatSummary(l10n),
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ),
+                  if (next != null) ...[
+                    const SizedBox(width: 12),
+                    Icon(Icons.schedule, size: 14, color: scheme.secondary),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        '${l10n.nextRing}: ${_formatNext(context, next)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.secondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
           ),
         ),
-        subtitle: Text(
-          _repeatLabel(context, alarm.repeatDaysMask) +
-              (alarm.label.isEmpty ? '' : ' · ${alarm.label}'),
-        ),
-        trailing: Switch(
-          value: alarm.isEnabled,
-          onChanged:
-              (v) => ref.read(alarmRepositoryProvider).setEnabled(alarm.id, v),
-        ),
-        onTap: () => showAlarmEditor(context, ref, alarm: alarm),
-        onLongPress: () async {
-          final ok = await confirmDialog(
-            context,
-            title: l10n.deleteConfirmTitle,
-            body: l10n.deleteConfirmBody,
-            confirmLabel: l10n.delete,
-          );
-          if (ok) await ref.read(alarmRepositoryProvider).delete(alarm.id);
-        },
       ),
     );
   }
 
-  String _repeatLabel(BuildContext context, int mask) {
-    final l10n = context.l10n;
-    if (mask == 0) return l10n.everyDay;
-    final days = AlarmTime.weekdays(mask);
-    if (days.length == 5 && days.every((d) => d <= 5)) return l10n.selectedDays;
-    return days.map(_weekdayShort).join(' ');
+  /// A one-time alarm has no repeat days to show; a daily one is implied by
+  /// every chip being lit.
+  bool get _showsChips => !(alarm.repeatDaysMask == 0 && alarm.oneTime);
+
+  String _repeatSummary(AppLocalizations l10n) {
+    if (alarm.repeatDaysMask == 0) {
+      return alarm.oneTime ? l10n.oneTime : l10n.everyDay;
+    }
+    return l10n.selectedDays;
   }
 
-  String _weekdayShort(int isoWeekday) {
-    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return names[(isoWeekday - 1) % 7];
+  String _formatNext(BuildContext context, DateTime next) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(next.year, next.month, next.day);
+    final diff = day.difference(today).inDays;
+    final l10n = context.l10n;
+    final time = MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(TimeOfDay.fromDateTime(next));
+    return switch (diff) {
+      0 => '${l10n.today} · $time',
+      1 => '${l10n.tomorrow} · $time',
+      _ =>
+        '${MaterialLocalizations.of(context).formatMediumDate(next)} · $time',
+    };
   }
 }
 
-Future<void> showAlarmEditor(
-  BuildContext context,
-  WidgetRef ref, {
-  Alarm? alarm,
-}) async {
-  final l10n = context.l10n;
-  var hour = alarm?.hour ?? 7;
-  var minute = alarm?.minute ?? 0;
-  var label = alarm?.label ?? '';
-  var mask = alarm?.repeatDaysMask ?? 0;
-  var snooze = alarm?.snoozeMinutes ?? 5;
-  var vibrate = alarm?.vibrate ?? true;
-  var challenge = AlarmChallenge.fromIndex(alarm?.challengeType ?? 0);
-  final labelCtrl = TextEditingController(text: label);
+/// The seven weekday chips, lit for every day this alarm fires on.
+class _DayChips extends StatelessWidget {
+  const _DayChips({required this.mask, required this.active});
 
-  final saved = await showDialog<bool>(
-    context: context,
-    builder:
-        (context) => StatefulBuilder(
-          builder:
-              (context, setState) => AlertDialog(
-                title: Text(alarm == null ? l10n.newAlarm : l10n.alarms),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay(hour: hour, minute: minute),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              hour = picked.hour;
-                              minute = picked.minute;
-                            });
-                          }
-                        },
-                        icon: const Icon(Icons.access_time),
-                        label: Text(AlarmTime.format(hour, minute)),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        children: [
-                          for (var i = 0; i < 7; i++)
-                            FilterChip(
-                              label: Text(
-                                const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-                              ),
-                              selected: (mask & (1 << i)) != 0,
-                              onSelected:
-                                  (v) => setState(
-                                    () =>
-                                        mask =
-                                            v
-                                                ? (mask | (1 << i))
-                                                : (mask & ~(1 << i)),
-                                  ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: labelCtrl,
-                        decoration: InputDecoration(labelText: l10n.alarmLabel),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        value: snooze,
-                        decoration: InputDecoration(labelText: l10n.snooze),
-                        items: [
-                          for (final s in [0, 5, 10, 15])
-                            DropdownMenuItem(value: s, child: Text('$s min')),
-                        ],
-                        onChanged: (v) => setState(() => snooze = v ?? 5),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<AlarmChallenge>(
-                        value: challenge,
-                        decoration: InputDecoration(labelText: l10n.challenge),
-                        items: [
-                          DropdownMenuItem(
-                            value: AlarmChallenge.none,
-                            child: Text(l10n.challengeNone),
-                          ),
-                          DropdownMenuItem(
-                            value: AlarmChallenge.math,
-                            child: Text(l10n.challengeMath),
-                          ),
-                          DropdownMenuItem(
-                            value: AlarmChallenge.memory,
-                            child: Text(l10n.challengeMemory),
-                          ),
-                          DropdownMenuItem(
-                            value: AlarmChallenge.code,
-                            child: Text(l10n.challengeCode),
-                          ),
-                        ],
-                        onChanged:
-                            (v) => setState(() => challenge = v ?? challenge),
-                      ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Vibrate'),
-                        value: vibrate,
-                        onChanged: (v) => setState(() => vibrate = v),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.save),
-                  ),
-                ],
+  final int mask;
+  final bool active;
+
+  static const _labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final on = active ? AlarmTime.weekdays(mask).toSet() : const <int>{};
+    return Row(
+      children: [
+        for (var i = 0; i < 7; i++) ...[
+          if (i > 0) const SizedBox(width: 6),
+          Container(
+            width: 26,
+            height: 26,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color:
+                  on.contains(i + 1)
+                      ? scheme.secondary
+                      : scheme.surfaceContainerHighest.withValues(alpha: 0.7),
+            ),
+            child: Text(
+              _labels[i],
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: on.contains(i + 1) ? scheme.onSecondary : scheme.outline,
               ),
-        ),
-  );
-
-  if (saved == true) {
-    final repo = ref.read(alarmRepositoryProvider);
-    if (alarm == null) {
-      await repo.create(
-        hour: hour,
-        minute: minute,
-        label: labelCtrl.text.trim(),
-        repeatDaysMask: mask,
-        snoozeMinutes: snooze,
-        vibrate: vibrate,
-        challenge: challenge,
-      );
-    } else {
-      await repo.updateAlarm(
-        alarm.copyWith(
-          hour: hour,
-          minute: minute,
-          label: labelCtrl.text.trim(),
-          repeatDaysMask: mask,
-          snoozeMinutes: snooze,
-          vibrate: vibrate,
-          challengeType: challenge.index,
-        ),
-      );
-    }
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }

@@ -41,6 +41,11 @@ void main() {
           'savings_goals',
           'exercises',
           'workout_sessions',
+          'workout_set_logs',
+          'workout_plans',
+          'workout_plan_items',
+          'workout_prefs',
+          'workout_schedules',
           'water_logs',
           'music_tracks',
           'alarms',
@@ -290,6 +295,17 @@ void main() {
         expect(next.dueDate, DateTime(2026, 6, 2));
       },
     );
+
+    test('an undated open task appears in today', () async {
+      await repo.create(title: 'Inbox item');
+      final done = (await repo.getById(await repo.create(title: 'Finished')))!;
+      await repo.setCompleted(done, true);
+
+      final today = await repo.watchToday().first;
+      final titles = today.map((e) => e.task.title);
+      expect(titles, contains('Inbox item'));
+      expect(titles, isNot(contains('Finished')));
+    });
 
     test('subtasks are linked to their parent', () async {
       final parent = await repo.create(title: 'Trip');

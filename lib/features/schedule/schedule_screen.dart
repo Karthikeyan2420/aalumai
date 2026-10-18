@@ -26,6 +26,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSchedule)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'scheduleAddEvent',
         onPressed: () => showEventEditor(context, initialDate: _selected),
         icon: const Icon(Icons.add),
         label: Text(l10n.add),

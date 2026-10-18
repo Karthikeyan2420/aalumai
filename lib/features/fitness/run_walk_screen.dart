@@ -6,6 +6,7 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
 import 'data/run_tracker.dart';
 import 'domain/geo.dart';
+import 'widgets/route_map.dart';
 
 /// Records a GPS run or walk, showing live distance, time and pace. The
 /// finished session is stored as a normal workout session (type run/walk) with
@@ -53,7 +54,17 @@ class _RunWalkScreenState extends ConsumerState<RunWalkScreen> {
                   onSelectionChanged:
                       (s) => setState(() => _selected = s.first),
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              // Live route canvas: the tracked GPS path drawn offline (no map
+              // tiles are fetched, so it still works without a connection).
+              Expanded(
+                child: RouteMapView(
+                  points: state.points,
+                  active: state.active,
+                  emptyHint: l10n.waitingForGps,
+                ),
+              ),
+              const SizedBox(height: 16),
               Text(
                 formatDistanceKm(state.distanceMeters),
                 textAlign: TextAlign.center,
@@ -69,7 +80,7 @@ class _RunWalkScreenState extends ConsumerState<RunWalkScreen> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   _Stat(
@@ -83,7 +94,7 @@ class _RunWalkScreenState extends ConsumerState<RunWalkScreen> {
                 const SizedBox(height: 16),
                 _ErrorNotice(error: state.error!),
               ],
-              const Spacer(),
+              const SizedBox(height: 16),
               if (!state.active)
                 FilledButton.icon(
                   onPressed:

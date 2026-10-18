@@ -9,6 +9,129 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get songs => 'Songs';
+
+  @override
+  String get folders => 'Folders';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get playAll => 'Play all';
+
+  @override
+  String get shuffleAll => 'Shuffle all';
+
+  @override
+  String get addToQueue => 'Add to queue';
+
+  @override
+  String get playNext => 'Play next';
+
+  @override
+  String get removeFromQueue => 'Remove from queue';
+
+  @override
+  String get label => 'Label';
+
+  @override
+  String get labels => 'Labels';
+
+  @override
+  String get createLabel => 'New label';
+
+  @override
+  String get favorite => 'Favorite';
+
+  @override
+  String get album => 'Album';
+
+  @override
+  String get artist => 'Artist';
+
+  @override
+  String get size => 'Size';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get scanDevice => 'Scan device';
+
+  @override
+  String get scanning => 'Scanning…';
+
+  @override
+  String get grantPermission => 'Grant permission';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get selectAll => 'Select all';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get mostPlayed => 'Most played';
+
+  @override
+  String get recentlyAdded => 'Recently added';
+
+  @override
+  String get totalSongs => 'Songs';
+
+  @override
+  String get duplicates => 'Possible duplicates';
+
+  @override
+  String get missingFiles => 'Missing files';
+
+  @override
+  String get changeColor => 'Colour';
+
+  @override
+  String get coverImage => 'Cover image';
+
+  @override
+  String get noFolders => 'No folders yet';
+
+  @override
+  String get repeatOff => 'Repeat off';
+
+  @override
+  String get repeatOne => 'Repeat one';
+
+  @override
+  String get repeatAll => 'Repeat all';
+
+  @override
+  String get scanComplete => 'Scan complete';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get playlist => 'Playlist';
+
+  @override
+  String get removeFromPlaylist => 'Remove from playlist';
+
+  @override
+  String get thisWeek => 'This week';
+
+  @override
+  String get earlier => 'Earlier';
+
+  @override
   String get appName => 'AALUMAI';
 
   @override
@@ -213,8 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permissionDeniedTitle => 'Permission needed';
 
   @override
-  String get permissionDeniedBody =>
-      'This feature needs a permission that was denied. Open settings to grant it.';
+  String get permissionDeniedBody => 'This feature needs a permission that was denied. Open settings to grant it.';
 
   @override
   String get emptyTasks => 'No tasks yet. Add your first task.';
@@ -376,12 +498,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportCsvDescription => 'Export supported data as CSV files.';
 
   @override
-  String get backupDescription =>
-      'Create a complete local backup of your data.';
+  String get backupDescription => 'Create a complete local backup of your data.';
 
   @override
-  String get restoreWarning =>
-      'Restoring will overwrite your current data. Continue?';
+  String get restoreWarning => 'Restoring will overwrite your current data. Continue?';
 
   @override
   String get backupSuccess => 'Backup created successfully.';
@@ -394,6 +514,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restoreFailed => 'Restore failed. The file may be invalid.';
+
+  @override
+  String get restorePartial => 'Data restored, but some alarms or reminders could not be re-armed. Please check them.';
 
   @override
   String get noBackupFile => 'No file selected.';
@@ -414,12 +537,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageNameKn => 'ಕನ್ನಡ';
 
   @override
-  String get privacyLocalFirst =>
-      'Your data stays on your device by default. AALUMAI is offline-first and does not upload your personal information.';
+  String get privacyLocalFirst => 'Your data stays on your device by default. AALUMAI is offline-first and does not upload your personal information.';
 
   @override
-  String get permissionsExplanation =>
-      'Permissions are requested only when a feature needs them.';
+  String get permissionsExplanation => 'Permissions are requested only when a feature needs them.';
 
   @override
   String get aboutPrivacy => 'Privacy policy';
@@ -428,8 +549,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutLicenses => 'Open-source licences';
 
   @override
-  String get aboutDescription =>
-      'AALUMAI is an offline-first personal life management app.';
+  String get aboutDescription => 'AALUMAI is an offline-first personal life management app.';
 
   @override
   String get madeWith => 'Made for everyday life.';
@@ -454,6 +574,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get everyDay => 'Every day';
+
+  @override
+  String get everyWeek => 'Every week';
+
+  @override
+  String get everyMonth => 'Every month';
+
+  @override
+  String get everyYear => 'Every year';
 
   @override
   String get selectedDays => 'Selected days';
@@ -585,6 +714,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurring => 'Recurring';
 
   @override
+  String get addRecurring => 'New recurring';
+
+  @override
+  String get dueRecurring => 'Due recurring';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
   String get fromAccount => 'From account';
 
   @override
@@ -654,10 +792,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyDismiss => 'Dismiss anyway';
 
   @override
+  String get dismissAlarm => 'Dismiss alarm';
+
+  @override
+  String get memorizeDigits => 'Memorize these digits';
+
+  @override
+  String get enterAnswer => 'Enter your answer';
+
+  @override
+  String get wrongAnswer => 'That\'s not right. Try again.';
+
+  @override
+  String get passAllChallenges => 'Pass every challenge to dismiss the alarm.';
+
+  @override
+  String challengeStep(int current, int total) {
+    return 'Challenge $current of $total';
+  }
+
+  @override
+  String get addChallenge => 'Add challenge';
+
+  @override
+  String get codeLength => 'Code length';
+
+  @override
+  String codeLengthValue(int count) {
+    return '$count characters';
+  }
+
+  @override
+  String get removeChallenge => 'Remove';
+
+  @override
+  String get moveUp => 'Move up';
+
+  @override
+  String get moveDown => 'Move down';
+
+  @override
+  String get previewAlarm => 'Test alarm';
+
+  @override
   String get music => 'Music';
 
   @override
   String get playlists => 'Playlists';
+
+  @override
+  String get addToPlaylist => 'Add to playlist';
+
+  @override
+  String get newPlaylist => 'New playlist';
+
+  @override
+  String get emptyPlaylist => 'Empty playlist';
+
+  @override
+  String get removeFolder => 'Remove folder';
+
+  @override
+  String get selectFolder => 'Select folder';
 
   @override
   String get tracks => 'Tracks';
@@ -691,6 +887,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get workoutHistory => 'Workout history';
+
+  @override
+  String get plans => 'Plans';
+
+  @override
+  String get newPlan => 'New plan';
+
+  @override
+  String get planName => 'Plan name';
+
+  @override
+  String get goals => 'Goals';
+
+  @override
+  String get newGoal => 'New goal';
+
+  @override
+  String get metric => 'Metric';
+
+  @override
+  String get target => 'Target';
+
+  @override
+  String get goalWorkoutsPerWeek => 'Workouts this week';
+
+  @override
+  String get goalWaterDaily => 'Water today (ml)';
+
+  @override
+  String get goalDistanceWeekly => 'Distance this week (m)';
+
+  @override
+  String get addExercise => 'Add exercise';
+
+  @override
+  String setProgress(int index, int total) {
+    return 'Set $index of $total';
+  }
+
+  @override
+  String get workoutComplete => 'Workout complete';
 
   @override
   String get startWorkout => 'Start workout';
@@ -729,6 +966,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get steps => 'Steps';
 
   @override
+  String get waitingForGps => 'Waiting for GPS…';
+
+  @override
   String get water => 'Water';
 
   @override
@@ -754,6 +994,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bodyweight => 'Bodyweight';
+
+  @override
+  String get dumbbellWorkouts => 'Dumbbell workouts';
+
+  @override
+  String get bodyweightWorkouts => 'Bodyweight workouts';
+
+  @override
+  String get stretchingWorkouts => 'Stretching';
+
+  @override
+  String get bandWorkouts => 'Resistance bands';
+
+  @override
+  String get gymWorkouts => 'Gym workouts';
+
+  @override
+  String get searchExercises => 'Search exercises';
+
+  @override
+  String get noExercisesMatch => 'No exercises match your filters.';
+
+  @override
+  String get difficultyLabel => 'Difficulty';
+
+  @override
+  String get yourExercises => 'Your exercises';
 
   @override
   String get dumbbells => 'Dumbbells';
@@ -852,8 +1119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incorrect => 'Not quite';
 
   @override
-  String get microphonePermission =>
-      'Microphone permission is needed to practise speaking.';
+  String get microphonePermission => 'Microphone permission is needed to practise speaking.';
 
   @override
   String get meals => 'Meals';
@@ -898,6 +1164,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateList => 'Generate from meal plan';
 
   @override
+  String get atStart => 'At start time';
+
+  @override
+  String minutesBefore(int count) {
+    return '$count min before';
+  }
+
+  @override
   String get reminderSet => 'Reminder set';
 
   @override
@@ -931,4 +1205,776 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightTrend => 'Weight trend';
+
+  @override
+  String get oneTime => 'One-time';
+
+  @override
+  String get repeatDays => 'Repeat';
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get vibrate => 'Vibrate';
+
+  @override
+  String get maxSnoozes => 'Max snoozes';
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String get upcomingAlarms => 'Upcoming alarms';
+
+  @override
+  String get nextRing => 'Next ring';
+
+  @override
+  String get soundClassic => 'Classic beep';
+
+  @override
+  String get soundGentle => 'Gentle chime';
+
+  @override
+  String get soundUrgent => 'Urgent';
+
+  @override
+  String get soundSystem => 'System default';
+
+  @override
+  String get snoozeDuration => 'Snooze length';
+
+  @override
+  String get ringsTomorrow => 'Tomorrow';
+
+  @override
+  String get noUpcomingAlarms => 'No upcoming alarms.';
+
+  @override
+  String get previewSound => 'Preview sound';
+
+  @override
+  String get alarmSoundCustom => 'Custom sound';
+
+  @override
+  String get customSoundFailed => 'Couldn\'t add that sound. Try another file.';
+
+  @override
+  String get alarmBackground => 'Alarm background';
+
+  @override
+  String get exactAlarmTitle => 'Allow exact alarms';
+
+  @override
+  String get exactAlarmBody => 'Android is blocking exact alarms, so alarms may ring late. Allow exact alarms in system settings.';
+
+  @override
+  String get exactAlarmAction => 'Allow';
+
+  @override
+  String get alarmScheduleError => 'Alarm could not be scheduled';
+
+  @override
+  String get chooseExercises => 'Choose exercises';
+
+  @override
+  String get newWorkout => 'New workout';
+
+  @override
+  String get elapsed => 'Elapsed';
+
+  @override
+  String get logSet => 'Log set';
+
+  @override
+  String get completeSet => 'Complete set';
+
+  @override
+  String get previousExercise => 'Previous';
+
+  @override
+  String get nextExercise => 'Next';
+
+  @override
+  String get workoutSummary => 'Workout summary';
+
+  @override
+  String get exercisesCompleted => 'Exercises completed';
+
+  @override
+  String get setsCompleted => 'Sets completed';
+
+  @override
+  String get totalReps => 'Total reps';
+
+  @override
+  String get skippedExercises => 'Skipped exercises';
+
+  @override
+  String get restComplete => 'Rest complete';
+
+  @override
+  String get workoutPaused => 'Workout paused';
+
+  @override
+  String get resumeWorkout => 'Resume workout';
+
+  @override
+  String get endWorkout => 'End workout';
+
+  @override
+  String get restartWorkout => 'Restart workout';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get nextUp => 'Next up';
+
+  @override
+  String get workoutInProgress => 'Workout in progress';
+
+  @override
+  String get resumeOrDiscard => 'You have a workout in progress.';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get actualReps => 'Actual reps';
+
+  @override
+  String get weightUsed => 'Weight (kg)';
+
+  @override
+  String get targetReps => 'Target reps';
+
+  @override
+  String get timed => 'Timed';
+
+  @override
+  String get startRest => 'Start rest';
+
+  @override
+  String get setDone => 'Set done';
+
+  @override
+  String get markSetDone => 'Mark set done';
+
+  @override
+  String get completeWorkout => 'Complete workout';
+
+  @override
+  String get workoutSaved => 'Workout saved';
+
+  @override
+  String get totalTime => 'Total time';
+
+  @override
+  String get resting => 'Resting';
+
+  @override
+  String get workSet => 'Work';
+
+  @override
+  String get go => 'Go';
+
+  @override
+  String get resumeLastWorkout => 'Resume last workout';
+
+  @override
+  String get planProgress => 'Plan progress';
+
+  @override
+  String get starterPlans => 'Starter plans';
+
+  @override
+  String get exerciseDetail => 'Exercise';
+
+  @override
+  String get howTo => 'How to do it';
+
+  @override
+  String get reorder => 'Reorder';
+
+  @override
+  String get editItem => 'Edit';
+
+  @override
+  String get musicScanFailed => 'Couldn\'t scan that folder. Check that access is granted and try again.';
+
+  @override
+  String get musicAccessNeeded => 'Choose a folder that contains your music. AALUMAI scans files on your device only.';
+
+  @override
+  String get rescan => 'Rescan folders';
+
+  @override
+  String get noMusicYet => 'No music added yet. Add a folder to get started.';
+
+  @override
+  String get musicAddedCount => 'tracks added';
+
+  @override
+  String get armsLabel => 'Arms';
+
+  @override
+  String get shouldersLabel => 'Shoulders';
+
+  @override
+  String get chestLabel => 'Chest';
+
+  @override
+  String get backLabel => 'Back';
+
+  @override
+  String get legsLabel => 'Legs';
+
+  @override
+  String get coreLabel => 'Core';
+
+  @override
+  String get cardioLabel => 'Cardio';
+
+  @override
+  String get secondsShort => 'sec';
+
+  @override
+  String get exercise => 'Exercise';
+
+  @override
+  String get emptyWorkoutExercises => 'Add or select at least one exercise to start.';
+
+  @override
+  String get newExercise => 'New exercise';
+
+  @override
+  String get timedExercise => 'Timed exercise';
+
+  @override
+  String get noSetsLogged => 'No sets were logged for this workout.';
+
+  @override
+  String get workoutPreferences => 'Workout preferences';
+
+  @override
+  String get planStyleLabel => 'Plan style';
+
+  @override
+  String get planStyleBalanced => 'Balanced';
+
+  @override
+  String get planStyleMuscleSplit => 'Muscle split';
+
+  @override
+  String get planStyleFullBody => 'Full body';
+
+  @override
+  String get planStyleCardioFocus => 'Cardio focus';
+
+  @override
+  String get fitnessLevelLabel => 'Fitness level';
+
+  @override
+  String get sessionLengthLabel => 'Session length';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get trainingDaysLabel => 'Training days';
+
+  @override
+  String get restDaysLabel => 'Rest days';
+
+  @override
+  String get primaryGoalLabel => 'Primary goal';
+
+  @override
+  String get goalGeneralHealth => 'General health';
+
+  @override
+  String get goalStrength => 'Strength';
+
+  @override
+  String get goalEndurance => 'Endurance';
+
+  @override
+  String get goalFlexibility => 'Flexibility';
+
+  @override
+  String get goalWeightManagement => 'Weight management';
+
+  @override
+  String get focusMusclesLabel => 'Focus muscles';
+
+  @override
+  String get availableEquipment => 'Available equipment';
+
+  @override
+  String get equipmentHint => 'Add equipment';
+
+  @override
+  String get preferredTimeLabel => 'Preferred time';
+
+  @override
+  String get anyTime => 'Any time';
+
+  @override
+  String get clearLabel => 'Clear';
+
+  @override
+  String get safetyGuidanceTitle => 'Health & safety';
+
+  @override
+  String get safetyGuidanceBody => 'Warm up first and work within your limits. Stop if you feel pain, dizziness or shortness of breath. This guidance is informed by WHO physical-activity advice for adults aged 18-64 and is not medical advice - seek professional guidance if you have a health condition.';
+
+  @override
+  String get safetyAcknowledged => 'I understand and will stay within my limits';
+
+  @override
+  String get savePreferences => 'Save preferences';
+
+  @override
+  String get preferencesSaved => 'Preferences saved';
+
+  @override
+  String get weeklyPlanner => 'Weekly planner';
+
+  @override
+  String get clearUnstarted => 'Clear un-started days';
+
+  @override
+  String get clearUnstartedBody => 'Remove planned, missed and rest days for this week. Completed sessions are kept.';
+
+  @override
+  String get generateWeek => 'Generate week';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String weekGenerated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions generated',
+      one: '1 session generated',
+      zero: 'No sessions generated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekCleared => 'Un-started days cleared';
+
+  @override
+  String get noPlansYet => 'Create a workout plan first';
+
+  @override
+  String get selectPlan => 'Select a plan';
+
+  @override
+  String get addSession => 'Add session';
+
+  @override
+  String get editSession => 'Edit session';
+
+  @override
+  String get sessionTitle => 'Session title';
+
+  @override
+  String get muscleGroupsLabel => 'Muscle groups';
+
+  @override
+  String get moveToDay => 'Move to another day';
+
+  @override
+  String get deleteSessionBody => 'This removes the session from the planner. Logged workout history is kept.';
+
+  @override
+  String get noSessionsThisWeek => 'No sessions planned';
+
+  @override
+  String get planWarnings => 'Plan check';
+
+  @override
+  String get warningConsecutiveDays => 'Several training days in a row - consider a rest day';
+
+  @override
+  String get warningConsecutiveSameMuscle => 'The same muscle group appears on back-to-back days';
+
+  @override
+  String get restDayLabel => 'Rest day';
+
+  @override
+  String get markRestDay => 'Mark rest day';
+
+  @override
+  String get statusPlanned => 'Planned';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusSkipped => 'Skipped';
+
+  @override
+  String get statusMissed => 'Missed';
+
+  @override
+  String get getStarted => 'Get Started';
+
+  @override
+  String get landingBrandLatin => 'AALUMAI';
+
+  @override
+  String get landingBrandNative => 'ஆளுமை';
+
+  @override
+  String get landingTaglineEnglish => 'Your life. Your control.';
+
+  @override
+  String get landingTaglineNative => 'உங்கள் வாழ்க்கை. உங்கள் கட்டுப்பாடு.';
+
+  @override
+  String get featureSmartAlarms => 'Smart Alarms';
+
+  @override
+  String get featureSmartAlarmsDesc => 'Wake up with purpose';
+
+  @override
+  String get featureFitness => 'Fitness & Workouts';
+
+  @override
+  String get featureFitnessDesc => 'Be healthy and strong';
+
+  @override
+  String get featureMusic => 'Music Player';
+
+  @override
+  String get featureMusicDesc => 'Your songs, your mood';
+
+  @override
+  String get featureHabits => 'Habits & Tasks';
+
+  @override
+  String get featureHabitsDesc => 'Build a better routine';
+
+  @override
+  String get featureExpenses => 'Expenses & Savings';
+
+  @override
+  String get featureExpensesDesc => 'Track and grow';
+
+  @override
+  String get featureCalendar => 'Calendar & Notes';
+
+  @override
+  String get featureCalendarDesc => 'Stay organized';
+
+  @override
+  String get formTips => 'Form tips';
+
+  @override
+  String get commonMistakes => 'Common mistakes';
+
+  @override
+  String get contraindications => 'When to avoid';
+
+  @override
+  String get alternatives => 'Alternatives';
+
+  @override
+  String get easierAlternative => 'Easier';
+
+  @override
+  String get harderAlternative => 'Harder';
+
+  @override
+  String get typeStrength => 'Strength';
+
+  @override
+  String get typeCardio => 'Cardio';
+
+  @override
+  String get typeMobility => 'Mobility';
+
+  @override
+  String get typeBalance => 'Balance';
+
+  @override
+  String get readinessCheck => 'Readiness check';
+
+  @override
+  String get readinessIntro => 'A quick check before you train';
+
+  @override
+  String get energyLabel => 'Energy';
+
+  @override
+  String get sorenessLabel => 'Muscle soreness';
+
+  @override
+  String get sleepLabel => 'Sleep quality';
+
+  @override
+  String get lowReadinessHint => 'Your readiness looks low. Consider a lighter, shorter session.';
+
+  @override
+  String get iAmReady => 'I\'m ready';
+
+  @override
+  String get mainWork => 'Main work';
+
+  @override
+  String get lowerIntensityHint => 'Ease off the intensity today.';
+
+  @override
+  String get sessionOutcomePartial => 'Partly completed';
+
+  @override
+  String get sessionOutcomeCancelled => 'Ended early';
+
+  @override
+  String get activityGuidance => 'Activity guidance';
+
+  @override
+  String get whoAttribution => 'Informed by WHO physical-activity guidance';
+
+  @override
+  String get dailyWorkout => 'Daily workout';
+
+  @override
+  String get startTodaysWorkout => 'Start today\'s workout';
+
+  @override
+  String get cardioEveryDay => 'Cardio every day';
+
+  @override
+  String get yogaCooldown => 'Yoga cool-down';
+
+  @override
+  String get activeRecoveryDay => 'Active recovery';
+
+  @override
+  String get yogaAfterWorkout => 'Yoga is best after the workout, as a cool-down.';
+
+  @override
+  String get whoAerobicLabel => 'Aerobic activity';
+
+  @override
+  String get whoStrengthLabel => 'Muscle strengthening';
+
+  @override
+  String whoAerobicValue(int minutes) {
+    return '$minutes / 150 min';
+  }
+
+  @override
+  String whoStrengthValue(int days) {
+    return '$days / 2 days';
+  }
+
+  @override
+  String get whoAerobicGoal => 'Aim for 150-300 minutes a week';
+
+  @override
+  String get whoStrengthGoal => 'Aim for at least 2 days a week';
+
+  @override
+  String get whoDisclaimer => 'General information, not medical advice. If you have a health condition, seek professional guidance before starting.';
+
+  @override
+  String get whoGoalMet => 'Guideline met';
+
+  @override
+  String get whoKeepGoing => 'Keep going';
+
+  @override
+  String get whoTips => 'Guidance tips';
+
+  @override
+  String get whoTipProgression => 'Start gradually and increase a little each week.';
+
+  @override
+  String get whoTipWalking => 'Walking and cycling count toward your aerobic goal.';
+
+  @override
+  String get whoTipStrength => 'Spread strength days across the week, with rest days in between.';
+
+  @override
+  String get whoTipAdapt => 'Adjust intensity to your age and ability, and choose easier variations when needed.';
+
+  @override
+  String get safetyTemplateNote => 'Exercises such as push-ups and planks are examples you can adjust - choose easier variations or swap them out as needed.';
+
+  @override
+  String get alarmSoundAndMotivation => 'Alarm Sound & Motivation';
+
+  @override
+  String get alarmMusic => 'Alarm music';
+
+  @override
+  String get alarmMusicHint => 'Plays while the alarm rings';
+
+  @override
+  String get soundMode => 'Sound mode';
+
+  @override
+  String get soundModeMusicVoice => 'Music + Motivation Voice';
+
+  @override
+  String get soundModeVoiceOnly => 'Voice Only';
+
+  @override
+  String get soundModeMusicOnly => 'Music Only';
+
+  @override
+  String get motivationalMessage => 'Motivational message';
+
+  @override
+  String get motivationalMessageHint => 'A short message spoken while the alarm rings';
+
+  @override
+  String get useSampleMessage => 'Use sample message';
+
+  @override
+  String get voicePreview => 'Preview voice';
+
+  @override
+  String get voicePreviewing => 'Previewing…';
+
+  @override
+  String get voicePreviewFailed => 'Voice preview isn\'t available. Check the alarm voice settings.';
+
+  @override
+  String alarmVoiceLabel(String gender, String language) {
+    return '$gender voice · $language';
+  }
+
+  @override
+  String get changeInSettings => 'Change in Settings';
+
+  @override
+  String get musicInterval => 'Music interval';
+
+  @override
+  String get musicIntervalHint => 'How long music plays before the next message';
+
+  @override
+  String get customInterval => 'Custom';
+
+  @override
+  String get customIntervalSeconds => 'Custom interval (seconds)';
+
+  @override
+  String customIntervalValue(int count) {
+    return '$count sec';
+  }
+
+  @override
+  String get voiceTiming => 'Voice timing';
+
+  @override
+  String get voiceTimingBeforeMusic => 'Speak before music starts';
+
+  @override
+  String get voiceTimingBetweenSegments => 'Speak between music segments';
+
+  @override
+  String get voiceTimingOverMusic => 'Speak over the music';
+
+  @override
+  String get voicePause => 'Pause between messages';
+
+  @override
+  String get voiceOnlyNeedsMessage => 'Add a message, or choose Music Only.';
+
+  @override
+  String get invalidInterval => 'Enter a value greater than zero.';
+
+  @override
+  String get settingsAlarmVoice => 'Alarm voice';
+
+  @override
+  String get settingsAlarmVoiceDesc => 'Voice, language, rate and pitch for alarms';
+
+  @override
+  String get alarmVoiceSettings => 'Alarm Voice Settings';
+
+  @override
+  String get voiceLanguage => 'Voice language';
+
+  @override
+  String get followAppLanguage => 'Follow app language';
+
+  @override
+  String get voiceSelect => 'Voice';
+
+  @override
+  String get voiceDeviceDefault => 'Device default';
+
+  @override
+  String get voiceDeviceDefaultDesc => 'Use any available voice';
+
+  @override
+  String get voiceGender => 'Voice gender';
+
+  @override
+  String get genderDefault => 'Default / Any';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get speechRate => 'Speech rate';
+
+  @override
+  String get speechPitch => 'Pitch';
+
+  @override
+  String get speechVolume => 'Speech volume';
+
+  @override
+  String get resetDefault => 'Reset';
+
+  @override
+  String get voicesLoading => 'Loading voices…';
+
+  @override
+  String get noInstalledVoices => 'No installed voices were found.';
+
+  @override
+  String get voiceLoadFailed => 'Couldn\'t read the installed voices.';
+
+  @override
+  String get openTtsSettings => 'Open TTS settings';
+
+  @override
+  String get ttsSettingsUnavailable => 'Couldn\'t open the system TTS settings.';
+
+  @override
+  String voiceUnavailableForLanguage(String language) {
+    return 'No $language voice is installed. Install a language pack in Android settings.';
+  }
+
+  @override
+  String get voiceGenderUnavailable => 'The chosen gender isn\'t available for this voice; using the closest match.';
+
+  @override
+  String get voiceFallbackNote => 'The selected voice is no longer available, so the device default is used.';
+
+  @override
+  String get previewSentence => 'This is how your alarm voice will sound.';
 }

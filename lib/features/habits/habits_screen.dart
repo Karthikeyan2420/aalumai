@@ -16,12 +16,13 @@ class HabitsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final habitsAsync = ref.watch(activeHabitsProvider);
-    final completionsAsync = ref.watch(weekHabitCompletionsProvider);
+    final completionsAsync = ref.watch(habitStreakCompletionsProvider);
     final today = HabitStreak.normalize(DateTime.now());
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.habitChecklist)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'habitsAdd',
         onPressed: () => showHabitEditor(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.add),
@@ -59,9 +60,10 @@ class HabitsScreen extends ConsumerWidget {
                 weekdaysMask: habit.weekdaysMask,
                 date: today,
               );
-              final streak = HabitStreak.currentDayStreak(
+              final streak = HabitStreak.currentStreak(
                 schedule: schedule,
                 weekdaysMask: habit.weekdaysMask,
+                targetPerWeek: habit.targetPerWeek,
                 completedDays: days,
                 today: today,
               );
@@ -70,6 +72,7 @@ class HabitsScreen extends ConsumerWidget {
                 completedToday: done,
                 eligibleToday: eligible,
                 streak: streak,
+                weekly: schedule == HabitSchedule.weeklyTarget,
                 weekDays: _weekDays(habit, days, today),
                 onToggle:
                     () => ref
@@ -169,9 +172,10 @@ class HabitsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     final allDays = days.toList()..sort();
     final schedule = HabitSchedule.fromIndex(habit.scheduleType);
-    final current = HabitStreak.currentDayStreak(
+    final current = HabitStreak.currentStreak(
       schedule: schedule,
       weekdaysMask: habit.weekdaysMask,
+      targetPerWeek: habit.targetPerWeek,
       completedDays: days,
       today: HabitStreak.normalize(DateTime.now()),
     );
@@ -287,12 +291,14 @@ class _HabitTile extends StatelessWidget {
     required this.onToggle,
     required this.onLongPress,
     required this.onTap,
+    this.weekly = false,
   });
 
   final Habit habit;
   final bool completedToday;
   final bool eligibleToday;
   final int streak;
+  final bool weekly;
   final List<_DayDot> weekDays;
   final VoidCallback onToggle;
   final VoidCallback onLongPress;
@@ -368,12 +374,14 @@ class _HabitTile extends StatelessWidget {
                           Row(
                             children: [
                               Icon(
-                                Icons.local_fire_department,
+                                weekly
+                                    ? Icons.calendar_view_week
+                                    : Icons.local_fire_department,
                                 size: 16,
                                 color: theme.colorScheme.tertiary,
                               ),
                               const SizedBox(width: 2),
-                              Text('$streak'),
+                              Text(weekly ? '${streak}w' : '$streak'),
                             ],
                           ),
                       ],

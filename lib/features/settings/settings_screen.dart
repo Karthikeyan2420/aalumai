@@ -7,11 +7,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/backgrounds/background_presets.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/backup_service.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/restore_reconciler.dart';
+import 'alarm_voice_settings_screen.dart';
+import 'background_settings_screen.dart';
 import 'data/lock_service.dart';
 
 const _languages = <(String, String)>[
@@ -57,6 +61,32 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(_themeLabel(context, themeMode)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _pickTheme(context, ref, themeMode),
+          ),
+          ListTile(
+            leading: const Icon(Icons.wallpaper_outlined),
+            title: const Text('Home background'),
+            subtitle: const Text('Relaxing image, colour or gradient'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _openBackground(context, BackgroundSlot.home),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dark_mode_outlined),
+            title: const Text('Alarm background'),
+            subtitle: const Text('Night-sky image, colour or gradient'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _openBackground(context, BackgroundSlot.alarm),
+          ),
+          ListTile(
+            leading: const Icon(Icons.record_voice_over_outlined),
+            title: Text(l10n.settingsAlarmVoice),
+            subtitle: Text(l10n.settingsAlarmVoiceDesc),
+            trailing: const Icon(Icons.chevron_right),
+            onTap:
+                () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AlarmVoiceSettingsScreen(),
+                  ),
+                ),
           ),
           const Divider(),
           _SectionHeader(l10n.settingsFitness),
@@ -137,12 +167,12 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.policy_outlined),
             title: Text(l10n.aboutPrivacy),
-            onTap: () => context.go(AppRoutes.about),
+            onTap: () => context.push(AppRoutes.about),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(l10n.about),
-            onTap: () => context.go(AppRoutes.about),
+            onTap: () => context.push(AppRoutes.about),
           ),
         ],
       ),
@@ -220,6 +250,14 @@ class SettingsScreen extends ConsumerWidget {
     if (mode != null) {
       await ref.read(themeModeProvider.notifier).setMode(mode);
     }
+  }
+
+  void _openBackground(BuildContext context, BackgroundSlot slot) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BackgroundSettingsScreen(slot: slot),
+      ),
+    );
   }
 
   Future<void> _editNumber(
@@ -328,20 +366,65 @@ class SettingsScreen extends ConsumerWidget {
           ),
     );
     if (ok != true) return;
+
+    // Snapshot the schedules owned by the *current* database before it is
+    // replaced, so schedules for records that the backup does not contain can
+    // be cancelled instead of ringing forever.
+    final ScheduleSnapshot before;
     try {
-      await ref.read(backupServiceProvider).restore(File(path));
-      ref.invalidate(appDatabaseProvider);
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.restoreSuccess)));
-      }
+      before = await ref.read(restoreReconcilerProvider).snapshot();
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.restoreFailed)));
       }
+      return;
+    }
+
+    try {
+      await ref.read(backupServiceProvider).restore(File(path));
+    } catch (_) {
+      // The database file itself could not be replaced: report failure and do
+      // not touch the existing schedules.
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.restoreFailed)));
+      }
+      return;
+    }
+
+    // Rebuild every data provider against the restored file, then reconcile the
+    // OS schedule set so it matches the restored records.
+    ref.invalidate(appDatabaseProvider);
+    final outcome = await _reconcileAfterRestore(ref, before);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          outcome.isComplete ? l10n.restoreSuccess : l10n.restorePartial,
+        ),
+      ),
+    );
+  }
+
+  /// Best-effort reconciliation that never lets a scheduling failure surface as
+  /// a crash. The database has already been restored; a failed re-arm is
+  /// reported (not hidden) and the restored data is left intact.
+  Future<RestoreOutcome> _reconcileAfterRestore(
+    WidgetRef ref,
+    ScheduleSnapshot before,
+  ) async {
+    try {
+      return await ref.read(restoreReconcilerProvider).reconcile(before);
+    } catch (e) {
+      return RestoreOutcome(
+        obsoleteCancelled: false,
+        alarmsReconciled: false,
+        remindersReconciled: false,
+        errors: [e.toString()],
+      );
     }
   }
 

@@ -191,6 +191,7 @@ class LessonDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(lesson.title)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'learningPractice',
         onPressed:
             () => Navigator.of(context).push(
               MaterialPageRoute(

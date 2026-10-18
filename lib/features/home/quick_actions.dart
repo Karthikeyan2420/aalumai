@@ -12,7 +12,6 @@ import '../fitness/data/fitness_repository.dart';
 import '../fitness/fitness_screen.dart';
 import '../habits/data/habit_repository.dart';
 import '../habits/habit_editor.dart';
-import '../notes/data/note_repository.dart';
 import '../notes/note_editor.dart';
 import '../tasks/task_editor.dart';
 
@@ -89,7 +88,7 @@ Future<void> runQuickAction(
     case QuickAction.workout:
       await _startWorkout(context, ref);
     case QuickAction.learn:
-      if (context.mounted) context.go(AppRoutes.learning);
+      if (context.mounted) context.push(AppRoutes.learning);
   }
 }
 
@@ -274,20 +273,11 @@ Future<int?> _promptAmount(BuildContext context) async {
 }
 
 Future<void> _addNote(BuildContext context, WidgetRef ref) async {
-  final id = await ref.read(noteRepositoryProvider).create();
-  if (!context.mounted) return;
-  await showNoteEditor(context, noteId: id);
+  await showNoteEditor(context);
 }
 
-Future<void> _startWorkout(BuildContext context, WidgetRef ref) async {
-  final l10n = context.l10n;
-  final id = await ref
-      .read(fitnessRepositoryProvider)
-      .startSession(name: l10n.workout);
-  if (!context.mounted) return;
-  await Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => WorkoutSessionScreen(sessionId: id)),
-  );
+Future<void> _startWorkout(BuildContext context, WidgetRef ref) {
+  return startQuickWorkout(context, ref);
 }
 
 Future<void> _completeHabit(BuildContext context, WidgetRef ref) {

@@ -183,6 +183,7 @@ class _RecipesTab extends ConsumerWidget {
     final recipes = ref.watch(recipesProvider);
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'mealsAddRecipe',
         onPressed: () => showRecipeEditor(context, ref),
         icon: const Icon(Icons.add),
         label: Text(l10n.add),
@@ -235,6 +236,7 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(recipe.name)),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'mealsAddIngredient',
         onPressed: () => showIngredientEditor(context, ref, recipe.id),
         icon: const Icon(Icons.add),
         label: Text(l10n.ingredients),

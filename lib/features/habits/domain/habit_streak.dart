@@ -65,6 +65,47 @@ class HabitStreak {
     return streak;
   }
 
+  /// The correct current streak for [schedule].
+  ///
+  /// Weekly-target habits are measured in qualifying *weeks* against
+  /// [targetPerWeek]; every other schedule is measured in eligible *days*.
+  /// This is the single entry point the UI should use so a weekly habit is
+  /// never shown a meaningless day streak.
+  static int currentStreak({
+    required HabitSchedule schedule,
+    required int weekdaysMask,
+    required int targetPerWeek,
+    required Set<DateTime> completedDays,
+    required DateTime today,
+  }) {
+    if (schedule == HabitSchedule.weeklyTarget) {
+      return currentWeeklyStreak(
+        targetPerWeek: targetPerWeek,
+        completionsByWeekStart: completionsByWeek(completedDays),
+        today: today,
+      );
+    }
+    return currentDayStreak(
+      schedule: schedule,
+      weekdaysMask: weekdaysMask,
+      completedDays: completedDays,
+      today: today,
+    );
+  }
+
+  /// Groups normalised [completedDays] into a count per ISO week start
+  /// (Monday), matching [startOfWeek].
+  static Map<DateTime, int> completionsByWeek(
+    Iterable<DateTime> completedDays,
+  ) {
+    final byWeek = <DateTime, int>{};
+    for (final day in completedDays) {
+      final week = startOfWeek(day);
+      byWeek[week] = (byWeek[week] ?? 0) + 1;
+    }
+    return byWeek;
+  }
+
   /// Current streak in eligible weeks for weekly-target habits.
   static int currentWeeklyStreak({
     required int targetPerWeek,

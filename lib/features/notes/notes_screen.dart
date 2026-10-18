@@ -61,9 +61,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final id = await repo.create();
-          if (context.mounted) showNoteEditor(context, noteId: id);
+        heroTag: 'notesAdd',
+        onPressed: () {
+          showNoteEditor(context);
         },
         icon: const Icon(Icons.add),
         label: Text(l10n.add),

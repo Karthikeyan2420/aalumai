@@ -397,6 +397,18 @@ class FinanceRepository {
         );
   }
 
+  Stream<List<RecurringRule>> watchRecurringRules() =>
+      (_db.select(_db.recurringRules)
+        ..orderBy([(t) => OrderingTerm(expression: t.nextDate)])).watch();
+
+  Future<void> deleteRecurring(int id) =>
+      (_db.delete(_db.recurringRules)..where((t) => t.id.equals(id))).go();
+
+  Future<void> setRecurringActive(int id, bool active) =>
+      (_db.update(_db.recurringRules)..where(
+        (t) => t.id.equals(id),
+      )).write(RecurringRulesCompanion(isActive: Value(active)));
+
   // ---- Debts --------------------------------------------------------------
 
   Stream<List<Debt>> watchDebts() =>
@@ -509,6 +521,10 @@ final budgetsProvider = StreamProvider<List<Budget>>(
 
 final debtsProvider = StreamProvider<List<Debt>>(
   (ref) => ref.watch(financeRepositoryProvider).watchDebts(),
+);
+
+final recurringRulesProvider = StreamProvider<List<RecurringRule>>(
+  (ref) => ref.watch(financeRepositoryProvider).watchRecurringRules(),
 );
 
 /// Formats paise for display using the app locale.

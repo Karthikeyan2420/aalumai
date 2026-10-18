@@ -25,6 +25,14 @@ class AppPreferences {
   static const _kRecentQuickActions = 'recent_quick_actions';
   static const _kDashboardHidden = 'dashboard_hidden';
 
+  // Global alarm voice preferences (shared by every ringing alarm).
+  static const _kVoiceLanguage = 'alarm_voice_language';
+  static const _kVoiceName = 'alarm_voice_name';
+  static const _kVoiceGender = 'alarm_voice_gender';
+  static const _kVoiceRate = 'alarm_voice_rate';
+  static const _kVoicePitch = 'alarm_voice_pitch';
+  static const _kVoiceVolume = 'alarm_voice_volume';
+
   String? get localeCode => _prefs.getString(_kLocale);
 
   Future<void> setLocaleCode(String code) => _prefs.setString(_kLocale, code);
@@ -119,4 +127,38 @@ class AppPreferences {
 
   Future<void> setDashboardHidden(List<String> keys) =>
       _prefs.setString(_kDashboardHidden, jsonEncode(keys));
+
+  /// Preferred TTS language for alarms. Empty means "follow the app language".
+  String get alarmVoiceLanguage => _prefs.getString(_kVoiceLanguage) ?? '';
+
+  Future<void> setAlarmVoiceLanguage(String code) =>
+      _prefs.setString(_kVoiceLanguage, code);
+
+  /// The installed TTS voice name to use, or empty for "device default / any".
+  String get alarmVoiceName => _prefs.getString(_kVoiceName) ?? '';
+
+  Future<void> setAlarmVoiceName(String name) =>
+      _prefs.setString(_kVoiceName, name);
+
+  /// Voice gender preference: 0 = default/any, 1 = female, 2 = male.
+  int get alarmVoiceGender => _prefs.getInt(_kVoiceGender) ?? 0;
+
+  Future<void> setAlarmVoiceGender(int value) =>
+      _prefs.setInt(_kVoiceGender, value);
+
+  double get alarmSpeechRate => _prefs.getDouble(_kVoiceRate) ?? 1.0;
+
+  Future<void> setAlarmSpeechRate(double value) =>
+      _prefs.setDouble(_kVoiceRate, value);
+
+  double get alarmSpeechPitch => _prefs.getDouble(_kVoicePitch) ?? 1.0;
+
+  Future<void> setAlarmSpeechPitch(double value) =>
+      _prefs.setDouble(_kVoicePitch, value);
+
+  /// Speech volume, 0.0 (silent) – 1.0 (loudest). Defaults to full.
+  double get alarmSpeechVolume => _prefs.getDouble(_kVoiceVolume) ?? 1.0;
+
+  Future<void> setAlarmSpeechVolume(double value) =>
+      _prefs.setDouble(_kVoiceVolume, value);
 }

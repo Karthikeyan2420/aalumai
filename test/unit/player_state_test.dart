@@ -13,6 +13,13 @@ MusicTrack _track(int id, String title) => MusicTrack(
   isFavorite: false,
   playCount: 0,
   addedAt: DateTime(2026, 1, 1),
+  mediaId: '',
+  genre: '',
+  mimeType: 'audio/mpeg',
+  sizeBytes: 4000000,
+  albumArtUri: '',
+  trackNumber: 0,
+  isMissing: false,
 );
 
 void main() {

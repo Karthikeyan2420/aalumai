@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
+import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/utils/money.dart';
+import '../../core/utils/recurrence.dart';
 import '../../core/widgets/charts.dart';
 import '../../core/widgets/common.dart';
 import 'data/finance_repository.dart';
@@ -23,6 +25,13 @@ class ExpensesScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.expenses),
+          actions: [
+            IconButton(
+              tooltip: l10n.recurring,
+              icon: const Icon(Icons.event_repeat),
+              onPressed: () => showRecurringManager(context, ref),
+            ),
+          ],
           bottom: TabBar(
             tabs: [
               Tab(text: l10n.expense),
@@ -32,6 +41,7 @@ class ExpensesScreen extends ConsumerWidget {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'expensesAdd',
           onPressed: () => showTransactionEditor(context, ref),
           icon: const Icon(Icons.add),
           label: Text(l10n.addTransaction),
@@ -88,7 +98,12 @@ class _TransactionsTab extends ConsumerWidget {
       loading: () => const LoadingState(),
       error: (e, _) => ErrorState(message: e.toString()),
       data: (list) {
-        if (list.isEmpty) {
+        final now = DateTime.now();
+        final due =
+            (ref.watch(recurringRulesProvider).valueOrNull ?? const [])
+                .where((r) => r.isActive && !r.nextDate.isAfter(now))
+                .toList();
+        if (list.isEmpty && due.isEmpty) {
           return EmptyState(
             icon: Icons.receipt_long_outlined,
             message: l10n.emptyExpenses,
@@ -96,11 +111,16 @@ class _TransactionsTab extends ConsumerWidget {
             onAction: () => showTransactionEditor(context, ref),
           );
         }
+        final headerCount = (due.isNotEmpty ? 1 : 0) + (showChart ? 1 : 0);
         return ListView.builder(
           padding: const EdgeInsets.only(bottom: 96),
-          itemCount: list.length + (showChart ? 1 : 0),
+          itemCount: list.length + headerCount,
           itemBuilder: (context, i) {
-            if (showChart && i == 0) {
+            if (due.isNotEmpty && i == 0) {
+              return _DueRecurringCard(rules: due);
+            }
+            final chartIndex = due.isNotEmpty ? 1 : 0;
+            if (showChart && i == chartIndex) {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: SectionCard(
@@ -110,7 +130,7 @@ class _TransactionsTab extends ConsumerWidget {
                 ),
               );
             }
-            final t = list[i - (showChart ? 1 : 0)];
+            final t = list[i - headerCount];
             final type = TransactionType.fromIndex(t.type);
             final sign = switch (type) {
               TransactionType.income => '+',
@@ -803,6 +823,331 @@ Future<void> showPaymentEditor(
           interestPaise: Money.rupeesToPaise(interest),
           date: DateTime.now(),
           accountId: accountId,
+        );
+  }
+}
+
+/// The human label for a recurring rule's frequency index.
+String _frequencyLabel(AppLocalizations l10n, int frequency) {
+  final freq = RecurrenceFrequency.values[frequency.clamp(0, 4)];
+  return switch (freq) {
+    RecurrenceFrequency.none => l10n.none,
+    RecurrenceFrequency.daily => l10n.everyDay,
+    RecurrenceFrequency.weekly => l10n.everyWeek,
+    RecurrenceFrequency.monthly => l10n.everyMonth,
+    RecurrenceFrequency.yearly => l10n.everyYear,
+  };
+}
+
+/// Banner shown at the top of the transactions list when recurring rules are
+/// due. Each row can be confirmed (recorded as a transaction and advanced).
+class _DueRecurringCard extends ConsumerWidget {
+  const _DueRecurringCard({required this.rules});
+  final List<RecurringRule> rules;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toString();
+    final accounts = ref.watch(accountsProvider).valueOrNull ?? const [];
+    final accountNames = {for (final a in accounts) a.id: a.name};
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: SectionCard(
+        title: l10n.dueRecurring,
+        icon: Icons.event_repeat,
+        child: Column(
+          children: [
+            for (final rule in rules)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  rule.note.isEmpty
+                      ? _frequencyLabel(l10n, rule.frequency)
+                      : rule.note,
+                ),
+                subtitle: Text(
+                  '${formatMoney(rule.amountPaise, locale)} · '
+                  '${accountNames[rule.accountId] ?? ''}',
+                ),
+                trailing: TextButton(
+                  onPressed:
+                      () => ref
+                          .read(financeRepositoryProvider)
+                          .confirmRecurring(rule),
+                  child: Text(l10n.confirm),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lists every recurring rule (active or paused) with confirm / pause / delete
+/// actions and a button to create a new one.
+Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final locale = Localizations.localeOf(context).toString();
+  final accounts = ref.read(accountsProvider).valueOrNull ?? const <Account>[];
+  final accountNames = {for (final a in accounts) a.id: a.name};
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder:
+        (context) => DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          builder:
+              (context, controller) => ref
+                  .watch(recurringRulesProvider)
+                  .when(
+                    loading: () => const LoadingState(),
+                    error: (e, _) => ErrorState(message: e.toString()),
+                    data:
+                        (rules) => ListView(
+                          controller: controller,
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    l10n.recurring,
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                ),
+                                FilledButton.icon(
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await showRecurringEditor(context, ref);
+                                  },
+                                  icon: const Icon(Icons.add),
+                                  label: Text(l10n.add),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            if (rules.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Text(l10n.emptyExpenses),
+                              ),
+                            for (final rule in rules)
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  rule.note.isEmpty
+                                      ? _frequencyLabel(l10n, rule.frequency)
+                                      : rule.note,
+                                ),
+                                subtitle: Text(
+                                  '${formatMoney(rule.amountPaise, locale)} · '
+                                  '${accountNames[rule.accountId] ?? ''}',
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: l10n.confirm,
+                                      icon: const Icon(Icons.check_circle),
+                                      onPressed:
+                                          rule.isActive
+                                              ? () => ref
+                                                  .read(
+                                                    financeRepositoryProvider,
+                                                  )
+                                                  .confirmRecurring(rule)
+                                              : null,
+                                    ),
+                                    Switch(
+                                      value: rule.isActive,
+                                      onChanged:
+                                          (v) => ref
+                                              .read(financeRepositoryProvider)
+                                              .setRecurringActive(rule.id, v),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      onPressed:
+                                          () => ref
+                                              .read(financeRepositoryProvider)
+                                              .deleteRecurring(rule.id),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                  ),
+        ),
+  );
+}
+
+/// Editor for a new recurring rule (expense or income).
+Future<void> showRecurringEditor(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final accounts = ref.read(accountsProvider).valueOrNull ?? const <Account>[];
+  if (accounts.isEmpty) {
+    await showAccountEditor(context, ref);
+    return;
+  }
+  final categories =
+      ref.read(categoriesProvider).valueOrNull ?? const <Category>[];
+  final amountCtrl = TextEditingController();
+  final noteCtrl = TextEditingController();
+  var type = TransactionType.expense;
+  var accountId = accounts.first.id;
+  var categoryId = -1;
+  var frequency = RecurrenceFrequency.monthly;
+  var nextDate = DateTime.now();
+
+  final saved = await showDialog<bool>(
+    context: context,
+    builder:
+        (context) => StatefulBuilder(
+          builder: (context, setState) {
+            final filtered =
+                categories
+                    .where(
+                      (c) =>
+                          (type == TransactionType.income && c.kind == 0) ||
+                          (type == TransactionType.expense && c.kind == 1),
+                    )
+                    .toList();
+            return AlertDialog(
+              title: Text(l10n.recurring),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SegmentedButton<TransactionType>(
+                      segments: [
+                        ButtonSegment(
+                          value: TransactionType.expense,
+                          label: Text(l10n.expense),
+                        ),
+                        ButtonSegment(
+                          value: TransactionType.income,
+                          label: Text(l10n.income),
+                        ),
+                      ],
+                      selected: {type},
+                      onSelectionChanged:
+                          (s) => setState(() {
+                            type = s.first;
+                            categoryId = -1;
+                          }),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: amountCtrl,
+                      autofocus: true,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(labelText: l10n.amount),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      value: accountId,
+                      decoration: InputDecoration(labelText: l10n.account),
+                      items: [
+                        for (final a in accounts)
+                          DropdownMenuItem(value: a.id, child: Text(a.name)),
+                      ],
+                      onChanged:
+                          (v) => setState(() => accountId = v ?? accountId),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      value: categoryId,
+                      decoration: InputDecoration(labelText: l10n.category),
+                      items: [
+                        DropdownMenuItem(value: -1, child: Text(l10n.none)),
+                        for (final c in filtered)
+                          DropdownMenuItem(value: c.id, child: Text(c.name)),
+                      ],
+                      onChanged: (v) => setState(() => categoryId = v ?? -1),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<RecurrenceFrequency>(
+                      value: frequency,
+                      decoration: InputDecoration(labelText: l10n.frequency),
+                      items: [
+                        for (final f in const [
+                          RecurrenceFrequency.daily,
+                          RecurrenceFrequency.weekly,
+                          RecurrenceFrequency.monthly,
+                          RecurrenceFrequency.yearly,
+                        ])
+                          DropdownMenuItem(
+                            value: f,
+                            child: Text(_frequencyLabel(l10n, f.index)),
+                          ),
+                      ],
+                      onChanged:
+                          (v) => setState(() => frequency = v ?? frequency),
+                    ),
+                    const SizedBox(height: 12),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.event),
+                      title: Text(l10n.taskDue),
+                      subtitle: Text(
+                        MaterialLocalizations.of(
+                          context,
+                        ).formatMediumDate(nextDate),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: nextDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() => nextDate = picked);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: noteCtrl,
+                      decoration: InputDecoration(labelText: l10n.description),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(l10n.save),
+                ),
+              ],
+            );
+          },
+        ),
+  );
+  final amount = double.tryParse(amountCtrl.text.trim()) ?? 0;
+  if (saved == true && amount > 0) {
+    await ref
+        .read(financeRepositoryProvider)
+        .createRecurring(
+          type: type.index,
+          accountId: accountId,
+          amountPaise: Money.rupeesToPaise(amount),
+          nextDate: nextDate,
+          categoryId: categoryId == -1 ? null : categoryId,
+          note: noteCtrl.text.trim(),
+          frequency: frequency.index,
         );
   }
 }

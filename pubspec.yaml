@@ -44,7 +44,11 @@ dependencies:
   # Media & audio
   just_audio: ^0.9.42
   audio_service: ^0.18.15
+  audio_session: ^0.1.21
   file_picker: ^8.1.6
+
+  # Keep the screen awake during an active workout
+  wakelock_plus: ^1.2.8
 
   # Location & fitness
   geolocator: ^13.0.2
@@ -52,9 +56,13 @@ dependencies:
   # Charts
   fl_chart: ^0.70.0
 
+  # Remote exercise demonstration GIFs (disk + memory cached)
+  cached_network_image: ^3.4.1
+
   # Learning
   flutter_tts: ^4.2.0
   speech_to_text: ^7.0.0
+  on_audio_query: ^2.9.0
 
 dev_dependencies:
   flutter_test:
@@ -69,7 +77,11 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - assets/data/
     - assets/images/
+    - assets/audio/
+    - assets/images/backgrounds/home/
+    - assets/images/backgrounds/alarm/
 
 flutter_launcher_icons:
   android: true

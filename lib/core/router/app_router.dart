@@ -7,6 +7,7 @@ import '../../features/fitness/fitness_screen.dart';
 import '../../features/habits/habits_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/dashboard_config_screen.dart';
+import '../../features/landing/landing_screen.dart';
 import '../../features/learning/learning_screen.dart';
 import '../../features/meals/meals_screen.dart';
 import '../../features/more/more_screen.dart';
@@ -17,8 +18,10 @@ import '../../features/schedule/schedule_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
 import '../shell/app_shell.dart';
+import 'navigator_key.dart';
 
 class AppRoutes {
+  static const landing = '/landing';
   static const home = '/home';
   static const schedule = '/schedule';
   static const tasks = '/tasks';
@@ -40,8 +43,16 @@ class AppRoutes {
 
 GoRouter createRouter() {
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    // Returning users land straight on the dashboard. First-run users are shown
+    // the combined welcome screen (language + branding) before the router is
+    // mounted, so they never repeat onboarding.
     initialLocation: AppRoutes.home,
     routes: [
+      GoRoute(
+        path: AppRoutes.landing,
+        builder: (context, state) => const LandingScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder:
             (context, state, navigationShell) =>

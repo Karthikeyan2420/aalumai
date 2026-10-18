@@ -7,15 +7,23 @@ import '../../core/widgets/common.dart';
 import '../settings/data/lock_service.dart';
 import 'data/note_repository.dart';
 
-Future<void> showNoteEditor(BuildContext context, {required int noteId}) {
+/// Opens the note editor. Pass [noteId] to edit an existing note, or omit it to
+/// open a new, unsaved draft.
+///
+/// A draft is never written to the database until the user explicitly saves
+/// meaningful content, so cancelling or leaving an empty "New Note" creates
+/// nothing.
+Future<void> showNoteEditor(BuildContext context, {int? noteId}) {
   return Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (_) => NoteEditorScreen(noteId: noteId)));
 }
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
-  const NoteEditorScreen({super.key, required this.noteId});
-  final int noteId;
+  const NoteEditorScreen({super.key, this.noteId});
+
+  /// `null` means a new draft that has not been persisted yet.
+  final int? noteId;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -36,7 +44,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   Future<void> _load() async {
-    final note = await ref.read(noteRepositoryProvider).getById(widget.noteId);
+    final id = widget.noteId;
+    if (id == null) {
+      // Draft: nothing is loaded and nothing is persisted until the user saves.
+      if (!mounted) return;
+      setState(() {
+        _note = null;
+        _unlocked = true;
+        _loading = false;
+      });
+      return;
+    }
+    final note = await ref.read(noteRepositoryProvider).getById(id);
     if (!mounted) return;
     setState(() {
       _note = note;
@@ -56,15 +75,31 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   Future<void> _save() async {
+    final kind = _isJournal ? NoteKind.journal.index : NoteKind.note.index;
+    final title = _title.text.trim();
+    final body = _body.text;
     final note = _note;
-    if (note == null) return;
+
+    if (note == null) {
+      // Draft: only persist when the user entered meaningful content.
+      if (title.isEmpty && body.trim().isEmpty) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+      await ref
+          .read(noteRepositoryProvider)
+          .create(title: title, body: body, kind: NoteKind.fromIndex(kind));
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
     await ref
         .read(noteRepositoryProvider)
         .updateNote(
           note.copyWith(
-            title: _title.text.trim(),
-            body: _body.text,
-            kind: _isJournal ? NoteKind.journal.index : NoteKind.note.index,
+            title: title,
+            body: body,
+            kind: kind,
             updatedAt: DateTime.now(),
           ),
         );
@@ -174,7 +209,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           IconButton(
             tooltip: l10n.noteLock,
             icon: Icon(locked ? Icons.lock : Icons.lock_open),
-            onPressed: _toggleLock,
+            onPressed: _note == null ? null : _toggleLock,
           ),
           IconButton(
             tooltip: l10n.save,

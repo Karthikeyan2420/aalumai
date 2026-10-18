@@ -96,10 +96,12 @@ class AboutScreen extends StatelessWidget {
                         color: theme.colorScheme.secondary,
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        l10n.privacyLocalFirst,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: Text(
+                          l10n.privacyLocalFirst,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
