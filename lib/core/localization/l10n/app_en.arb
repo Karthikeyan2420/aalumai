@@ -17,7 +17,7 @@
   "size": "Size",
   "sortBy": "Sort by",
   "scanDevice": "Scan device",
-  "scanning": "Scanning\u2026",
+  "scanning": "Scanning…",
   "grantPermission": "Grant permission",
   "openSettings": "Open settings",
   "selectAll": "Select all",
@@ -344,7 +344,7 @@
   "duration": "Duration",
   "pace": "Pace",
   "steps": "Steps",
-  "waitingForGps": "Waiting for GPS\u2026",
+  "waitingForGps": "Waiting for GPS…",
   "water": "Water",
   "addWater": "Add water",
   "glasses": "glasses",
@@ -684,27 +684,35 @@
   "soundModeVoiceOnly": "Voice Only",
   "soundModeMusicOnly": "Music Only",
   "motivationalMessage": "Motivational message",
-  "motivationalMessageHint": "A short message spoken while the alarm rings",
+  "motivationalMessageHint": "Repeats on the music interval while you solve challenges",
+  "finalMotivationalMessage": "Final motivation",
+  "finalMotivationalMessageHint": "Spoken once after every challenge — tap Done to close",
   "useSampleMessage": "Use sample message",
   "voicePreview": "Preview voice",
-  "voicePreviewing": "Previewing\u2026",
+  "voicePreviewing": "Previewing…",
   "voicePreviewFailed": "Voice preview isn't available. Check the alarm voice settings.",
-  "alarmVoiceLabel": "{gender} voice \u00b7 {language}",
+  "alarmVoiceLabel": "{gender} voice · {language}",
   "@alarmVoiceLabel": {
     "placeholders": {
-      "gender": { "type": "String" },
-      "language": { "type": "String" }
+      "gender": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
     }
   },
   "changeInSettings": "Change in Settings",
   "musicInterval": "Music interval",
-  "musicIntervalHint": "How long music plays before the next message",
+  "musicIntervalHint": "How long music plays before the next message while ringing",
   "customInterval": "Custom",
   "customIntervalSeconds": "Custom interval (seconds)",
   "customIntervalValue": "{count} sec",
   "@customIntervalValue": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "voiceTiming": "Voice timing",
@@ -730,7 +738,7 @@
   "speechPitch": "Pitch",
   "speechVolume": "Speech volume",
   "resetDefault": "Reset",
-  "voicesLoading": "Loading voices\u2026",
+  "voicesLoading": "Loading voices…",
   "noInstalledVoices": "No installed voices were found.",
   "voiceLoadFailed": "Couldn't read the installed voices.",
   "openTtsSettings": "Open TTS settings",
@@ -738,10 +746,156 @@
   "voiceUnavailableForLanguage": "No {language} voice is installed. Install a language pack in Android settings.",
   "@voiceUnavailableForLanguage": {
     "placeholders": {
-      "language": { "type": "String" }
+      "language": {
+        "type": "String"
+      }
     }
   },
   "voiceGenderUnavailable": "The chosen gender isn't available for this voice; using the closest match.",
   "voiceFallbackNote": "The selected voice is no longer available, so the device default is used.",
-  "previewSentence": "This is how your alarm voice will sound."
+  "previewSentence": "This is how your alarm voice will sound.",
+  "saveActivityPrompt": "Save this activity?",
+  "personalBest": "Personal best",
+  "newPersonalBest": "New personal best",
+  "unfinishedPlan": "This plan has an unfinished workout.",
+  "startFresh": "Start fresh",
+  "route": "Route",
+  "yoga": "Yoga",
+  "yogaToday": "Today's yoga",
+  "yogaRecommendedForYou": "Recommended for you",
+  "yogaRoutines": "Routines",
+  "yogaPoses": "Poses",
+  "yogaStartRoutine": "Start routine",
+  "yogaSync": "Update poses",
+  "yogaSynced": "Updated {count} poses",
+  "@yogaSynced": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yogaSyncFailed": "Couldn't reach the yoga service. Showing offline poses.",
+  "yogaOfflineNote": "Poses are stored on your device and work offline.",
+  "yogaLevel": "Level",
+  "yogaLevelBeginner": "Beginner",
+  "yogaLevelIntermediate": "Intermediate",
+  "yogaLevelAdvanced": "Advanced",
+  "yogaPoseCount": "{count} poses",
+  "@yogaPoseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yogaMinutes": "{count} min",
+  "@yogaMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yogaInstructions": "How to practise",
+  "yogaBenefits": "Benefits",
+  "yogaBreathing": "Breathing",
+  "yogaTakeCare": "Take care",
+  "yogaNoImage": "No verified image is available for this pose.",
+  "yogaAddFavorite": "Add to favourites",
+  "yogaRemoveFavorite": "Remove from favourites",
+  "yogaFavorites": "Favourites",
+  "yogaNoFavorites": "No favourite poses yet.",
+  "yogaHistory": "Yoga history",
+  "yogaNoHistory": "No yoga sessions yet.",
+  "yogaSkip": "Skip",
+  "yogaNext": "Next",
+  "yogaPrevious": "Back",
+  "yogaPause": "Pause",
+  "yogaResume": "Resume",
+  "yogaFinish": "Finish",
+  "yogaFinishPrompt": "Finish the session?",
+  "yogaSessionComplete": "Yoga session complete",
+  "yogaPoseOf": "Pose {current} of {total}",
+  "@yogaPoseOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "yogaSearchPoses": "Search poses",
+  "yogaAllCategories": "All",
+  "yogaCategoryOther": "Other",
+  "yogaGetReady": "Get ready",
+  "yogaDone": "Done",
+  "yogaAttribution": "Pose data from the yoga-api open dataset. General information only — not medical advice.",
+  "yogaSafetyNote": "Move within a comfortable range. Stop if you feel pain, and see a health professional if you have a medical condition.",
+  "yogaPickLevel": "Choose a level",
+  "yogaLastSynced": "Last updated {when}",
+  "@yogaLastSynced": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "yogaNeverSynced": "Not yet updated from the service",
+  "yogaStart": "Start",
+  "yogaOverview": "Overview",
+  "yogaNoResults": "No yoga poses match your search.",
+  "workouts": "Workouts",
+  "customizeWorkout": "Customize workout",
+  "dumbbellWeightHint": "Dumbbell and barbell exercises use your own weights. Log the weight you lift during each set.",
+  "restDay": "Rest day",
+  "workoutSettings": "Workout",
+  "workoutSettingsDesc": "Choose the equipment and muscle groups for your daily workout",
+  "workoutCategoriesHint": "Tick the equipment and muscle groups you want in your daily workout. Only the ticked options are used to build each day.",
+  "equipmentBodyweight": "No equipment (bodyweight)",
+  "jarvisTitle": "Jarvis",
+  "jarvisSubtitle": "On-device AI assistant",
+  "jarvisChat": "Chat",
+  "jarvisModel": "Model",
+  "jarvisMemories": "Memories",
+  "jarvisChatEmpty": "Ask anything — Jarvis runs entirely on this device.",
+  "jarvisInputHint": "Message Jarvis…",
+  "jarvisSend": "Send",
+  "jarvisStop": "Stop",
+  "jarvisClearChat": "Clear chat",
+  "jarvisThinking": "Thinking…",
+  "jarvisAllowAction": "Allow this action?",
+  "jarvisAllow": "Allow",
+  "jarvisDecline": "Decline",
+  "jarvisNoModel": "No model installed yet.",
+  "jarvisModelInstalled": "Model installed",
+  "jarvisModelLoaded": "Model loaded — ready for chat",
+  "jarvisModelNotLoaded": "Model not loaded",
+  "jarvisDownloadModel": "Download model (~1.3 GB)",
+  "jarvisImportModel": "Import a GGUF file",
+  "jarvisDeleteModel": "Delete model",
+  "jarvisLoadModel": "Load model",
+  "jarvisUnloadModel": "Unload model",
+  "jarvisDownloading": "Downloading…",
+  "jarvisVerifying": "Verifying…",
+  "jarvisCpuThreads": "CPU threads",
+  "jarvisContextSize": "Context size",
+  "jarvisNoMemories": "No memories saved yet.",
+  "jarvisConfirmMemory": "Confirm",
+  "jarvisPendingMemory": "Pending confirmation",
+  "jarvisForgetMemory": "Forget",
+  "jarvisAddMemory": "Save a memory",
+  "jarvisMemoryHint": "A fact or preference Jarvis should remember",
+  "jarvisDeleteModelWarning": "Delete the installed model? You can download or import it again later.",
+  "jarvisMicHold": "Hold to speak",
+  "jarvisSpeakReplies": "Speak replies",
+  "jarvisBriefingTitle": "Morning briefing",
+  "jarvisBriefingTasks": "{count} tasks due",
+  "jarvisBriefingEvents": "{count} events today",
+  "jarvisBriefingAlarm": "Next alarm {time}",
+  "jarvisBriefingQuiet": "Nothing due today — a clear morning.",
+  "jarvisBriefingToggle": "Daily briefing",
+  "jarvisBriefingToggleHint": "A summary notification at 08:00 each morning."
 }

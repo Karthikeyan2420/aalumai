@@ -9,6 +9,7 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AlarmTriggerPlugin())
+        flutterEngine.plugins.add(JarvisActionsPlugin())
         // A cold start triggered by the alarm notification (or its full-screen
         // intent) carries the alarm id; stash it for Dart to consume once its
         // navigator is ready.

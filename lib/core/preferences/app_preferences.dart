@@ -22,6 +22,13 @@ class AppPreferences {
   static const _kStepGoal = 'step_goal';
   static const _kLastBackupAt = 'last_backup_at';
   static const _kQuickWaterMl = 'quick_water_ml';
+  static const _kJarvisReminderSeq = 'jarvis_reminder_seq';
+  static const _kJarvisModelFile = 'jarvis_model_file';
+  static const _kJarvisModelSha = 'jarvis_model_sha256';
+  static const _kJarvisModelThreads = 'jarvis_model_threads';
+  static const _kJarvisModelContext = 'jarvis_model_context';
+  static const _kJarvisBriefingEnabled = 'jarvis_briefing_enabled';
+  static const _kJarvisBriefingId = 'jarvis_briefing_id';
   static const _kRecentQuickActions = 'recent_quick_actions';
   static const _kDashboardHidden = 'dashboard_hidden';
 
@@ -161,4 +168,65 @@ class AppPreferences {
 
   Future<void> setAlarmSpeechVolume(double value) =>
       _prefs.setDouble(_kVoiceVolume, value);
+
+  /// Jarvis one-shot reminders need notification ids that never collide with
+  /// alarms (id*10), snooze (4 000 000+), task (1 000 000+), event
+  /// (2 000 000+) or habit (3 000 000+) ids. Jarvis claims the 5 000 000+
+  /// block and takes its sequence from this counter, persisted so ids stay
+  /// unique across restarts.
+  Future<int> nextJarvisReminderId() async {
+    final seq = _prefs.getInt(_kJarvisReminderSeq) ?? 0;
+    final next = seq >= 4999999 ? 0 : seq + 1;
+    await _prefs.setInt(_kJarvisReminderSeq, next);
+    return 5000000 + seq;
+  }
+
+  // ------------------------------------------------------ Jarvis AI model
+
+  /// File name of the installed GGUF model inside the app-private models
+  /// directory. Empty = no model installed yet.
+  String get jarvisModelFile => _prefs.getString(_kJarvisModelFile) ?? '';
+
+  Future<void> setJarvisModelFile(String value) =>
+      _prefs.setString(_kJarvisModelFile, value);
+
+  /// SHA-256 of the installed model, recorded at install time so later runs
+  /// can detect silent corruption.
+  String get jarvisModelSha256 => _prefs.getString(_kJarvisModelSha) ?? '';
+
+  Future<void> setJarvisModelSha256(String value) =>
+      _prefs.setString(_kJarvisModelSha, value);
+
+  /// CPU threads for inference. Clamped to 1–8 (the practical range for the
+  /// mid-range phones this app targets).
+  int get jarvisModelThreads {
+    final value = _prefs.getInt(_kJarvisModelThreads) ?? 4;
+    return value.clamp(1, 8);
+  }
+
+  Future<void> setJarvisModelThreads(int value) =>
+      _prefs.setInt(_kJarvisModelThreads, value.clamp(1, 8));
+
+  /// Context window passed to llama.cpp (affects memory use, not file size).
+  int get jarvisModelContextSize {
+    final value = _prefs.getInt(_kJarvisModelContext) ?? 4096;
+    return value.clamp(1024, 8192);
+  }
+
+  Future<void> setJarvisModelContextSize(int value) =>
+      _prefs.setInt(_kJarvisModelContext, value.clamp(1024, 8192));
+
+  /// Whether the morning briefing notification is armed (default on).
+  bool get jarvisBriefingEnabled =>
+      _prefs.getBool(_kJarvisBriefingEnabled) ?? true;
+
+  Future<void> setJarvisBriefingEnabled(bool value) =>
+      _prefs.setBool(_kJarvisBriefingEnabled, value);
+
+  /// Notification id currently holding the briefing (0 = disarmed). Stored so
+  /// re-arming always cancels the previous slot first.
+  int get jarvisBriefingId => _prefs.getInt(_kJarvisBriefingId) ?? 0;
+
+  Future<void> setJarvisBriefingId(int value) =>
+      _prefs.setInt(_kJarvisBriefingId, value);
 }

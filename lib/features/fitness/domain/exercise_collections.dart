@@ -5,6 +5,20 @@ import '../../../core/db/database.dart';
 /// Declaration order is the order the categories are presented in the UI.
 enum WorkoutCollection { dumbbell, bodyweight, stretching, band, gym }
 
+/// The collections shown in the app. Only gym machines are excluded — the app
+/// supports bodyweight, free-weight, band and kettlebell home workouts.
+const kHomeCollections = <WorkoutCollection>{
+  WorkoutCollection.bodyweight,
+  WorkoutCollection.dumbbell,
+  WorkoutCollection.stretching,
+  WorkoutCollection.band,
+};
+
+/// The equipment-based collections the exercise library is browsed by.
+/// Only home-compatible collections are included.
+List<WorkoutCollection> homeCollections() =>
+    WorkoutCollection.values.where(kHomeCollections.contains).toList();
+
 /// Files an exercise into a [WorkoutCollection] from its *metadata* — the
 /// equipment it needs and the movement category the dataset publishes — never
 /// from its name, so an exercise can never be filed by a coincidence of
@@ -23,18 +37,12 @@ WorkoutCollection? workoutCollectionFor({
     return WorkoutCollection.stretching;
   }
   return switch (equipment.trim().toLowerCase()) {
-    'dumbbell' => WorkoutCollection.dumbbell,
+    'dumbbell' || 'barbell' || 'ez-bar' || 'kettlebell' =>
+      WorkoutCollection.dumbbell,
     'band' => WorkoutCollection.band,
     'bodyweight' => WorkoutCollection.bodyweight,
-    'barbell' ||
-    'cable' ||
-    'machine' ||
-    'lever' ||
-    'smith' ||
-    'ez-bar' ||
-    'kettlebell' ||
-    'sled' ||
-    'other' => WorkoutCollection.gym,
+    'cable' || 'machine' || 'lever' || 'smith' || 'sled' || 'other' =>
+      WorkoutCollection.gym,
     _ => null,
   };
 }

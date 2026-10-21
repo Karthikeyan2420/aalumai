@@ -54,6 +54,7 @@ class AlarmPlaybackConfig {
     required this.mode,
     required this.soundId,
     this.message = '',
+    this.finalMessage = '',
     this.musicIntervalSec = kDefaultMusicIntervalSec,
     this.voicePauseSec = kDefaultVoicePauseSec,
     this.voiceTiming = VoiceTiming.betweenSegments,
@@ -69,6 +70,7 @@ class AlarmPlaybackConfig {
   final String soundId;
 
   final String message;
+  final String finalMessage;
   final int musicIntervalSec;
   final int voicePauseSec;
   final VoiceTiming voiceTiming;
@@ -98,6 +100,8 @@ class AlarmPlaybackConfig {
   bool get speaks =>
       effectiveMode != AlarmSoundMode.musicOnly && message.trim().isNotEmpty;
 
+  bool get speaksFinal => finalMessage.trim().isNotEmpty;
+
   int get safeMusicIntervalSec => musicIntervalSec.clamp(1, 3600);
 
   int get safeVoicePauseSec => voicePauseSec.clamp(1, 3600);
@@ -106,6 +110,7 @@ class AlarmPlaybackConfig {
     AlarmSoundMode? mode,
     String? soundId,
     String? message,
+    String? finalMessage,
     int? musicIntervalSec,
     int? voicePauseSec,
     VoiceTiming? voiceTiming,
@@ -118,6 +123,7 @@ class AlarmPlaybackConfig {
       mode: mode ?? this.mode,
       soundId: soundId ?? this.soundId,
       message: message ?? this.message,
+      finalMessage: finalMessage ?? this.finalMessage,
       musicIntervalSec: musicIntervalSec ?? this.musicIntervalSec,
       voicePauseSec: voicePauseSec ?? this.voicePauseSec,
       voiceTiming: voiceTiming ?? this.voiceTiming,

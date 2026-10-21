@@ -11,7 +11,7 @@ import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
 import 'domain/session_flow.dart';
 import 'domain/workout_queue.dart';
-import 'widgets/exercise_art.dart';
+import 'widgets/exercise_gif.dart';
 
 /// The full guided workout experience. Steps through a plan's exercises set by
 /// set, with countdown timers for timed holds, a rest countdown between sets,
@@ -53,6 +53,7 @@ class WorkoutPlayerScreen extends ConsumerStatefulWidget {
 
 class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
   final Stopwatch _stopwatch = Stopwatch()..start();
+  final Stopwatch _stepWatch = Stopwatch();
   Timer? _timer;
   late int _index = widget.startIndex;
   int _remaining = 0;
@@ -224,10 +225,14 @@ class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
 
   void _enterStep() {
     _timer?.cancel();
+    _stepWatch
+      ..stop()
+      ..reset();
     if (_done) {
       _finish();
       return;
     }
+    if (!_paused) _stepWatch.start();
     final step = widget.steps[_index];
     setState(() => _remaining = step.isTimedCountdown ? step.durationSec : 0);
     _persistProgress();
@@ -262,16 +267,53 @@ class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
     if (_sessionId == null) return;
     final step = widget.steps[_index];
     if (!step.isWork) return;
-    await ref
-        .read(fitnessRepositoryProvider)
-        .logSet(
-          sessionId: _sessionId!,
+    final repo = ref.read(fitnessRepositoryProvider);
+    final loggedReps = reps ?? step.reps;
+    final loggedWeight = weightGrams ?? 0;
+    // Timed steps store how long the user actually held the position, which
+    // is shorter than the plan when they finish or skip early.
+    final loggedDuration = step.isTimed ? _stepWatch.elapsed.inSeconds : 0;
+    await repo.logSet(
+      sessionId: _sessionId!,
+      exerciseId: step.exerciseId,
+      setIndex: step.setIndex,
+      reps: loggedReps,
+      weightGrams: loggedWeight,
+      durationSec: loggedDuration,
+    );
+    final records = <bool>[];
+    if (loggedWeight > 0) {
+      records.add(
+        await repo.updatePersonalRecord(
           exerciseId: step.exerciseId,
-          setIndex: step.setIndex,
-          reps: reps ?? step.reps,
-          weightGrams: weightGrams ?? 0,
-          durationSec: step.isTimed ? step.durationSec : 0,
-        );
+          recordType: PersonalRecordKind.weightGrams.index,
+          value: loggedWeight,
+        ),
+      );
+    }
+    if (loggedReps > 0) {
+      records.add(
+        await repo.updatePersonalRecord(
+          exerciseId: step.exerciseId,
+          recordType: PersonalRecordKind.reps.index,
+          value: loggedReps,
+        ),
+      );
+    }
+    if (loggedDuration > 0) {
+      records.add(
+        await repo.updatePersonalRecord(
+          exerciseId: step.exerciseId,
+          recordType: PersonalRecordKind.durationSec.index,
+          value: loggedDuration,
+        ),
+      );
+    }
+    if (records.contains(true) && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.newPersonalBest)));
+    }
   }
 
   Future<void> _advance({required bool log}) async {
@@ -393,8 +435,10 @@ class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
     if (_paused) {
       _timer?.cancel();
       _stopwatch.stop();
+      _stepWatch.stop();
     } else {
       _stopwatch.start();
+      _stepWatch.start();
       _startTimer();
     }
   }
@@ -558,7 +602,8 @@ class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
             ),
           ),
           const Spacer(),
-          ExerciseArt(
+          ExerciseGif(
+            gifUrl: step.gifUrl,
             category: step.category,
             size: 160,
             borderRadius: 24,

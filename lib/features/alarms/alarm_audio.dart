@@ -274,14 +274,21 @@ class AlarmAudio {
   }
 
   /// Starts a ring using the full [config] (sound mode, message and timing).
-  Future<void> start(AlarmPlaybackConfig config) async {
+  ///
+  /// When [musicAlreadyPlaying] is true (the native ring service is already
+  /// looping the tone), only the spoken message is started here so TTS runs on
+  /// the Flutter main isolate where `flutter_tts` is reliable.
+  Future<void> start(
+    AlarmPlaybackConfig config, {
+    bool musicAlreadyPlaying = false,
+  }) async {
     await _resetSession();
     _config = config;
     _tone = AlarmSounds.resolveTone(config.soundId);
     _volume = (config.volumePercent / 100).clamp(0.0, 1.0).toDouble();
     _ringing = true;
-    _startVibration(config.vibrate);
-    if (config.playsMusic) await _ensurePlaying();
+    _startVibration(config.vibrate && !musicAlreadyPlaying);
+    if (config.playsMusic && !musicAlreadyPlaying) await _ensurePlaying();
     _startWatchdog();
     _startVoiceLoop();
   }

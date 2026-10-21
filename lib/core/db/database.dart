@@ -38,6 +38,10 @@ part 'database.g.dart';
     BodyMeasurements,
     PersonalRecords,
     FitnessGoals,
+    YogaPoseCache,
+    YogaSessions,
+    YogaPoseLogs,
+    YogaFavorites,
     MusicFolders,
     MusicTracks,
     Playlists,
@@ -57,6 +61,7 @@ part 'database.g.dart';
     VocabReviews,
     PronunciationAttempts,
     LearningProgress,
+    JarvisMemories,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -65,7 +70,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -157,6 +162,23 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(exercises, exercises.secondaryMuscles);
         await m.addColumn(exercises, exercises.sourceCategory);
         await m.addColumn(exercises, exercises.gifUrl);
+      }
+      if (from < 8) {
+        // Additive only: the yoga feature. New tables only — no existing rows
+        // are touched. The api-pose cache starts empty and is filled by the
+        // repository; the bundled snapshot keeps the catalogue usable offline.
+        await m.createTable(yogaPoseCache);
+        await m.createTable(yogaSessions);
+        await m.createTable(yogaPoseLogs);
+        await m.createTable(yogaFavorites);
+      }
+      if (from < 9) {
+        await m.addColumn(alarms, alarms.finalMessage);
+      }
+      if (from < 10) {
+        // Additive only: new table for the Jarvis assistant's memories.
+        // Existing rows are untouched; the table starts empty.
+        await m.createTable(jarvisMemories);
       }
     },
     beforeOpen: (details) async {

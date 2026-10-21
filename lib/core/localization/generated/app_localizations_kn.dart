@@ -1843,6 +1843,12 @@ class AppLocalizationsKn extends AppLocalizations {
   String get motivationalMessageHint => 'ಅಲಾರಂ ಮೊಳಗುವಾಗ ಹೇಳುವ ಸಣ್ಣ ಸಂದೇಶ';
 
   @override
+  String get finalMotivationalMessage => 'Final motivation';
+
+  @override
+  String get finalMotivationalMessageHint => 'Spoken once after every challenge — tap Done to close';
+
+  @override
   String get useSampleMessage => 'ಮಾದರಿ ಸಂದೇಶವನ್ನು ಬಳಸಿ';
 
   @override
@@ -1976,4 +1982,338 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get previewSentence => 'ನಿಮ್ಮ ಅಲಾರಂ ಧ್ವನಿ ಹೇಗೆ ಕೇಳುತ್ತದೆ ಎಂಬುದು ಇಲ್ಲಿದೆ.';
+
+  @override
+  String get saveActivityPrompt => 'ಈ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬೇಕೇ?';
+
+  @override
+  String get personalBest => 'ವೈಯಕ್ತಿಕ ಅತ್ಯುತ್ತಮ';
+
+  @override
+  String get newPersonalBest => 'ಹೊಸ ವೈಯಕ್ತಿಕ ಅತ್ಯುತ್ತಮ';
+
+  @override
+  String get unfinishedPlan => 'ಈ ಯೋಜನೆಯಲ್ಲಿ ಅಪೂರ್ಣ ವ್ಯಾಯಾಮವಿದೆ.';
+
+  @override
+  String get startFresh => 'ಹೊಸದಾಗಿ ಪ್ರಾರಂಭಿಸಿ';
+
+  @override
+  String get route => 'ಮಾರ್ಗ';
+
+  @override
+  String get yoga => 'Yoga';
+
+  @override
+  String get yogaToday => 'Today\'s yoga';
+
+  @override
+  String get yogaRecommendedForYou => 'Recommended for you';
+
+  @override
+  String get yogaRoutines => 'Routines';
+
+  @override
+  String get yogaPoses => 'Poses';
+
+  @override
+  String get yogaStartRoutine => 'Start routine';
+
+  @override
+  String get yogaSync => 'Update poses';
+
+  @override
+  String yogaSynced(int count) {
+    return 'Updated $count poses';
+  }
+
+  @override
+  String get yogaSyncFailed => 'Couldn\'t reach the yoga service. Showing offline poses.';
+
+  @override
+  String get yogaOfflineNote => 'Poses are stored on your device and work offline.';
+
+  @override
+  String get yogaLevel => 'Level';
+
+  @override
+  String get yogaLevelBeginner => 'Beginner';
+
+  @override
+  String get yogaLevelIntermediate => 'Intermediate';
+
+  @override
+  String get yogaLevelAdvanced => 'Advanced';
+
+  @override
+  String yogaPoseCount(int count) {
+    return '$count poses';
+  }
+
+  @override
+  String yogaMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get yogaInstructions => 'How to practise';
+
+  @override
+  String get yogaBenefits => 'Benefits';
+
+  @override
+  String get yogaBreathing => 'Breathing';
+
+  @override
+  String get yogaTakeCare => 'Take care';
+
+  @override
+  String get yogaNoImage => 'No verified image is available for this pose.';
+
+  @override
+  String get yogaAddFavorite => 'Add to favourites';
+
+  @override
+  String get yogaRemoveFavorite => 'Remove from favourites';
+
+  @override
+  String get yogaFavorites => 'Favourites';
+
+  @override
+  String get yogaNoFavorites => 'No favourite poses yet.';
+
+  @override
+  String get yogaHistory => 'Yoga history';
+
+  @override
+  String get yogaNoHistory => 'No yoga sessions yet.';
+
+  @override
+  String get yogaSkip => 'Skip';
+
+  @override
+  String get yogaNext => 'Next';
+
+  @override
+  String get yogaPrevious => 'Back';
+
+  @override
+  String get yogaPause => 'Pause';
+
+  @override
+  String get yogaResume => 'Resume';
+
+  @override
+  String get yogaFinish => 'Finish';
+
+  @override
+  String get yogaFinishPrompt => 'Finish the session?';
+
+  @override
+  String get yogaSessionComplete => 'Yoga session complete';
+
+  @override
+  String yogaPoseOf(int current, int total) {
+    return 'Pose $current of $total';
+  }
+
+  @override
+  String get yogaSearchPoses => 'Search poses';
+
+  @override
+  String get yogaAllCategories => 'All';
+
+  @override
+  String get yogaCategoryOther => 'Other';
+
+  @override
+  String get yogaGetReady => 'Get ready';
+
+  @override
+  String get yogaDone => 'Done';
+
+  @override
+  String get yogaAttribution => 'Pose data from the yoga-api open dataset. General information only — not medical advice.';
+
+  @override
+  String get yogaSafetyNote => 'Move within a comfortable range. Stop if you feel pain, and see a health professional if you have a medical condition.';
+
+  @override
+  String get yogaPickLevel => 'Choose a level';
+
+  @override
+  String yogaLastSynced(String when) {
+    return 'Last updated $when';
+  }
+
+  @override
+  String get yogaNeverSynced => 'Not yet updated from the service';
+
+  @override
+  String get yogaStart => 'Start';
+
+  @override
+  String get yogaOverview => 'Overview';
+
+  @override
+  String get yogaNoResults => 'No yoga poses match your search.';
+
+  @override
+  String get workouts => 'Workouts';
+
+  @override
+  String get customizeWorkout => 'Customize workout';
+
+  @override
+  String get dumbbellWeightHint => 'Dumbbell and barbell exercises use your own weights. Log the weight you lift during each set.';
+
+  @override
+  String get restDay => 'Rest day';
+
+  @override
+  String get workoutSettings => 'Workout';
+
+  @override
+  String get workoutSettingsDesc => 'Choose the equipment and muscle groups for your daily workout';
+
+  @override
+  String get workoutCategoriesHint => 'Tick the equipment and muscle groups you want in your daily workout. Only the ticked options are used to build each day.';
+
+  @override
+  String get equipmentBodyweight => 'No equipment (bodyweight)';
+
+  @override
+  String get jarvisTitle => 'Jarvis';
+
+  @override
+  String get jarvisSubtitle => 'On-device AI assistant';
+
+  @override
+  String get jarvisChat => 'Chat';
+
+  @override
+  String get jarvisModel => 'Model';
+
+  @override
+  String get jarvisMemories => 'Memories';
+
+  @override
+  String get jarvisChatEmpty => 'Ask anything — Jarvis runs entirely on this device.';
+
+  @override
+  String get jarvisInputHint => 'Message Jarvis…';
+
+  @override
+  String get jarvisSend => 'Send';
+
+  @override
+  String get jarvisStop => 'Stop';
+
+  @override
+  String get jarvisClearChat => 'Clear chat';
+
+  @override
+  String get jarvisThinking => 'Thinking…';
+
+  @override
+  String get jarvisAllowAction => 'Allow this action?';
+
+  @override
+  String get jarvisAllow => 'Allow';
+
+  @override
+  String get jarvisDecline => 'Decline';
+
+  @override
+  String get jarvisNoModel => 'No model installed yet.';
+
+  @override
+  String get jarvisModelInstalled => 'Model installed';
+
+  @override
+  String get jarvisModelLoaded => 'Model loaded — ready for chat';
+
+  @override
+  String get jarvisModelNotLoaded => 'Model not loaded';
+
+  @override
+  String get jarvisDownloadModel => 'Download model (~1.3 GB)';
+
+  @override
+  String get jarvisImportModel => 'Import a GGUF file';
+
+  @override
+  String get jarvisDeleteModel => 'Delete model';
+
+  @override
+  String get jarvisLoadModel => 'Load model';
+
+  @override
+  String get jarvisUnloadModel => 'Unload model';
+
+  @override
+  String get jarvisDownloading => 'Downloading…';
+
+  @override
+  String get jarvisVerifying => 'Verifying…';
+
+  @override
+  String get jarvisCpuThreads => 'CPU threads';
+
+  @override
+  String get jarvisContextSize => 'Context size';
+
+  @override
+  String get jarvisNoMemories => 'No memories saved yet.';
+
+  @override
+  String get jarvisConfirmMemory => 'Confirm';
+
+  @override
+  String get jarvisPendingMemory => 'Pending confirmation';
+
+  @override
+  String get jarvisForgetMemory => 'Forget';
+
+  @override
+  String get jarvisAddMemory => 'Save a memory';
+
+  @override
+  String get jarvisMemoryHint => 'A fact or preference Jarvis should remember';
+
+  @override
+  String get jarvisDeleteModelWarning => 'Delete the installed model? You can download or import it again later.';
+
+  @override
+  String get jarvisMicHold => 'Hold to speak';
+
+  @override
+  String get jarvisSpeakReplies => 'Speak replies';
+
+  @override
+  String get jarvisBriefingTitle => 'Morning briefing';
+
+  @override
+  String jarvisBriefingTasks(Object count) {
+    return '$count tasks due';
+  }
+
+  @override
+  String jarvisBriefingEvents(Object count) {
+    return '$count events today';
+  }
+
+  @override
+  String jarvisBriefingAlarm(Object time) {
+    return 'Next alarm $time';
+  }
+
+  @override
+  String get jarvisBriefingQuiet => 'Nothing due today — a clear morning.';
+
+  @override
+  String get jarvisBriefingToggle => 'Daily briefing';
+
+  @override
+  String get jarvisBriefingToggleHint => 'A summary notification at 08:00 each morning.';
 }

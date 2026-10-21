@@ -52,7 +52,7 @@ void main() {
   testWidgets('shows every preference section', (tester) async {
     await pumpPrefs(tester);
 
-    expect(find.text('Workout preferences'), findsOneWidget);
+    expect(find.text('Customize workout'), findsOneWidget);
     // Sections are laid out in a scrollable body.
     expect(find.byType(ListView), findsOneWidget);
     final saveBtn = find.text('Save preferences');

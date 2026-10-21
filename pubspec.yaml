@@ -59,10 +59,20 @@ dependencies:
   # Remote exercise demonstration GIFs (disk + memory cached)
   cached_network_image: ^3.4.1
 
+  # Yoga pose API client (yoga-api: pose metadata + demonstration images)
+  http: ^1.2.0
+
+  # Real map tiles for the Run/Walk module (OpenStreetMap, no API key)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
   # Learning
   flutter_tts: ^4.2.0
   speech_to_text: ^7.0.0
   on_audio_query: ^2.9.0
+
+  # Jarvis local AI runtime (Android, llama.cpp GGUF inference, offline)
+  llama_flutter_android: ^0.2.6
 
 dev_dependencies:
   flutter_test:

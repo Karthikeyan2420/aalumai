@@ -55,6 +55,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
   final _audio = AlarmAudio();
   final _labelCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
+  final _finalMessageCtrl = TextEditingController();
 
   late int _hour = widget.alarm?.hour ?? 7;
   late int _minute = widget.alarm?.minute ?? 0;
@@ -96,6 +97,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
     super.initState();
     _labelCtrl.text = widget.alarm?.label ?? '';
     _messageCtrl.text = widget.alarm?.message ?? '';
+    _finalMessageCtrl.text = widget.alarm?.finalMessage ?? '';
   }
 
   @override
@@ -103,6 +105,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
     _audio.dispose();
     _labelCtrl.dispose();
     _messageCtrl.dispose();
+    _finalMessageCtrl.dispose();
     super.dispose();
   }
 
@@ -159,6 +162,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
     final encoded = AlarmChallengeSequence.encode(sequence);
     final primary = sequence.first;
     final message = _messageCtrl.text.trim();
+    final finalMessage = _finalMessageCtrl.text.trim();
     try {
       if (_isEditing) {
         final updated = widget.alarm!.copyWith(
@@ -176,6 +180,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
           isEnabled: _enabled,
           soundMode: _soundMode.index,
           message: message,
+          finalMessage: finalMessage,
           musicIntervalSec: _musicInterval,
           voiceTiming: _voiceTiming.index,
           voicePauseSec: _voicePause,
@@ -197,6 +202,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
           isEnabled: _enabled,
           soundMode: _soundMode.index,
           message: message,
+          finalMessage: finalMessage,
           musicIntervalSec: _musicInterval,
           voiceTiming: _voiceTiming.index,
           voicePauseSec: _voicePause,
@@ -599,6 +605,18 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
                     label: Text(l10n.useSampleMessage),
                   ),
                 ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _finalMessageCtrl,
+                  minLines: 1,
+                  maxLines: 4,
+                  maxLength: 200,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: l10n.finalMotivationalMessage,
+                    hintText: l10n.finalMotivationalMessageHint,
+                  ),
+                ),
                 if (_soundMode == AlarmSoundMode.musicAndVoice) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -638,9 +656,16 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  Text(
+                    l10n.voiceTiming,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 8),
                   DropdownButtonFormField<VoiceTiming>(
                     value: _voiceTiming,
-                    decoration: InputDecoration(labelText: l10n.voiceTiming),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
                     items: [
                       for (final timing in VoiceTiming.values)
                         DropdownMenuItem(
@@ -648,8 +673,9 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
                           child: Text(_voiceTimingLabel(l10n, timing)),
                         ),
                     ],
-                    onChanged:
-                        (v) => setState(() => _voiceTiming = v ?? _voiceTiming),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _voiceTiming = v);
+                    },
                   ),
                 ],
                 if (_soundMode == AlarmSoundMode.voiceOnly) ...[

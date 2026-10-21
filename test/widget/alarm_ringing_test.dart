@@ -10,7 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Alarm _alarm({String label = 'Wake up', String challengeSequence = 'math'}) =>
+Alarm _alarm({
+  String label = 'Wake up',
+  String challengeSequence = 'math',
+  String finalMessage = '',
+}) =>
     Alarm(
       id: 1,
       hour: 7,
@@ -35,6 +39,7 @@ Alarm _alarm({String label = 'Wake up', String challengeSequence = 'math'}) =>
       createdAt: DateTime(2024),
       soundMode: 2,
       message: '',
+      finalMessage: finalMessage,
       musicIntervalSec: 10,
       voiceTiming: 1,
       voicePauseSec: 5,
@@ -183,6 +188,50 @@ void main() {
     expect(find.text('Challenge 1 of 2'), findsOneWidget);
     expect(player.playing, isTrue);
   });
+
+  testWidgets(
+    'final motivation stays on screen until Done when finalMessage is set',
+    (tester) async {
+      final player = _FakeAudioPlayer();
+      final ringing = AlarmRingingScreen(
+        alarm: _alarm(finalMessage: 'You crushed it!'),
+        audio: AlarmAudio(player: player),
+        challengeBuilder:
+            (kind, random) =>
+                const AlarmChallengeData(prompt: '2 + 2', answer: '4'),
+      );
+      await tester.pumpWidget(
+        wrap(
+          Builder(
+            builder: (context) {
+              return Scaffold(
+                body: FilledButton(
+                  onPressed:
+                      () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => ringing),
+                      ),
+                  child: const Text('Open ring'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open ring'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.enterText(find.byType(TextField), '4');
+      await tester.tap(find.text('Done'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(player.playing, isFalse);
+      expect(find.text('You crushed it!'), findsOneWidget);
+      expect(find.text('Final motivation'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'passing every challenge stops the audio and completes the ring',

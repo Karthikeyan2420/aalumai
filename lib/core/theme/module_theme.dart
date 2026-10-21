@@ -24,6 +24,7 @@ class ModuleAccents {
   static const savings = Color(0xFFEAB308); // amber
   static const meals = Color(0xFFEC4899); // pink
   static const learning = Color(0xFF06B6D4); // cyan
+  static const jarvis = Color(0xFF6366F1); // indigo
   static const water = Color(0xFF38BDF8); // light blue
   static const settings = Color(0xFF64748B); // slate
 }
@@ -54,7 +55,8 @@ enum DashboardModule {
   expenses,
   savings,
   meals,
-  learning;
+  learning,
+  jarvis;
 
   Color get accent => switch (this) {
     DashboardModule.alarm => ModuleAccents.alarm,
@@ -68,6 +70,7 @@ enum DashboardModule {
     DashboardModule.savings => ModuleAccents.savings,
     DashboardModule.meals => ModuleAccents.meals,
     DashboardModule.learning => ModuleAccents.learning,
+    DashboardModule.jarvis => ModuleAccents.jarvis,
   };
 
   IconData get icon => switch (this) {
@@ -82,5 +85,6 @@ enum DashboardModule {
     DashboardModule.savings => Icons.savings,
     DashboardModule.meals => Icons.restaurant,
     DashboardModule.learning => Icons.school,
+    DashboardModule.jarvis => Icons.smart_toy_outlined,
   };
 }

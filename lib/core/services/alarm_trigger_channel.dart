@@ -249,6 +249,17 @@ class AlarmTriggerChannel {
     }
   }
 
+  /// Stops native TTS while the ring service keeps playing music. Used when the
+  /// ringing screen takes over speech on the Flutter main isolate.
+  static Future<void> delegateSpeechToFlutter() async {
+    if (!_supported) return;
+    try {
+      await _channel.invokeMethod<bool>('delegateSpeechToFlutter');
+    } catch (e) {
+      debugPrint('Native speech handoff failed: $e');
+    }
+  }
+
   /// Asks the ring service to stop. Safe to call when it is not running.
   static Future<void> stopRing() async {
     if (!_supported) return;

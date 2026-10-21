@@ -656,6 +656,13 @@ List<Widget> _moduleCards(
       subtitle: l10n.continueLearning,
       onTap: () => context.push(AppRoutes.learning),
     ),
+    ModuleCard(
+      module: DashboardModule.jarvis,
+      title: l10n.jarvisTitle,
+      value: 'AI',
+      subtitle: l10n.jarvisSubtitle,
+      onTap: () => context.push(AppRoutes.jarvis),
+    ),
   ];
 }
 

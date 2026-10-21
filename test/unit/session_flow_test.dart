@@ -33,15 +33,16 @@ void main() {
       testExercise(id: 5, name: 'Squat', category: 4),
     ];
 
-    test('selectWarmUps draws only from the warm-up category', () {
+    test('selectWarmUps draws from the mobility and warm-up categories', () {
       final warmUps = SessionBuilder.selectWarmUps(library, count: 3);
       expect(warmUps, isNotEmpty);
-      expect(warmUps.every((e) => e.category == 8), isTrue);
+      expect(warmUps.every((e) => e.category == 7 || e.category == 8), isTrue);
     });
 
     test('selectWarmUps never exceeds the available pool', () {
       final warmUps = SessionBuilder.selectWarmUps(library, count: 99);
-      expect(warmUps, hasLength(3));
+      // Every exercise is bodyweight, so the pool is the whole library.
+      expect(warmUps, hasLength(library.length));
     });
 
     test('selectCoolDowns prefers mobility then stretches', () {
@@ -50,9 +51,17 @@ void main() {
       expect(coolDowns.first.category, 7);
     });
 
-    test('a seed rotates the selection deterministically', () {
-      final a = SessionBuilder.selectWarmUps(library, count: 1, seed: 0);
-      final b = SessionBuilder.selectWarmUps(library, count: 1, seed: 1);
+    test('a seed rotates the filler deterministically', () {
+      // A library with no push-up/plank/stretch core leaves the whole pick to
+      // the seeded filler, so two seeds land on different exercises.
+      final pool = [
+        for (var id = 1; id <= 5; id++)
+          testExercise(id: id, name: 'Mobility $id', category: 7),
+      ];
+      final a = SessionBuilder.selectWarmUps(pool, count: 1, seed: 0);
+      final b = SessionBuilder.selectWarmUps(pool, count: 1, seed: 1);
+      expect(a, hasLength(1));
+      expect(b, hasLength(1));
       expect(a.first.id, isNot(b.first.id));
     });
   });

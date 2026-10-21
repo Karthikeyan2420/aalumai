@@ -61,6 +61,12 @@ class MoreScreen extends StatelessWidget {
         ModuleAccents.notes,
       ),
       _MoreItem(
+        Icons.smart_toy_outlined,
+        l10n.jarvisTitle,
+        AppRoutes.jarvis,
+        ModuleAccents.jarvis,
+      ),
+      _MoreItem(
         Icons.settings_outlined,
         l10n.settings,
         AppRoutes.settings,

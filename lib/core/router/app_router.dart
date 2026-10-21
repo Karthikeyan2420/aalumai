@@ -4,11 +4,13 @@ import '../../features/about/about_screen.dart';
 import '../../features/alarms/alarms_screen.dart';
 import '../../features/expenses/expenses_screen.dart';
 import '../../features/fitness/fitness_screen.dart';
+import '../../features/fitness/yoga_screen.dart';
 import '../../features/habits/habits_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/dashboard_config_screen.dart';
 import '../../features/landing/landing_screen.dart';
 import '../../features/learning/learning_screen.dart';
+import '../../features/jarvis/jarvis_screen.dart';
 import '../../features/meals/meals_screen.dart';
 import '../../features/more/more_screen.dart';
 import '../../features/music/music_screen.dart';
@@ -26,6 +28,7 @@ class AppRoutes {
   static const schedule = '/schedule';
   static const tasks = '/tasks';
   static const fitness = '/fitness';
+  static const yoga = '/yoga';
   static const more = '/more';
 
   static const expenses = '/expenses';
@@ -36,6 +39,7 @@ class AppRoutes {
   static const savings = '/savings';
   static const meals = '/meals';
   static const learning = '/learning';
+  static const jarvis = '/jarvis';
   static const settings = '/settings';
   static const about = '/about';
   static const dashboardConfig = '/dashboard-config';
@@ -101,6 +105,10 @@ GoRouter createRouter() {
         ],
       ),
       GoRoute(
+        path: AppRoutes.yoga,
+        builder: (context, state) => const YogaScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.expenses,
         builder: (context, state) => const ExpensesScreen(),
       ),
@@ -131,6 +139,10 @@ GoRouter createRouter() {
       GoRoute(
         path: AppRoutes.learning,
         builder: (context, state) => const LearningScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.jarvis,
+        builder: (context, state) => const JarvisScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

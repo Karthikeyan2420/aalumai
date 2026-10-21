@@ -17,6 +17,7 @@ import '../../core/services/restore_reconciler.dart';
 import 'alarm_voice_settings_screen.dart';
 import 'background_settings_screen.dart';
 import 'data/lock_service.dart';
+import 'workout_settings_screen.dart';
 
 const _languages = <(String, String)>[
   ('en', 'English'),
@@ -111,6 +112,18 @@ class SettingsScreen extends ConsumerWidget {
             onChanged:
                 (v) =>
                     ref.read(appPreferencesProvider).setWorkoutMusicEnabled(v),
+          ),
+          ListTile(
+            leading: const Icon(Icons.fitness_center),
+            title: Text(l10n.workoutSettings),
+            subtitle: Text(l10n.workoutSettingsDesc),
+            trailing: const Icon(Icons.chevron_right),
+            onTap:
+                () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const WorkoutSettingsScreen(),
+                  ),
+                ),
           ),
           const Divider(),
           _SectionHeader(l10n.settingsNotifications),

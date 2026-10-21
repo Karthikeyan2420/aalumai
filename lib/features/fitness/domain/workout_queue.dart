@@ -17,6 +17,7 @@ class WorkoutStep {
     required this.setIndex,
     required this.totalSets,
     this.category = 0,
+    this.gifUrl = '',
     this.reps = 0,
     this.durationSec = 0,
     this.isTimed = false,
@@ -27,8 +28,11 @@ class WorkoutStep {
   final int exerciseId;
   final String exerciseName;
 
-  /// Exercise category index, used to pick the illustration.
+  /// Exercise category index, used to pick the illustration fallback.
   final int category;
+
+  /// Remote GIF URL from the exercise dataset. Empty when none was published.
+  final String gifUrl;
 
   /// 0-based index of the set within its exercise.
   final int setIndex;
@@ -54,6 +58,7 @@ class WorkoutStep {
     setIndex: setIndex,
     totalSets: totalSets,
     category: category,
+    gifUrl: gifUrl,
     reps: reps,
     durationSec: durationSec,
     isTimed: isTimed,
@@ -120,6 +125,7 @@ class WorkoutQueue {
             exerciseId: spec.exercise.id,
             exerciseName: spec.exercise.name,
             category: spec.exercise.category,
+            gifUrl: spec.exercise.gifUrl,
             setIndex: s,
             totalSets: sets,
             reps: spec.reps,
@@ -143,6 +149,7 @@ class WorkoutQueue {
             exerciseId: workSteps[i].exerciseId,
             exerciseName: workSteps[i].exerciseName,
             category: workSteps[i].category,
+            gifUrl: workSteps[i].gifUrl,
             setIndex: workSteps[i].setIndex,
             totalSets: workSteps[i].totalSets,
             durationSec: rests[i],
@@ -167,6 +174,7 @@ class WorkoutQueue {
         'e': s.exerciseId,
         'n': s.exerciseName,
         'c': s.category,
+        'g': s.gifUrl,
         'i': s.setIndex,
         't': s.totalSets,
         'r': s.reps,
@@ -188,6 +196,7 @@ class WorkoutQueue {
             exerciseId: e['e'] as int,
             exerciseName: (e['n'] as String?) ?? '',
             category: (e['c'] as int?) ?? 0,
+            gifUrl: (e['g'] as String?) ?? '',
             setIndex: (e['i'] as int?) ?? 0,
             totalSets: (e['t'] as int?) ?? 1,
             reps: (e['r'] as int?) ?? 0,

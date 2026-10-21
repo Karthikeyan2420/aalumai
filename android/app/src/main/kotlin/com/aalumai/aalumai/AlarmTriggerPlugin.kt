@@ -152,6 +152,11 @@ class AlarmTriggerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 result.success(true)
             }
 
+            "delegateSpeechToFlutter" -> {
+                AlarmAudioService.delegateSpeechToFlutter()
+                result.success(true)
+            }
+
             "isRinging" -> {
                 result.success(
                     mapOf(

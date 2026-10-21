@@ -68,15 +68,24 @@ class RunState {
 /// Records a GPS run/walk: streams positions, accumulates distance and elapsed
 /// time, and persists the finished session (with an encoded route) to the
 /// existing workout-session schema.
-class RunTrackerController extends Notifier<RunState> {
+class RunTrackerController extends AutoDisposeNotifier<RunState> {
   StreamSubscription<Position>? _posSub;
   Timer? _timer;
 
   @override
   RunState build() {
     ref.onDispose(() {
+      final id = state.sessionId;
+      final stillActive = state.active;
       _posSub?.cancel();
+      _posSub = null;
       _timer?.cancel();
+      _timer = null;
+      // Leaving the screen must stop GPS. An unsaved session is removed so a
+      // half-started run does not stay active in the background.
+      if (stillActive && id != null) {
+        unawaited(ref.read(fitnessRepositoryProvider).deleteSession(id));
+      }
     });
     return const RunState();
   }
@@ -179,6 +188,7 @@ class RunTrackerController extends Notifier<RunState> {
   }
 }
 
-final runTrackerProvider = NotifierProvider<RunTrackerController, RunState>(
-  RunTrackerController.new,
-);
+final runTrackerProvider =
+    NotifierProvider.autoDispose<RunTrackerController, RunState>(
+      RunTrackerController.new,
+    );

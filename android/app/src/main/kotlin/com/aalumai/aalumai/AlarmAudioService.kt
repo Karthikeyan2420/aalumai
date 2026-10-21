@@ -19,6 +19,7 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
@@ -112,6 +113,11 @@ class AlarmAudioService : Service() {
                 }
             }
         }
+
+        /** Stops native TTS while keeping alarm music (Flutter owns speech). */
+        fun delegateSpeechToFlutter() {
+            instance?.delegateSpeechToFlutter()
+        }
     }
 
     private var payload: AlarmTriggerPayload? = null
@@ -132,6 +138,9 @@ class AlarmAudioService : Service() {
     private var ringActive = false
 
     @Volatile
+    private var speechDelegatedToFlutter = false
+
+    @Volatile
     private var utteranceDone = true
 
     private var ttsReady: CountDownLatch? = null
@@ -148,7 +157,12 @@ class AlarmAudioService : Service() {
             // that carries the delete intent and full-screen intent.
             ensureAlarmNotification(current)
             if (current.playsMusic) reassertMusic()
-            if (current.speaks && voiceThread?.isAlive != true) startVoiceLoop(current)
+            if (!speechDelegatedToFlutter &&
+                current.speaks &&
+                voiceThread?.isAlive != true
+            ) {
+                startVoiceLoop(current)
+            }
             mainHandler.postDelayed(this, 1000)
         }
     }
@@ -196,6 +210,7 @@ class AlarmAudioService : Service() {
         if (ringActive) stopRing()
         payload = next
         ringActive = true
+        speechDelegatedToFlutter = false
         isRinging = true
         ringingAlarmId = next.alarmId
         baseVolume = next.volume.coerceIn(0, 100) / 100f
@@ -213,6 +228,7 @@ class AlarmAudioService : Service() {
 
     private fun stopRing() {
         ringActive = false
+        speechDelegatedToFlutter = false
         isRinging = false
         ringingAlarmId = -1
         mainHandler.removeCallbacks(watchdog)
@@ -363,37 +379,85 @@ class AlarmAudioService : Service() {
 
     // ---------------------------------------------------------- speaking
 
-    private fun startVoiceLoop(current: AlarmTriggerPayload) {
-        if (!current.speaks) return
-        val latch = CountDownLatch(1)
-        ttsReady = latch
-        try {
-            tts = TextToSpeech(this) { status ->
-                if (status == TextToSpeech.SUCCESS) configureTts(current)
-                latch.countDown()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "TTS unavailable: $e")
-            latch.countDown()
-            return
+    private fun delegateSpeechToFlutter() {
+        if (!ringActive || speechDelegatedToFlutter) return
+        speechDelegatedToFlutter = true
+        stopSpeechOnly()
+    }
+
+    private fun stopSpeechOnly() {
+        voiceThread?.interrupt()
+        voiceThread = null
+        sleepLock.withLock { sleepSignal.signalAll() }
+        utteranceLock.withLock {
+            utteranceDone = true
+            utteranceSignal.signalAll()
         }
-        voiceThread = Thread {
+        mainHandler.post {
             try {
-                latch.await()
-                runVoiceLoop(current)
-            } catch (_: InterruptedException) {
-                // Ringing stopped while waiting.
+                tts?.stop()
+            } catch (_: Exception) {
             }
-        }.also {
-            it.isDaemon = true
-            it.start()
+        }
+    }
+
+    private fun startVoiceLoop(current: AlarmTriggerPayload) {
+        if (!current.speaks || speechDelegatedToFlutter) return
+        if (voiceThread?.isAlive == true) return
+        // TextToSpeech must be created and spoken on the main thread; timing/sleep
+        // for the voice loop still runs on a background thread.
+        mainHandler.post {
+            if (!ringActive || !current.speaks) return@post
+            val initLatch = CountDownLatch(1)
+            ttsReady = initLatch
+            try {
+                if (tts == null) {
+                    tts = TextToSpeech(applicationContext) { status ->
+                        if (status == TextToSpeech.SUCCESS) {
+                            configureTts(current)
+                        } else {
+                            Log.e(TAG, "TTS engine init failed with status $status")
+                        }
+                        initLatch.countDown()
+                    }
+                } else {
+                    configureTts(current)
+                    initLatch.countDown()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "TTS unavailable: $e")
+                initLatch.countDown()
+                return@post
+            }
+            voiceThread = Thread {
+                try {
+                    initLatch.await(15, TimeUnit.SECONDS)
+                    if (tts == null || !ringActive) return@Thread
+                    runVoiceLoop(current)
+                } catch (_: InterruptedException) {
+                    // Ringing stopped while waiting.
+                }
+            }.also {
+                it.isDaemon = true
+                it.start()
+            }
         }
     }
 
     private fun configureTts(current: AlarmTriggerPayload) {
         val engine = tts ?: return
         try {
-            engine.language = Locale(current.languageCode.ifEmpty { "en" })
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                engine.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build(),
+                )
+            }
+            engine.language = Locale.forLanguageTag(
+                current.languageCode.ifEmpty { "en" }.replace('_', '-'),
+            )
             engine.setSpeechRate(current.speechRate)
             engine.setPitch(current.speechPitch)
             if (current.voiceName.isNotEmpty()) {
@@ -459,19 +523,59 @@ class AlarmAudioService : Service() {
 
     private fun speak(text: String, muteMusic: Boolean) {
         val engine = tts
-        if (!ringActive || engine == null) return
-        if (payload?.playsMusic == true && player != null) {
-            val ducked =
-                if (muteMusic) 0f
-                else (baseVolume * 0.35 * (payload?.speechVolume ?: 1f)).coerceIn(0.0, 1.0).toFloat()
+        if (!ringActive || engine == null || text.isBlank()) return
+        val posted = CountDownLatch(1)
+        var speakError = false
+        mainHandler.post {
+            if (!ringActive) {
+                posted.countDown()
+                return@post
+            }
+            if (payload?.playsMusic == true && player != null) {
+                val ducked =
+                    if (muteMusic) 0f
+                    else (baseVolume * 0.35 * (payload?.speechVolume ?: 1f))
+                        .coerceIn(0.0, 1.0)
+                        .toFloat()
+                try {
+                    player?.setVolume(ducked, ducked)
+                } catch (_: Exception) {
+                }
+            }
             try {
-                player?.setVolume(ducked, ducked)
-            } catch (_: Exception) {
+                utteranceLock.withLock { utteranceDone = false }
+                val params = Bundle().apply {
+                    putFloat(
+                        TextToSpeech.Engine.KEY_PARAM_VOLUME,
+                        (payload?.speechVolume ?: 1f).coerceIn(0f, 1f),
+                    )
+                    putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_ALARM)
+                }
+                val result = engine.speak(
+                    text,
+                    TextToSpeech.QUEUE_FLUSH,
+                    params,
+                    UTTERANCE_ID,
+                )
+                if (result == TextToSpeech.ERROR) {
+                    speakError = true
+                    signalUtteranceDone()
+                }
+            } catch (e: Exception) {
+                speakError = true
+                Log.w(TAG, "Speech failed to start: $e")
+                signalUtteranceDone()
+            } finally {
+                posted.countDown()
             }
         }
         try {
-            utteranceLock.withLock { utteranceDone = false }
-            engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID)
+            posted.await(5, TimeUnit.SECONDS)
+        } catch (_: InterruptedException) {
+            return
+        }
+        if (speakError || !ringActive) return
+        try {
             val deadline = System.currentTimeMillis() + 30_000
             utteranceLock.withLock {
                 var remaining = deadline - System.currentTimeMillis()
@@ -487,10 +591,12 @@ class AlarmAudioService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "Speech failed: $e")
         } finally {
-            if (ringActive && payload?.playsMusic == true) {
-                try {
-                    player?.setVolume(baseVolume, baseVolume)
-                } catch (_: Exception) {
+            mainHandler.post {
+                if (ringActive && payload?.playsMusic == true) {
+                    try {
+                        player?.setVolume(baseVolume, baseVolume)
+                    } catch (_: Exception) {
+                    }
                 }
             }
         }

@@ -184,6 +184,74 @@ void main() {
     });
   });
 
+  group('who daily plan on the bundled library', () {
+    test('every day fills its cardio and yoga blocks from real data', () async {
+      await repo.seedExercises();
+      final library = await db.select(db.exercises).get();
+      final byId = {for (final e in library) e.id: e};
+      // Monday (strength), Wednesday (strength), Sunday (active recovery).
+      for (final offset in [0, 2, 6]) {
+        final date = DateTime(2026, 1, 5).add(Duration(days: offset));
+        final day = WeekPlanGenerator.generateWhoDay(
+          date: date,
+          preferences: const WorkoutPreferences(
+            fitnessLevel: FitnessLevel.advanced,
+          ),
+          exercises: library,
+        );
+        expect(day, isNotNull, reason: 'weekday ${date.weekday}');
+        final chosen = [for (final item in day!.items) byId[item.exerciseId]!];
+        expect(
+          chosen.any((e) => e.category == WhoDailyPlan.cardio),
+          isTrue,
+          reason: 'cardio weekday ${date.weekday}',
+        );
+        expect(
+          chosen.any((e) => e.category == WhoDailyPlan.yoga),
+          isTrue,
+          reason: 'yoga weekday ${date.weekday}',
+        );
+      }
+    });
+  });
+
+  group('personal records', () {
+    test('keeps the higher best and ignores a lower attempt', () async {
+      final exerciseId = await db
+          .into(db.exercises)
+          .insert(ExercisesCompanion.insert(name: 'Squat'));
+      expect(
+        await repo.updatePersonalRecord(
+          exerciseId: exerciseId,
+          recordType: PersonalRecordKind.weightGrams.index,
+          value: 20000,
+        ),
+        isTrue,
+      );
+      expect(
+        await repo.updatePersonalRecord(
+          exerciseId: exerciseId,
+          recordType: PersonalRecordKind.weightGrams.index,
+          value: 15000,
+        ),
+        isFalse,
+      );
+      expect(
+        await repo.updatePersonalRecord(
+          exerciseId: exerciseId,
+          recordType: PersonalRecordKind.weightGrams.index,
+          value: 40000,
+        ),
+        isTrue,
+      );
+      final best = await repo.bestRecord(
+        exerciseId,
+        PersonalRecordKind.weightGrams.index,
+      );
+      expect(best?.value, 40000);
+    });
+  });
+
   group('session outcome', () {
     test('finishSession records the outcome', () async {
       final id = await repo.startSession(name: 'Test');

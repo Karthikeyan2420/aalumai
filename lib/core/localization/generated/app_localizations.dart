@@ -3704,8 +3704,20 @@ abstract class AppLocalizations {
   /// No description provided for @motivationalMessageHint.
   ///
   /// In en, this message translates to:
-  /// **'A short message spoken while the alarm rings'**
+  /// **'Repeats on the music interval while you solve challenges'**
   String get motivationalMessageHint;
+
+  /// No description provided for @finalMotivationalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Final motivation'**
+  String get finalMotivationalMessage;
+
+  /// No description provided for @finalMotivationalMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken once after every challenge — tap Done to close'**
+  String get finalMotivationalMessageHint;
 
   /// No description provided for @useSampleMessage.
   ///
@@ -3752,7 +3764,7 @@ abstract class AppLocalizations {
   /// No description provided for @musicIntervalHint.
   ///
   /// In en, this message translates to:
-  /// **'How long music plays before the next message'**
+  /// **'How long music plays before the next message while ringing'**
   String get musicIntervalHint;
 
   /// No description provided for @customInterval.
@@ -3964,6 +3976,642 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is how your alarm voice will sound.'**
   String get previewSentence;
+
+  /// No description provided for @saveActivityPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this activity?'**
+  String get saveActivityPrompt;
+
+  /// No description provided for @personalBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal best'**
+  String get personalBest;
+
+  /// No description provided for @newPersonalBest.
+  ///
+  /// In en, this message translates to:
+  /// **'New personal best'**
+  String get newPersonalBest;
+
+  /// No description provided for @unfinishedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan has an unfinished workout.'**
+  String get unfinishedPlan;
+
+  /// No description provided for @startFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fresh'**
+  String get startFresh;
+
+  /// No description provided for @route.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get route;
+
+  /// No description provided for @yoga.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get yoga;
+
+  /// No description provided for @yogaToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s yoga'**
+  String get yogaToday;
+
+  /// No description provided for @yogaRecommendedForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for you'**
+  String get yogaRecommendedForYou;
+
+  /// No description provided for @yogaRoutines.
+  ///
+  /// In en, this message translates to:
+  /// **'Routines'**
+  String get yogaRoutines;
+
+  /// No description provided for @yogaPoses.
+  ///
+  /// In en, this message translates to:
+  /// **'Poses'**
+  String get yogaPoses;
+
+  /// No description provided for @yogaStartRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Start routine'**
+  String get yogaStartRoutine;
+
+  /// No description provided for @yogaSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Update poses'**
+  String get yogaSync;
+
+  /// No description provided for @yogaSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} poses'**
+  String yogaSynced(int count);
+
+  /// No description provided for @yogaSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the yoga service. Showing offline poses.'**
+  String get yogaSyncFailed;
+
+  /// No description provided for @yogaOfflineNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Poses are stored on your device and work offline.'**
+  String get yogaOfflineNote;
+
+  /// No description provided for @yogaLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get yogaLevel;
+
+  /// No description provided for @yogaLevelBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get yogaLevelBeginner;
+
+  /// No description provided for @yogaLevelIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get yogaLevelIntermediate;
+
+  /// No description provided for @yogaLevelAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get yogaLevelAdvanced;
+
+  /// No description provided for @yogaPoseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} poses'**
+  String yogaPoseCount(int count);
+
+  /// No description provided for @yogaMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String yogaMinutes(int count);
+
+  /// No description provided for @yogaInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'How to practise'**
+  String get yogaInstructions;
+
+  /// No description provided for @yogaBenefits.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefits'**
+  String get yogaBenefits;
+
+  /// No description provided for @yogaBreathing.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing'**
+  String get yogaBreathing;
+
+  /// No description provided for @yogaTakeCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Take care'**
+  String get yogaTakeCare;
+
+  /// No description provided for @yogaNoImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No verified image is available for this pose.'**
+  String get yogaNoImage;
+
+  /// No description provided for @yogaAddFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favourites'**
+  String get yogaAddFavorite;
+
+  /// No description provided for @yogaRemoveFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favourites'**
+  String get yogaRemoveFavorite;
+
+  /// No description provided for @yogaFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites'**
+  String get yogaFavorites;
+
+  /// No description provided for @yogaNoFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favourite poses yet.'**
+  String get yogaNoFavorites;
+
+  /// No description provided for @yogaHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga history'**
+  String get yogaHistory;
+
+  /// No description provided for @yogaNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No yoga sessions yet.'**
+  String get yogaNoHistory;
+
+  /// No description provided for @yogaSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get yogaSkip;
+
+  /// No description provided for @yogaNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get yogaNext;
+
+  /// No description provided for @yogaPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get yogaPrevious;
+
+  /// No description provided for @yogaPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get yogaPause;
+
+  /// No description provided for @yogaResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get yogaResume;
+
+  /// No description provided for @yogaFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get yogaFinish;
+
+  /// No description provided for @yogaFinishPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the session?'**
+  String get yogaFinishPrompt;
+
+  /// No description provided for @yogaSessionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga session complete'**
+  String get yogaSessionComplete;
+
+  /// No description provided for @yogaPoseOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Pose {current} of {total}'**
+  String yogaPoseOf(int current, int total);
+
+  /// No description provided for @yogaSearchPoses.
+  ///
+  /// In en, this message translates to:
+  /// **'Search poses'**
+  String get yogaSearchPoses;
+
+  /// No description provided for @yogaAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get yogaAllCategories;
+
+  /// No description provided for @yogaCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get yogaCategoryOther;
+
+  /// No description provided for @yogaGetReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ready'**
+  String get yogaGetReady;
+
+  /// No description provided for @yogaDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get yogaDone;
+
+  /// No description provided for @yogaAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Pose data from the yoga-api open dataset. General information only — not medical advice.'**
+  String get yogaAttribution;
+
+  /// No description provided for @yogaSafetyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Move within a comfortable range. Stop if you feel pain, and see a health professional if you have a medical condition.'**
+  String get yogaSafetyNote;
+
+  /// No description provided for @yogaPickLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a level'**
+  String get yogaPickLevel;
+
+  /// No description provided for @yogaLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated {when}'**
+  String yogaLastSynced(String when);
+
+  /// No description provided for @yogaNeverSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet updated from the service'**
+  String get yogaNeverSynced;
+
+  /// No description provided for @yogaStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get yogaStart;
+
+  /// No description provided for @yogaOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get yogaOverview;
+
+  /// No description provided for @yogaNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No yoga poses match your search.'**
+  String get yogaNoResults;
+
+  /// No description provided for @workouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Workouts'**
+  String get workouts;
+
+  /// No description provided for @customizeWorkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize workout'**
+  String get customizeWorkout;
+
+  /// No description provided for @dumbbellWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dumbbell and barbell exercises use your own weights. Log the weight you lift during each set.'**
+  String get dumbbellWeightHint;
+
+  /// No description provided for @restDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest day'**
+  String get restDay;
+
+  /// No description provided for @workoutSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout'**
+  String get workoutSettings;
+
+  /// No description provided for @workoutSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the equipment and muscle groups for your daily workout'**
+  String get workoutSettingsDesc;
+
+  /// No description provided for @workoutCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the equipment and muscle groups you want in your daily workout. Only the ticked options are used to build each day.'**
+  String get workoutCategoriesHint;
+
+  /// No description provided for @equipmentBodyweight.
+  ///
+  /// In en, this message translates to:
+  /// **'No equipment (bodyweight)'**
+  String get equipmentBodyweight;
+
+  /// No description provided for @jarvisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jarvis'**
+  String get jarvisTitle;
+
+  /// No description provided for @jarvisSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device AI assistant'**
+  String get jarvisSubtitle;
+
+  /// No description provided for @jarvisChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get jarvisChat;
+
+  /// No description provided for @jarvisModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get jarvisModel;
+
+  /// No description provided for @jarvisMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories'**
+  String get jarvisMemories;
+
+  /// No description provided for @jarvisChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything — Jarvis runs entirely on this device.'**
+  String get jarvisChatEmpty;
+
+  /// No description provided for @jarvisInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Jarvis…'**
+  String get jarvisInputHint;
+
+  /// No description provided for @jarvisSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get jarvisSend;
+
+  /// No description provided for @jarvisStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get jarvisStop;
+
+  /// No description provided for @jarvisClearChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat'**
+  String get jarvisClearChat;
+
+  /// No description provided for @jarvisThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get jarvisThinking;
+
+  /// No description provided for @jarvisAllowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow this action?'**
+  String get jarvisAllowAction;
+
+  /// No description provided for @jarvisAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get jarvisAllow;
+
+  /// No description provided for @jarvisDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get jarvisDecline;
+
+  /// No description provided for @jarvisNoModel.
+  ///
+  /// In en, this message translates to:
+  /// **'No model installed yet.'**
+  String get jarvisNoModel;
+
+  /// No description provided for @jarvisModelInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Model installed'**
+  String get jarvisModelInstalled;
+
+  /// No description provided for @jarvisModelLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Model loaded — ready for chat'**
+  String get jarvisModelLoaded;
+
+  /// No description provided for @jarvisModelNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Model not loaded'**
+  String get jarvisModelNotLoaded;
+
+  /// No description provided for @jarvisDownloadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download model (~1.3 GB)'**
+  String get jarvisDownloadModel;
+
+  /// No description provided for @jarvisImportModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a GGUF file'**
+  String get jarvisImportModel;
+
+  /// No description provided for @jarvisDeleteModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete model'**
+  String get jarvisDeleteModel;
+
+  /// No description provided for @jarvisLoadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Load model'**
+  String get jarvisLoadModel;
+
+  /// No description provided for @jarvisUnloadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unload model'**
+  String get jarvisUnloadModel;
+
+  /// No description provided for @jarvisDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get jarvisDownloading;
+
+  /// No description provided for @jarvisVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying…'**
+  String get jarvisVerifying;
+
+  /// No description provided for @jarvisCpuThreads.
+  ///
+  /// In en, this message translates to:
+  /// **'CPU threads'**
+  String get jarvisCpuThreads;
+
+  /// No description provided for @jarvisContextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Context size'**
+  String get jarvisContextSize;
+
+  /// No description provided for @jarvisNoMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories saved yet.'**
+  String get jarvisNoMemories;
+
+  /// No description provided for @jarvisConfirmMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get jarvisConfirmMemory;
+
+  /// No description provided for @jarvisPendingMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending confirmation'**
+  String get jarvisPendingMemory;
+
+  /// No description provided for @jarvisForgetMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Forget'**
+  String get jarvisForgetMemory;
+
+  /// No description provided for @jarvisAddMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a memory'**
+  String get jarvisAddMemory;
+
+  /// No description provided for @jarvisMemoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A fact or preference Jarvis should remember'**
+  String get jarvisMemoryHint;
+
+  /// No description provided for @jarvisDeleteModelWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the installed model? You can download or import it again later.'**
+  String get jarvisDeleteModelWarning;
+
+  /// No description provided for @jarvisMicHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to speak'**
+  String get jarvisMicHold;
+
+  /// No description provided for @jarvisSpeakReplies.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak replies'**
+  String get jarvisSpeakReplies;
+
+  /// No description provided for @jarvisBriefingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning briefing'**
+  String get jarvisBriefingTitle;
+
+  /// No description provided for @jarvisBriefingTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tasks due'**
+  String jarvisBriefingTasks(Object count);
+
+  /// No description provided for @jarvisBriefingEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} events today'**
+  String jarvisBriefingEvents(Object count);
+
+  /// No description provided for @jarvisBriefingAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Next alarm {time}'**
+  String jarvisBriefingAlarm(Object time);
+
+  /// No description provided for @jarvisBriefingQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due today — a clear morning.'**
+  String get jarvisBriefingQuiet;
+
+  /// No description provided for @jarvisBriefingToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily briefing'**
+  String get jarvisBriefingToggle;
+
+  /// No description provided for @jarvisBriefingToggleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A summary notification at 08:00 each morning.'**
+  String get jarvisBriefingToggleHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

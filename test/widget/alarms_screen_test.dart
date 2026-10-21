@@ -76,6 +76,7 @@ Alarm _alarm({
   createdAt: DateTime(2024),
   soundMode: 2,
   message: '',
+  finalMessage: '',
   musicIntervalSec: 10,
   voiceTiming: 1,
   voicePauseSec: 5,

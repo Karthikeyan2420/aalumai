@@ -86,5 +86,15 @@ void main() {
     test('returns null for malformed json', () {
       expect(GeoPoint.fromJson({'lat': 1.0}), isNull);
     });
+
+    test('decodeRoute reads a stored track and ignores other payloads', () {
+      const point = GeoPoint(latitude: 12.5, longitude: 77.25, timestampMs: 99);
+      final route = '[{"lat":12.5,"lng":77.25,"t":99}]';
+      final decoded = decodeRoute(route);
+      expect(decoded, hasLength(1));
+      expect(decoded.single.latitude, point.latitude);
+      expect(decodeRoute('[{"k":0}]'), isEmpty);
+      expect(decodeRoute(''), isEmpty);
+    });
   });
 }

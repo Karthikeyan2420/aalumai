@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 /// A single recorded location fix on a run/walk route.
@@ -78,6 +79,25 @@ String formatPace(int secondsPerKm) {
   final minutes = secondsPerKm ~/ 60;
   final seconds = secondsPerKm % 60;
   return '$minutes:${seconds.toString().padLeft(2, '0')} /km';
+}
+
+/// Decodes a route stored on a run/walk session. Returns an empty list when
+/// the payload is missing or is not a list of points.
+List<GeoPoint> decodeRoute(String routeJson) {
+  if (routeJson.isEmpty) return const [];
+  try {
+    final raw = jsonDecode(routeJson);
+    if (raw is! List) return const [];
+    final points = <GeoPoint>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final point = GeoPoint.fromJson(Map<String, dynamic>.from(item));
+      if (point != null) points.add(point);
+    }
+    return points;
+  } catch (_) {
+    return const [];
+  }
 }
 
 /// Formats a duration as `h:mm:ss` (or `m:ss` under an hour).

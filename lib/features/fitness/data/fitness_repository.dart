@@ -10,6 +10,9 @@ import '../domain/who_guidance.dart';
 import '../domain/workout_preferences.dart';
 import 'exercise_catalog.dart';
 
+/// What a personal-record value measures. The index is stored as `recordType`.
+enum PersonalRecordKind { weightGrams, reps, durationSec }
+
 class FitnessRepository {
   FitnessRepository(this._db, {ExerciseCatalog? catalog})
     : _catalog = catalog ?? ExerciseCatalog();
@@ -367,6 +370,10 @@ class FitnessRepository {
             .get();
     return rows.isEmpty ? null : rows.first;
   }
+
+  Stream<List<PersonalRecord>> watchRecords(int exerciseId) =>
+      (_db.select(_db.personalRecords)
+        ..where((t) => t.exerciseId.equals(exerciseId))).watch();
 
   /// Simple double-progression suggestion based on logged sets.
   Future<String> progressionSuggestion(int exerciseId) async {
@@ -952,6 +959,16 @@ final exercisesProvider = StreamProvider<List<Exercise>>(
 
 final workoutSessionsProvider = StreamProvider<List<WorkoutSession>>(
   (ref) => ref.watch(fitnessRepositoryProvider).watchSessions(),
+);
+
+final exerciseRecordsProvider =
+    StreamProvider.family<List<PersonalRecord>, int>(
+      (ref, exerciseId) =>
+          ref.watch(fitnessRepositoryProvider).watchRecords(exerciseId),
+    );
+
+final runsProvider = StreamProvider<List<WorkoutSession>>(
+  (ref) => ref.watch(fitnessRepositoryProvider).watchRuns(),
 );
 
 final workoutSetLogsProvider = StreamProvider.family<List<WorkoutSetLog>, int>(

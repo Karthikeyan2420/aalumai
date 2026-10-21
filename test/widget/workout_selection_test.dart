@@ -13,12 +13,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../support/gif_test_helper.dart';
+
 /// End-to-end coverage for picking one of the three seeded starter plans and
 /// actually getting into the guided workout.
 ///
 /// Regression guard: selecting a plan could leave the UI on a spinner forever
 /// instead of opening the player.
 void main() {
+  setupGifTestEnvironment();
+
   late AppDatabase db;
   late FitnessRepository repo;
   late SharedPreferences prefs;
@@ -91,9 +95,12 @@ void main() {
 
   /// Unmounts the tree so drift's stream providers close, then flushes the
   /// zero-duration cleanup timers they schedule (mirrors workout_player_test).
+  /// The 11s pump also fires flutter_cache_manager's cache-cleanup timer,
+  /// otherwise it outlives the test and trips the pending-timer invariant.
   Future<void> unmount(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 20));
+    await tester.pump(const Duration(seconds: 11));
   }
 
   /// Loads each starter plan's exercises straight from the database.
@@ -144,12 +151,19 @@ void main() {
   testWidgets('tapping a plan opens its detail screen, not a spinner', (
     tester,
   ) async {
+    // The plans sit at the bottom of a long ListView; a tall window keeps them
+    // on-screen so the tap is not obscured.
+    tester.view.physicalSize = const Size(1000, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await seed(tester);
     await tester.pumpWidget(host());
     await settle(tester);
 
     await tester.tap(
-      find.descendant(of: find.byType(TabBar), matching: find.text('Plans')),
+      find.descendant(of: find.byType(TabBar), matching: find.text('Workout')),
     );
     await settle(tester);
 
@@ -174,13 +188,20 @@ void main() {
   testWidgets('the play button reaches the guided player for all plans', (
     tester,
   ) async {
+    // The plans sit at the bottom of a long ListView; a tall window keeps all
+    // three built so the lazy viewport never has to be scrolled.
+    tester.view.physicalSize = const Size(1000, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await seed(tester);
 
     for (final planName in planNames) {
       await tester.pumpWidget(host());
       await settle(tester);
       await tester.tap(
-        find.descendant(of: find.byType(TabBar), matching: find.text('Plans')),
+        find.descendant(of: find.byType(TabBar), matching: find.text('Workout')),
       );
       await settle(tester);
 

@@ -53,7 +53,17 @@ void main() {
         ),
         WorkoutCollection.bodyweight,
       );
-      for (final equipment in const ['barbell', 'cable', 'machine', 'lever']) {
+      for (final equipment in const ['barbell', 'ez-bar']) {
+        expect(
+          workoutCollectionFor(
+            equipment: equipment,
+            sourceCategory: 'strength',
+          ),
+          WorkoutCollection.dumbbell,
+          reason: equipment,
+        );
+      }
+      for (final equipment in const ['cable', 'machine', 'lever']) {
         expect(
           workoutCollectionFor(
             equipment: equipment,

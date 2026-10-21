@@ -5,6 +5,7 @@ import '../../core/db/database.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
+import 'domain/equipment_filter.dart';
 import 'domain/exercise_collections.dart';
 import 'domain/exercise_format.dart';
 import 'exercise_detail_screen.dart';
@@ -12,9 +13,9 @@ import 'widgets/exercise_gif.dart';
 
 /// The exercise list of one workout collection, with search and filters.
 ///
-/// A null [collection] lists the whole library. Exercises are filed into a
-/// collection from their metadata (equipment and the dataset's movement
-/// category), so the dumbbell list can never mix in other equipment.
+/// A null [collection] lists the whole library. Gym-machine exercises are
+/// always excluded — the app supports home workouts (bodyweight, free weights,
+/// bands and kettlebells) only.
 class ExerciseCategoryScreen extends ConsumerStatefulWidget {
   const ExerciseCategoryScreen({super.key, this.collection});
 
@@ -48,6 +49,7 @@ class _ExerciseCategoryScreenState
       for (final e in all)
         if ((widget.collection == null ||
                 exerciseCollection(e) == widget.collection) &&
+            !isGymEquipment(e.equipment) &&
             (_muscle == null || exercisePrimaryMuscle(e) == _muscle) &&
             (_equipment == null || e.equipment == _equipment) &&
             (_difficulty == null || e.difficulty == _difficulty) &&
@@ -311,7 +313,8 @@ class _FilterOptions {
     final equipment =
         <String>{
             for (final e in all)
-              if (e.equipment.isNotEmpty) e.equipment,
+              if (e.equipment.isNotEmpty && !isGymEquipment(e.equipment))
+                e.equipment,
           }.toList()
           ..sort();
     final difficulties =

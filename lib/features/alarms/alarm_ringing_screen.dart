@@ -75,6 +75,8 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
   bool _wrong = false;
   bool _revealed = false;
   bool _completed = false;
+  bool _showFinalMotivation = false;
+  bool _allowDismiss = false;
   Timer? _revealTimer;
 
   int get _total => _sequence.length;
@@ -131,22 +133,20 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
   }
 
   Future<void> _startAudio() async {
-    if (!widget.isPreview) {
-      // The native ring service is the single owner of ring audio whenever it
-      // is what fired this alarm: it may already be looping the tone from the
-      // moment the alarm triggered, before any Flutter code ran. Starting the
-      // in-process player on top of that would play the alarm twice, so only
-      // fall back to it when no native trigger is ringing for this alarm (for
-      // example exact alarms were denied, or the screen was opened directly).
-      final native = await AlarmTriggerChannel.ringState();
-      if (native.isFor(widget.alarm.id)) return;
-    }
     final config = await _buildConfig();
     if (widget.isPreview) {
       await _preview(config);
-    } else {
-      await _audio.start(config);
+      return;
     }
+    // The native ring service may already be looping the tone from the moment
+    // the alarm triggered. Starting music again would double the alarm, but TTS
+    // still runs here on the Flutter main isolate where speech is reliable.
+    final native = await AlarmTriggerChannel.ringState();
+    final nativeMusic = native.isFor(widget.alarm.id);
+    if (nativeMusic && config.speaks) {
+      await AlarmTriggerChannel.delegateSpeechToFlutter();
+    }
+    await _audio.start(config, musicAlreadyPlaying: nativeMusic);
   }
 
   /// Builds the playback configuration from the alarm's own sound settings and
@@ -170,6 +170,7 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
       mode: AlarmSoundMode.fromIndex(widget.alarm.soundMode),
       soundId: widget.alarm.soundUri,
       message: widget.alarm.message,
+      finalMessage: widget.alarm.finalMessage,
       musicIntervalSec: widget.alarm.musicIntervalSec,
       voicePauseSec: widget.alarm.voicePauseSec,
       voiceTiming: VoiceTiming.fromIndex(widget.alarm.voiceTiming),
@@ -231,20 +232,47 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
     }
   }
 
-  /// Every challenge passed: stop the audio/vibration and finalise the ring.
+  /// Every challenge passed: stop the tone, optionally show the final
+  /// motivation (spoken + on screen) until the user taps Done.
   Future<void> _complete() async {
     if (_completed) return;
     setState(() => _completed = true);
-    // The ring is over: release the screen wake lock.
-    unawaited(WakelockPlus.disable().catchError((_) {}));
-    // The native ring service may be the one producing sound, and it must not
-    // outlive a completed sequence. Safe to call when it never started.
     await AlarmTriggerChannel.stopRing();
     await _audio.stop();
     if (!widget.isPreview) {
       await ref.read(alarmRepositoryProvider).complete(widget.alarm);
     }
-    if (mounted) Navigator.of(context).maybePop();
+    final config = await _buildConfig();
+    final finalText = config.finalMessage.trim();
+    if (finalText.isEmpty) {
+      unawaited(WakelockPlus.disable().catchError((_) {}));
+      _popRingingScreen();
+      return;
+    }
+    if (mounted) setState(() => _showFinalMotivation = true);
+    await _speakText(config, finalText);
+  }
+
+  Future<void> _speakText(AlarmPlaybackConfig config, String text) async {
+    final tts = _tts;
+    if (tts == null || text.isEmpty) return;
+    try {
+      await tts.configure(config.voice, config.languageCode);
+      await tts.speak(text);
+    } catch (_) {}
+  }
+
+  Future<void> _dismissFinalMotivation() async {
+    unawaited(WakelockPlus.disable().catchError((_) {}));
+    _popRingingScreen();
+  }
+
+  void _popRingingScreen() {
+    if (!mounted) return;
+    setState(() => _allowDismiss = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.of(context).pop();
+    });
   }
 
   @override
@@ -271,7 +299,7 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: widget.isPreview,
+      canPop: widget.isPreview || _allowDismiss,
       child: CustomBackground(
         slot: BackgroundSlot.alarm,
         overlayColor: Colors.black,
@@ -324,6 +352,49 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
   Widget _buildChallenges(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    if (_showFinalMotivation) {
+      final text = widget.alarm.finalMessage.trim();
+      return Column(
+        children: [
+          const Spacer(),
+          Icon(Icons.record_voice_over, size: 72, color: _accent),
+          const SizedBox(height: 16),
+          Text(
+            l10n.finalMotivationalMessage,
+            style: theme.textTheme.titleMedium?.copyWith(color: Colors.white70),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: _accent,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: _dismissFinalMotivation,
+              icon: const Icon(Icons.check),
+              label: Text(
+                l10n.done,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     return Column(
       children: [
         _RingingBeacon(color: _accent),

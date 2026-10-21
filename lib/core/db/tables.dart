@@ -474,6 +474,70 @@ class FitnessGoals extends Table {
 }
 
 // ---------------------------------------------------------------------------
+// Yoga
+// ---------------------------------------------------------------------------
+
+/// Cached yoga-api poses. The app ships a bundled snapshot; the repository
+/// refreshes it from the API when the network is available and writes the
+/// result here so the catalogue keeps working offline.
+class YogaPoseCache extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get apiId => integer().nullable()();
+
+  /// Stable local key (slug of the english name). Unique per pose.
+  TextColumn get poseKey => text()();
+  TextColumn get englishName => text()();
+  TextColumn get sanskritName => text().withDefault(const Constant(''))();
+  TextColumn get translation => text().withDefault(const Constant(''))();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  TextColumn get benefits => text().withDefault(const Constant(''))();
+  TextColumn get imageUrl => text().withDefault(const Constant(''))();
+  TextColumn get category => text().withDefault(const Constant(''))();
+  IntColumn get difficulty => integer().withDefault(const Constant(0))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// One completed or abandoned guided yoga practice.
+class YogaSessions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get routineKey => text().withDefault(const Constant(''))();
+  TextColumn get title => text().withDefault(const Constant(''))();
+  IntColumn get difficulty => integer().withDefault(const Constant(0))();
+  DateTimeColumn get startedAt => dateTime()();
+  DateTimeColumn get endedAt => dateTime().nullable()();
+  IntColumn get durationSec => integer().withDefault(const Constant(0))();
+  IntColumn get poseCount => integer().withDefault(const Constant(0))();
+  IntColumn get completedPoses => integer().withDefault(const Constant(0))();
+
+  /// How the session ended: 0 completed, 1 partial, 2 cancelled.
+  IntColumn get outcome => integer().withDefault(const Constant(0))();
+  IntColumn get stepIndex => integer().withDefault(const Constant(0))();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+}
+
+/// Per-pose log inside a yoga session.
+class YogaPoseLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionId =>
+      integer().references(YogaSessions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get poseKey => text()();
+  TextColumn get englishName => text().withDefault(const Constant(''))();
+  IntColumn get positionIndex => integer().withDefault(const Constant(0))();
+  IntColumn get plannedSec => integer().withDefault(const Constant(0))();
+  IntColumn get actualSec => integer().withDefault(const Constant(0))();
+
+  /// 0 completed, 1 skipped.
+  IntColumn get outcome => integer().withDefault(const Constant(0))();
+}
+
+/// Poses the user has bookmarked for quick access.
+class YogaFavorites extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get poseKey => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+// ---------------------------------------------------------------------------
 // Music
 // ---------------------------------------------------------------------------
 
@@ -607,6 +671,10 @@ class Alarms extends Table {
   /// Per-alarm motivational message spoken by TTS while ringing. Each alarm
   /// keeps its own copy; empty means "no spoken message".
   TextColumn get message => text().withDefault(const Constant(''))();
+
+  /// Spoken once after every dismissal challenge is passed. The screen stays
+  /// open until the user taps Done; empty skips this step.
+  TextColumn get finalMessage => text().withDefault(const Constant(''))();
 
   /// Seconds of music played before the next spoken message in
   /// music + voice mode. Never determines how long the whole alarm runs.
@@ -751,4 +819,23 @@ class LearningProgress extends Table {
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   IntColumn get score => integer().withDefault(const Constant(0))();
   DateTimeColumn get completedAt => dateTime().nullable()();
+}
+
+// ---------------------------------------------------------------------------
+// Jarvis (local AI assistant)
+// ---------------------------------------------------------------------------
+
+/// Durable facts and preferences the assistant remembers. Rows written by the
+/// model start with `confirmed = false` until the user acknowledges them in
+/// the memory manager.
+class JarvisMemories extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get content => text()();
+
+  /// One of the [MemoryCategory] names: fact, preference, goal, person,
+  /// event, summary. Stored as text so new categories never need migrations.
+  TextColumn get category => text().withDefault(const Constant('fact'))();
+  BoolColumn get confirmed => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

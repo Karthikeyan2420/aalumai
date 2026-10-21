@@ -1,4 +1,5 @@
 import '../../../core/db/database.dart';
+import 'equipment_filter.dart';
 
 /// Overall structure the planner uses when generating a week.
 enum WorkoutPlanStyle { balanced, muscleSplit, fullBody, cardioFocus }
@@ -27,7 +28,7 @@ class WorkoutPreferences {
     this.planStyle = WorkoutPlanStyle.balanced,
     this.fitnessLevel = FitnessLevel.beginner,
     this.equipment = const [],
-    this.sessionMinutes = 30,
+    this.sessionMinutes = 75,
     this.trainingDaysMask = 0x1F,
     this.restDaysMask = 0,
     this.goal = WorkoutGoal.generalHealth,
@@ -408,8 +409,10 @@ class WeekPlanGenerator {
     required List<Exercise> exercises,
     required List<MuscleGroup> groups,
     int? perGroupOverride,
+    Set<String>? equipmentOverride,
   }) {
     final maxLevel = preferences.fitnessLevel.index + 1;
+    final selected = equipmentOverride ?? _selectedEquipment(preferences);
     final perGroup =
         perGroupOverride ??
         ((preferences.sessionMinutes / 8).ceil()).clamp(1, 3);
@@ -419,12 +422,14 @@ class WeekPlanGenerator {
     for (final group in groups) {
       final limit = _singleBlockGroups.contains(group) ? 1 : perGroup;
       final candidates =
-          exercises.where((e) {
-              if (e.category != group) return false;
-              if (e.difficulty > maxLevel) return false;
-              if (!_equipmentAvailable(e, preferences.equipment)) return false;
-              return true;
-            }).toList()
+          exercises
+              .where(
+                (e) =>
+                    e.category == group &&
+                    e.difficulty <= maxLevel &&
+                    isEquipmentSelected(e.equipment, selected),
+              )
+              .toList()
             ..sort((a, b) => a.id.compareTo(b.id));
 
       var added = 0;
@@ -437,6 +442,26 @@ class WeekPlanGenerator {
       }
     }
     return chosen;
+  }
+
+  /// The equipment the user has selected in Settings → Workout. Falls back to
+  /// the default home selection when preferences hold none.
+  static Set<String> _selectedEquipment(WorkoutPreferences preferences) {
+    if (preferences.equipment.isEmpty) {
+      return defaultEquipmentSelection().toSet();
+    }
+    return preferences.equipment.map((e) => e.trim().toLowerCase()).toSet();
+  }
+
+  /// The muscle-group categories the daily workout may draw from. When the user
+  /// has selected none, every group in [groups] is allowed.
+  static List<MuscleGroup> allowedGroups(
+    WorkoutPreferences preferences,
+    List<MuscleGroup> groups,
+  ) {
+    final selected = preferences.goalMuscles;
+    if (selected.isEmpty) return groups;
+    return groups.where(selected.contains).toList();
   }
 
   static List<PlannedItem> _selectItems({
@@ -465,17 +490,59 @@ class WeekPlanGenerator {
   static int _substituteFor(int exerciseId, Map<int, int> substitutions) =>
       substitutions[exerciseId] ?? exerciseId;
 
-  static bool _equipmentAvailable(Exercise e, List<String> available) {
-    final needed = e.equipment.trim();
-    if (needed.isEmpty ||
-        needed.toLowerCase() == 'none' ||
-        needed.toLowerCase() == 'bodyweight') {
-      return true;
-    }
-    if (available.isEmpty) return true;
-    final lower = needed.toLowerCase();
-    return available.any(
-      (a) => lower.contains(a.toLowerCase()) || a.toLowerCase().contains(lower),
+  /// Generates today's home workout: a warm-up, a long main set targeting the
+  /// day's muscle groups, and a cool-down. The main work is scaled to fill
+  /// roughly [WorkoutPreferences.sessionMinutes] (the app targets a 60–90
+  /// minute home session) by widening the per-group exercise count and raising
+  /// the working sets. Returns null when the library has no usable exercises.
+  static PlannedDay? generateHomeDay({
+    required DateTime date,
+    required WorkoutPreferences preferences,
+    required List<Exercise> exercises,
+    Map<int, int> substitutions = const {},
+  }) {
+    final allGroups = WhoDailyPlan.groupsFor(date.weekday);
+    // Restrict the main work to the muscle groups the user enabled in
+    // Settings → Workout. Mobility (cool-down) and cardio blocks are only
+    // dropped when the user explicitly unchecked them.
+    final groups = allowedGroups(preferences, allGroups);
+    // Aim the main block at ~75 minutes of home work. The default preference
+    // length drives the per-group breadth; sets are raised on top of it.
+    final targetMinutes = preferences.sessionMinutes.clamp(45, 90);
+    final perGroup = ((targetMinutes - 20) / 6).round().clamp(2, 4);
+    final mainSets = targetMinutes >= 60 ? 4 : 3;
+
+    final chosen = _selectExercises(
+      preferences: preferences,
+      exercises: exercises,
+      groups: groups,
+      perGroupOverride: perGroup,
+    );
+    if (chosen.isEmpty) return null;
+
+    return PlannedDay(
+      date: date,
+      title: '',
+      muscleGroups: groups,
+      items: [
+        for (final e in chosen)
+          if (e.category == WhoDailyPlan.yoga)
+            PlannedItem(
+              exerciseId: _substituteFor(e.id, substitutions),
+              sets: e.defaultSets,
+              reps: e.defaultReps,
+              durationSec: e.defaultDurationSec,
+              restSec: e.restSec,
+            )
+          else
+            PlannedItem(
+              exerciseId: _substituteFor(e.id, substitutions),
+              sets: mainSets,
+              reps: e.defaultReps,
+              durationSec: e.defaultDurationSec,
+              restSec: e.restSec,
+            ),
+      ],
     );
   }
 

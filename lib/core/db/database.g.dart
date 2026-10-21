@@ -16142,6 +16142,2182 @@ class FitnessGoalsCompanion extends UpdateCompanion<FitnessGoal> {
   }
 }
 
+class $YogaPoseCacheTable extends YogaPoseCache
+    with TableInfo<$YogaPoseCacheTable, YogaPoseCacheData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YogaPoseCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _apiIdMeta = const VerificationMeta('apiId');
+  @override
+  late final GeneratedColumn<int> apiId = GeneratedColumn<int>(
+    'api_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _poseKeyMeta = const VerificationMeta(
+    'poseKey',
+  );
+  @override
+  late final GeneratedColumn<String> poseKey = GeneratedColumn<String>(
+    'pose_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _englishNameMeta = const VerificationMeta(
+    'englishName',
+  );
+  @override
+  late final GeneratedColumn<String> englishName = GeneratedColumn<String>(
+    'english_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sanskritNameMeta = const VerificationMeta(
+    'sanskritName',
+  );
+  @override
+  late final GeneratedColumn<String> sanskritName = GeneratedColumn<String>(
+    'sanskrit_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _translationMeta = const VerificationMeta(
+    'translation',
+  );
+  @override
+  late final GeneratedColumn<String> translation = GeneratedColumn<String>(
+    'translation',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _benefitsMeta = const VerificationMeta(
+    'benefits',
+  );
+  @override
+  late final GeneratedColumn<String> benefits = GeneratedColumn<String>(
+    'benefits',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<int> difficulty = GeneratedColumn<int>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    apiId,
+    poseKey,
+    englishName,
+    sanskritName,
+    translation,
+    description,
+    benefits,
+    imageUrl,
+    category,
+    difficulty,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'yoga_pose_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YogaPoseCacheData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('api_id')) {
+      context.handle(
+        _apiIdMeta,
+        apiId.isAcceptableOrUnknown(data['api_id']!, _apiIdMeta),
+      );
+    }
+    if (data.containsKey('pose_key')) {
+      context.handle(
+        _poseKeyMeta,
+        poseKey.isAcceptableOrUnknown(data['pose_key']!, _poseKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_poseKeyMeta);
+    }
+    if (data.containsKey('english_name')) {
+      context.handle(
+        _englishNameMeta,
+        englishName.isAcceptableOrUnknown(
+          data['english_name']!,
+          _englishNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_englishNameMeta);
+    }
+    if (data.containsKey('sanskrit_name')) {
+      context.handle(
+        _sanskritNameMeta,
+        sanskritName.isAcceptableOrUnknown(
+          data['sanskrit_name']!,
+          _sanskritNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('translation')) {
+      context.handle(
+        _translationMeta,
+        translation.isAcceptableOrUnknown(
+          data['translation']!,
+          _translationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('benefits')) {
+      context.handle(
+        _benefitsMeta,
+        benefits.isAcceptableOrUnknown(data['benefits']!, _benefitsMeta),
+      );
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  YogaPoseCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YogaPoseCacheData(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      apiId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}api_id'],
+      ),
+      poseKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}pose_key'],
+          )!,
+      englishName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}english_name'],
+          )!,
+      sanskritName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}sanskrit_name'],
+          )!,
+      translation:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}translation'],
+          )!,
+      description:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}description'],
+          )!,
+      benefits:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}benefits'],
+          )!,
+      imageUrl:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}image_url'],
+          )!,
+      category:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}category'],
+          )!,
+      difficulty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}difficulty'],
+          )!,
+      updatedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}updated_at'],
+          )!,
+    );
+  }
+
+  @override
+  $YogaPoseCacheTable createAlias(String alias) {
+    return $YogaPoseCacheTable(attachedDatabase, alias);
+  }
+}
+
+class YogaPoseCacheData extends DataClass
+    implements Insertable<YogaPoseCacheData> {
+  final int id;
+  final int? apiId;
+
+  /// Stable local key (slug of the english name). Unique per pose.
+  final String poseKey;
+  final String englishName;
+  final String sanskritName;
+  final String translation;
+  final String description;
+  final String benefits;
+  final String imageUrl;
+  final String category;
+  final int difficulty;
+  final DateTime updatedAt;
+  const YogaPoseCacheData({
+    required this.id,
+    this.apiId,
+    required this.poseKey,
+    required this.englishName,
+    required this.sanskritName,
+    required this.translation,
+    required this.description,
+    required this.benefits,
+    required this.imageUrl,
+    required this.category,
+    required this.difficulty,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || apiId != null) {
+      map['api_id'] = Variable<int>(apiId);
+    }
+    map['pose_key'] = Variable<String>(poseKey);
+    map['english_name'] = Variable<String>(englishName);
+    map['sanskrit_name'] = Variable<String>(sanskritName);
+    map['translation'] = Variable<String>(translation);
+    map['description'] = Variable<String>(description);
+    map['benefits'] = Variable<String>(benefits);
+    map['image_url'] = Variable<String>(imageUrl);
+    map['category'] = Variable<String>(category);
+    map['difficulty'] = Variable<int>(difficulty);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  YogaPoseCacheCompanion toCompanion(bool nullToAbsent) {
+    return YogaPoseCacheCompanion(
+      id: Value(id),
+      apiId:
+          apiId == null && nullToAbsent ? const Value.absent() : Value(apiId),
+      poseKey: Value(poseKey),
+      englishName: Value(englishName),
+      sanskritName: Value(sanskritName),
+      translation: Value(translation),
+      description: Value(description),
+      benefits: Value(benefits),
+      imageUrl: Value(imageUrl),
+      category: Value(category),
+      difficulty: Value(difficulty),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory YogaPoseCacheData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YogaPoseCacheData(
+      id: serializer.fromJson<int>(json['id']),
+      apiId: serializer.fromJson<int?>(json['apiId']),
+      poseKey: serializer.fromJson<String>(json['poseKey']),
+      englishName: serializer.fromJson<String>(json['englishName']),
+      sanskritName: serializer.fromJson<String>(json['sanskritName']),
+      translation: serializer.fromJson<String>(json['translation']),
+      description: serializer.fromJson<String>(json['description']),
+      benefits: serializer.fromJson<String>(json['benefits']),
+      imageUrl: serializer.fromJson<String>(json['imageUrl']),
+      category: serializer.fromJson<String>(json['category']),
+      difficulty: serializer.fromJson<int>(json['difficulty']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'apiId': serializer.toJson<int?>(apiId),
+      'poseKey': serializer.toJson<String>(poseKey),
+      'englishName': serializer.toJson<String>(englishName),
+      'sanskritName': serializer.toJson<String>(sanskritName),
+      'translation': serializer.toJson<String>(translation),
+      'description': serializer.toJson<String>(description),
+      'benefits': serializer.toJson<String>(benefits),
+      'imageUrl': serializer.toJson<String>(imageUrl),
+      'category': serializer.toJson<String>(category),
+      'difficulty': serializer.toJson<int>(difficulty),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  YogaPoseCacheData copyWith({
+    int? id,
+    Value<int?> apiId = const Value.absent(),
+    String? poseKey,
+    String? englishName,
+    String? sanskritName,
+    String? translation,
+    String? description,
+    String? benefits,
+    String? imageUrl,
+    String? category,
+    int? difficulty,
+    DateTime? updatedAt,
+  }) => YogaPoseCacheData(
+    id: id ?? this.id,
+    apiId: apiId.present ? apiId.value : this.apiId,
+    poseKey: poseKey ?? this.poseKey,
+    englishName: englishName ?? this.englishName,
+    sanskritName: sanskritName ?? this.sanskritName,
+    translation: translation ?? this.translation,
+    description: description ?? this.description,
+    benefits: benefits ?? this.benefits,
+    imageUrl: imageUrl ?? this.imageUrl,
+    category: category ?? this.category,
+    difficulty: difficulty ?? this.difficulty,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  YogaPoseCacheData copyWithCompanion(YogaPoseCacheCompanion data) {
+    return YogaPoseCacheData(
+      id: data.id.present ? data.id.value : this.id,
+      apiId: data.apiId.present ? data.apiId.value : this.apiId,
+      poseKey: data.poseKey.present ? data.poseKey.value : this.poseKey,
+      englishName:
+          data.englishName.present ? data.englishName.value : this.englishName,
+      sanskritName:
+          data.sanskritName.present
+              ? data.sanskritName.value
+              : this.sanskritName,
+      translation:
+          data.translation.present ? data.translation.value : this.translation,
+      description:
+          data.description.present ? data.description.value : this.description,
+      benefits: data.benefits.present ? data.benefits.value : this.benefits,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      category: data.category.present ? data.category.value : this.category,
+      difficulty:
+          data.difficulty.present ? data.difficulty.value : this.difficulty,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaPoseCacheData(')
+          ..write('id: $id, ')
+          ..write('apiId: $apiId, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('englishName: $englishName, ')
+          ..write('sanskritName: $sanskritName, ')
+          ..write('translation: $translation, ')
+          ..write('description: $description, ')
+          ..write('benefits: $benefits, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('category: $category, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    apiId,
+    poseKey,
+    englishName,
+    sanskritName,
+    translation,
+    description,
+    benefits,
+    imageUrl,
+    category,
+    difficulty,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YogaPoseCacheData &&
+          other.id == this.id &&
+          other.apiId == this.apiId &&
+          other.poseKey == this.poseKey &&
+          other.englishName == this.englishName &&
+          other.sanskritName == this.sanskritName &&
+          other.translation == this.translation &&
+          other.description == this.description &&
+          other.benefits == this.benefits &&
+          other.imageUrl == this.imageUrl &&
+          other.category == this.category &&
+          other.difficulty == this.difficulty &&
+          other.updatedAt == this.updatedAt);
+}
+
+class YogaPoseCacheCompanion extends UpdateCompanion<YogaPoseCacheData> {
+  final Value<int> id;
+  final Value<int?> apiId;
+  final Value<String> poseKey;
+  final Value<String> englishName;
+  final Value<String> sanskritName;
+  final Value<String> translation;
+  final Value<String> description;
+  final Value<String> benefits;
+  final Value<String> imageUrl;
+  final Value<String> category;
+  final Value<int> difficulty;
+  final Value<DateTime> updatedAt;
+  const YogaPoseCacheCompanion({
+    this.id = const Value.absent(),
+    this.apiId = const Value.absent(),
+    this.poseKey = const Value.absent(),
+    this.englishName = const Value.absent(),
+    this.sanskritName = const Value.absent(),
+    this.translation = const Value.absent(),
+    this.description = const Value.absent(),
+    this.benefits = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.category = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  YogaPoseCacheCompanion.insert({
+    this.id = const Value.absent(),
+    this.apiId = const Value.absent(),
+    required String poseKey,
+    required String englishName,
+    this.sanskritName = const Value.absent(),
+    this.translation = const Value.absent(),
+    this.description = const Value.absent(),
+    this.benefits = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.category = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : poseKey = Value(poseKey),
+       englishName = Value(englishName);
+  static Insertable<YogaPoseCacheData> custom({
+    Expression<int>? id,
+    Expression<int>? apiId,
+    Expression<String>? poseKey,
+    Expression<String>? englishName,
+    Expression<String>? sanskritName,
+    Expression<String>? translation,
+    Expression<String>? description,
+    Expression<String>? benefits,
+    Expression<String>? imageUrl,
+    Expression<String>? category,
+    Expression<int>? difficulty,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (apiId != null) 'api_id': apiId,
+      if (poseKey != null) 'pose_key': poseKey,
+      if (englishName != null) 'english_name': englishName,
+      if (sanskritName != null) 'sanskrit_name': sanskritName,
+      if (translation != null) 'translation': translation,
+      if (description != null) 'description': description,
+      if (benefits != null) 'benefits': benefits,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (category != null) 'category': category,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  YogaPoseCacheCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? apiId,
+    Value<String>? poseKey,
+    Value<String>? englishName,
+    Value<String>? sanskritName,
+    Value<String>? translation,
+    Value<String>? description,
+    Value<String>? benefits,
+    Value<String>? imageUrl,
+    Value<String>? category,
+    Value<int>? difficulty,
+    Value<DateTime>? updatedAt,
+  }) {
+    return YogaPoseCacheCompanion(
+      id: id ?? this.id,
+      apiId: apiId ?? this.apiId,
+      poseKey: poseKey ?? this.poseKey,
+      englishName: englishName ?? this.englishName,
+      sanskritName: sanskritName ?? this.sanskritName,
+      translation: translation ?? this.translation,
+      description: description ?? this.description,
+      benefits: benefits ?? this.benefits,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
+      difficulty: difficulty ?? this.difficulty,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (apiId.present) {
+      map['api_id'] = Variable<int>(apiId.value);
+    }
+    if (poseKey.present) {
+      map['pose_key'] = Variable<String>(poseKey.value);
+    }
+    if (englishName.present) {
+      map['english_name'] = Variable<String>(englishName.value);
+    }
+    if (sanskritName.present) {
+      map['sanskrit_name'] = Variable<String>(sanskritName.value);
+    }
+    if (translation.present) {
+      map['translation'] = Variable<String>(translation.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (benefits.present) {
+      map['benefits'] = Variable<String>(benefits.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<int>(difficulty.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaPoseCacheCompanion(')
+          ..write('id: $id, ')
+          ..write('apiId: $apiId, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('englishName: $englishName, ')
+          ..write('sanskritName: $sanskritName, ')
+          ..write('translation: $translation, ')
+          ..write('description: $description, ')
+          ..write('benefits: $benefits, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('category: $category, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $YogaSessionsTable extends YogaSessions
+    with TableInfo<$YogaSessionsTable, YogaSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YogaSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _routineKeyMeta = const VerificationMeta(
+    'routineKey',
+  );
+  @override
+  late final GeneratedColumn<String> routineKey = GeneratedColumn<String>(
+    'routine_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<int> difficulty = GeneratedColumn<int>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endedAt = GeneratedColumn<DateTime>(
+    'ended_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationSecMeta = const VerificationMeta(
+    'durationSec',
+  );
+  @override
+  late final GeneratedColumn<int> durationSec = GeneratedColumn<int>(
+    'duration_sec',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _poseCountMeta = const VerificationMeta(
+    'poseCount',
+  );
+  @override
+  late final GeneratedColumn<int> poseCount = GeneratedColumn<int>(
+    'pose_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _completedPosesMeta = const VerificationMeta(
+    'completedPoses',
+  );
+  @override
+  late final GeneratedColumn<int> completedPoses = GeneratedColumn<int>(
+    'completed_poses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<int> outcome = GeneratedColumn<int>(
+    'outcome',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _stepIndexMeta = const VerificationMeta(
+    'stepIndex',
+  );
+  @override
+  late final GeneratedColumn<int> stepIndex = GeneratedColumn<int>(
+    'step_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    routineKey,
+    title,
+    difficulty,
+    startedAt,
+    endedAt,
+    durationSec,
+    poseCount,
+    completedPoses,
+    outcome,
+    stepIndex,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'yoga_sessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YogaSession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('routine_key')) {
+      context.handle(
+        _routineKeyMeta,
+        routineKey.isAcceptableOrUnknown(data['routine_key']!, _routineKeyMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    }
+    if (data.containsKey('duration_sec')) {
+      context.handle(
+        _durationSecMeta,
+        durationSec.isAcceptableOrUnknown(
+          data['duration_sec']!,
+          _durationSecMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pose_count')) {
+      context.handle(
+        _poseCountMeta,
+        poseCount.isAcceptableOrUnknown(data['pose_count']!, _poseCountMeta),
+      );
+    }
+    if (data.containsKey('completed_poses')) {
+      context.handle(
+        _completedPosesMeta,
+        completedPoses.isAcceptableOrUnknown(
+          data['completed_poses']!,
+          _completedPosesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    }
+    if (data.containsKey('step_index')) {
+      context.handle(
+        _stepIndexMeta,
+        stepIndex.isAcceptableOrUnknown(data['step_index']!, _stepIndexMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  YogaSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YogaSession(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      routineKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}routine_key'],
+          )!,
+      title:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}title'],
+          )!,
+      difficulty:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}difficulty'],
+          )!,
+      startedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}started_at'],
+          )!,
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ended_at'],
+      ),
+      durationSec:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}duration_sec'],
+          )!,
+      poseCount:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}pose_count'],
+          )!,
+      completedPoses:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}completed_poses'],
+          )!,
+      outcome:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}outcome'],
+          )!,
+      stepIndex:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}step_index'],
+          )!,
+      notes:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}notes'],
+          )!,
+    );
+  }
+
+  @override
+  $YogaSessionsTable createAlias(String alias) {
+    return $YogaSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class YogaSession extends DataClass implements Insertable<YogaSession> {
+  final int id;
+  final String routineKey;
+  final String title;
+  final int difficulty;
+  final DateTime startedAt;
+  final DateTime? endedAt;
+  final int durationSec;
+  final int poseCount;
+  final int completedPoses;
+
+  /// How the session ended: 0 completed, 1 partial, 2 cancelled.
+  final int outcome;
+  final int stepIndex;
+  final String notes;
+  const YogaSession({
+    required this.id,
+    required this.routineKey,
+    required this.title,
+    required this.difficulty,
+    required this.startedAt,
+    this.endedAt,
+    required this.durationSec,
+    required this.poseCount,
+    required this.completedPoses,
+    required this.outcome,
+    required this.stepIndex,
+    required this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['routine_key'] = Variable<String>(routineKey);
+    map['title'] = Variable<String>(title);
+    map['difficulty'] = Variable<int>(difficulty);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    if (!nullToAbsent || endedAt != null) {
+      map['ended_at'] = Variable<DateTime>(endedAt);
+    }
+    map['duration_sec'] = Variable<int>(durationSec);
+    map['pose_count'] = Variable<int>(poseCount);
+    map['completed_poses'] = Variable<int>(completedPoses);
+    map['outcome'] = Variable<int>(outcome);
+    map['step_index'] = Variable<int>(stepIndex);
+    map['notes'] = Variable<String>(notes);
+    return map;
+  }
+
+  YogaSessionsCompanion toCompanion(bool nullToAbsent) {
+    return YogaSessionsCompanion(
+      id: Value(id),
+      routineKey: Value(routineKey),
+      title: Value(title),
+      difficulty: Value(difficulty),
+      startedAt: Value(startedAt),
+      endedAt:
+          endedAt == null && nullToAbsent
+              ? const Value.absent()
+              : Value(endedAt),
+      durationSec: Value(durationSec),
+      poseCount: Value(poseCount),
+      completedPoses: Value(completedPoses),
+      outcome: Value(outcome),
+      stepIndex: Value(stepIndex),
+      notes: Value(notes),
+    );
+  }
+
+  factory YogaSession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YogaSession(
+      id: serializer.fromJson<int>(json['id']),
+      routineKey: serializer.fromJson<String>(json['routineKey']),
+      title: serializer.fromJson<String>(json['title']),
+      difficulty: serializer.fromJson<int>(json['difficulty']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      endedAt: serializer.fromJson<DateTime?>(json['endedAt']),
+      durationSec: serializer.fromJson<int>(json['durationSec']),
+      poseCount: serializer.fromJson<int>(json['poseCount']),
+      completedPoses: serializer.fromJson<int>(json['completedPoses']),
+      outcome: serializer.fromJson<int>(json['outcome']),
+      stepIndex: serializer.fromJson<int>(json['stepIndex']),
+      notes: serializer.fromJson<String>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'routineKey': serializer.toJson<String>(routineKey),
+      'title': serializer.toJson<String>(title),
+      'difficulty': serializer.toJson<int>(difficulty),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'endedAt': serializer.toJson<DateTime?>(endedAt),
+      'durationSec': serializer.toJson<int>(durationSec),
+      'poseCount': serializer.toJson<int>(poseCount),
+      'completedPoses': serializer.toJson<int>(completedPoses),
+      'outcome': serializer.toJson<int>(outcome),
+      'stepIndex': serializer.toJson<int>(stepIndex),
+      'notes': serializer.toJson<String>(notes),
+    };
+  }
+
+  YogaSession copyWith({
+    int? id,
+    String? routineKey,
+    String? title,
+    int? difficulty,
+    DateTime? startedAt,
+    Value<DateTime?> endedAt = const Value.absent(),
+    int? durationSec,
+    int? poseCount,
+    int? completedPoses,
+    int? outcome,
+    int? stepIndex,
+    String? notes,
+  }) => YogaSession(
+    id: id ?? this.id,
+    routineKey: routineKey ?? this.routineKey,
+    title: title ?? this.title,
+    difficulty: difficulty ?? this.difficulty,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt.present ? endedAt.value : this.endedAt,
+    durationSec: durationSec ?? this.durationSec,
+    poseCount: poseCount ?? this.poseCount,
+    completedPoses: completedPoses ?? this.completedPoses,
+    outcome: outcome ?? this.outcome,
+    stepIndex: stepIndex ?? this.stepIndex,
+    notes: notes ?? this.notes,
+  );
+  YogaSession copyWithCompanion(YogaSessionsCompanion data) {
+    return YogaSession(
+      id: data.id.present ? data.id.value : this.id,
+      routineKey:
+          data.routineKey.present ? data.routineKey.value : this.routineKey,
+      title: data.title.present ? data.title.value : this.title,
+      difficulty:
+          data.difficulty.present ? data.difficulty.value : this.difficulty,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      durationSec:
+          data.durationSec.present ? data.durationSec.value : this.durationSec,
+      poseCount: data.poseCount.present ? data.poseCount.value : this.poseCount,
+      completedPoses:
+          data.completedPoses.present
+              ? data.completedPoses.value
+              : this.completedPoses,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+      stepIndex: data.stepIndex.present ? data.stepIndex.value : this.stepIndex,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaSession(')
+          ..write('id: $id, ')
+          ..write('routineKey: $routineKey, ')
+          ..write('title: $title, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('durationSec: $durationSec, ')
+          ..write('poseCount: $poseCount, ')
+          ..write('completedPoses: $completedPoses, ')
+          ..write('outcome: $outcome, ')
+          ..write('stepIndex: $stepIndex, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    routineKey,
+    title,
+    difficulty,
+    startedAt,
+    endedAt,
+    durationSec,
+    poseCount,
+    completedPoses,
+    outcome,
+    stepIndex,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YogaSession &&
+          other.id == this.id &&
+          other.routineKey == this.routineKey &&
+          other.title == this.title &&
+          other.difficulty == this.difficulty &&
+          other.startedAt == this.startedAt &&
+          other.endedAt == this.endedAt &&
+          other.durationSec == this.durationSec &&
+          other.poseCount == this.poseCount &&
+          other.completedPoses == this.completedPoses &&
+          other.outcome == this.outcome &&
+          other.stepIndex == this.stepIndex &&
+          other.notes == this.notes);
+}
+
+class YogaSessionsCompanion extends UpdateCompanion<YogaSession> {
+  final Value<int> id;
+  final Value<String> routineKey;
+  final Value<String> title;
+  final Value<int> difficulty;
+  final Value<DateTime> startedAt;
+  final Value<DateTime?> endedAt;
+  final Value<int> durationSec;
+  final Value<int> poseCount;
+  final Value<int> completedPoses;
+  final Value<int> outcome;
+  final Value<int> stepIndex;
+  final Value<String> notes;
+  const YogaSessionsCompanion({
+    this.id = const Value.absent(),
+    this.routineKey = const Value.absent(),
+    this.title = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.durationSec = const Value.absent(),
+    this.poseCount = const Value.absent(),
+    this.completedPoses = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.stepIndex = const Value.absent(),
+    this.notes = const Value.absent(),
+  });
+  YogaSessionsCompanion.insert({
+    this.id = const Value.absent(),
+    this.routineKey = const Value.absent(),
+    this.title = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    required DateTime startedAt,
+    this.endedAt = const Value.absent(),
+    this.durationSec = const Value.absent(),
+    this.poseCount = const Value.absent(),
+    this.completedPoses = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.stepIndex = const Value.absent(),
+    this.notes = const Value.absent(),
+  }) : startedAt = Value(startedAt);
+  static Insertable<YogaSession> custom({
+    Expression<int>? id,
+    Expression<String>? routineKey,
+    Expression<String>? title,
+    Expression<int>? difficulty,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? endedAt,
+    Expression<int>? durationSec,
+    Expression<int>? poseCount,
+    Expression<int>? completedPoses,
+    Expression<int>? outcome,
+    Expression<int>? stepIndex,
+    Expression<String>? notes,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (routineKey != null) 'routine_key': routineKey,
+      if (title != null) 'title': title,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (durationSec != null) 'duration_sec': durationSec,
+      if (poseCount != null) 'pose_count': poseCount,
+      if (completedPoses != null) 'completed_poses': completedPoses,
+      if (outcome != null) 'outcome': outcome,
+      if (stepIndex != null) 'step_index': stepIndex,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  YogaSessionsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? routineKey,
+    Value<String>? title,
+    Value<int>? difficulty,
+    Value<DateTime>? startedAt,
+    Value<DateTime?>? endedAt,
+    Value<int>? durationSec,
+    Value<int>? poseCount,
+    Value<int>? completedPoses,
+    Value<int>? outcome,
+    Value<int>? stepIndex,
+    Value<String>? notes,
+  }) {
+    return YogaSessionsCompanion(
+      id: id ?? this.id,
+      routineKey: routineKey ?? this.routineKey,
+      title: title ?? this.title,
+      difficulty: difficulty ?? this.difficulty,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      durationSec: durationSec ?? this.durationSec,
+      poseCount: poseCount ?? this.poseCount,
+      completedPoses: completedPoses ?? this.completedPoses,
+      outcome: outcome ?? this.outcome,
+      stepIndex: stepIndex ?? this.stepIndex,
+      notes: notes ?? this.notes,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (routineKey.present) {
+      map['routine_key'] = Variable<String>(routineKey.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<int>(difficulty.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<DateTime>(endedAt.value);
+    }
+    if (durationSec.present) {
+      map['duration_sec'] = Variable<int>(durationSec.value);
+    }
+    if (poseCount.present) {
+      map['pose_count'] = Variable<int>(poseCount.value);
+    }
+    if (completedPoses.present) {
+      map['completed_poses'] = Variable<int>(completedPoses.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<int>(outcome.value);
+    }
+    if (stepIndex.present) {
+      map['step_index'] = Variable<int>(stepIndex.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('routineKey: $routineKey, ')
+          ..write('title: $title, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('durationSec: $durationSec, ')
+          ..write('poseCount: $poseCount, ')
+          ..write('completedPoses: $completedPoses, ')
+          ..write('outcome: $outcome, ')
+          ..write('stepIndex: $stepIndex, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $YogaPoseLogsTable extends YogaPoseLogs
+    with TableInfo<$YogaPoseLogsTable, YogaPoseLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YogaPoseLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<int> sessionId = GeneratedColumn<int>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES yoga_sessions (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _poseKeyMeta = const VerificationMeta(
+    'poseKey',
+  );
+  @override
+  late final GeneratedColumn<String> poseKey = GeneratedColumn<String>(
+    'pose_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _englishNameMeta = const VerificationMeta(
+    'englishName',
+  );
+  @override
+  late final GeneratedColumn<String> englishName = GeneratedColumn<String>(
+    'english_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _positionIndexMeta = const VerificationMeta(
+    'positionIndex',
+  );
+  @override
+  late final GeneratedColumn<int> positionIndex = GeneratedColumn<int>(
+    'position_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _plannedSecMeta = const VerificationMeta(
+    'plannedSec',
+  );
+  @override
+  late final GeneratedColumn<int> plannedSec = GeneratedColumn<int>(
+    'planned_sec',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _actualSecMeta = const VerificationMeta(
+    'actualSec',
+  );
+  @override
+  late final GeneratedColumn<int> actualSec = GeneratedColumn<int>(
+    'actual_sec',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<int> outcome = GeneratedColumn<int>(
+    'outcome',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sessionId,
+    poseKey,
+    englishName,
+    positionIndex,
+    plannedSec,
+    actualSec,
+    outcome,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'yoga_pose_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YogaPoseLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('pose_key')) {
+      context.handle(
+        _poseKeyMeta,
+        poseKey.isAcceptableOrUnknown(data['pose_key']!, _poseKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_poseKeyMeta);
+    }
+    if (data.containsKey('english_name')) {
+      context.handle(
+        _englishNameMeta,
+        englishName.isAcceptableOrUnknown(
+          data['english_name']!,
+          _englishNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position_index')) {
+      context.handle(
+        _positionIndexMeta,
+        positionIndex.isAcceptableOrUnknown(
+          data['position_index']!,
+          _positionIndexMeta,
+        ),
+      );
+    }
+    if (data.containsKey('planned_sec')) {
+      context.handle(
+        _plannedSecMeta,
+        plannedSec.isAcceptableOrUnknown(data['planned_sec']!, _plannedSecMeta),
+      );
+    }
+    if (data.containsKey('actual_sec')) {
+      context.handle(
+        _actualSecMeta,
+        actualSec.isAcceptableOrUnknown(data['actual_sec']!, _actualSecMeta),
+      );
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  YogaPoseLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YogaPoseLog(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      sessionId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}session_id'],
+          )!,
+      poseKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}pose_key'],
+          )!,
+      englishName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}english_name'],
+          )!,
+      positionIndex:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}position_index'],
+          )!,
+      plannedSec:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}planned_sec'],
+          )!,
+      actualSec:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}actual_sec'],
+          )!,
+      outcome:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}outcome'],
+          )!,
+    );
+  }
+
+  @override
+  $YogaPoseLogsTable createAlias(String alias) {
+    return $YogaPoseLogsTable(attachedDatabase, alias);
+  }
+}
+
+class YogaPoseLog extends DataClass implements Insertable<YogaPoseLog> {
+  final int id;
+  final int sessionId;
+  final String poseKey;
+  final String englishName;
+  final int positionIndex;
+  final int plannedSec;
+  final int actualSec;
+
+  /// 0 completed, 1 skipped.
+  final int outcome;
+  const YogaPoseLog({
+    required this.id,
+    required this.sessionId,
+    required this.poseKey,
+    required this.englishName,
+    required this.positionIndex,
+    required this.plannedSec,
+    required this.actualSec,
+    required this.outcome,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['session_id'] = Variable<int>(sessionId);
+    map['pose_key'] = Variable<String>(poseKey);
+    map['english_name'] = Variable<String>(englishName);
+    map['position_index'] = Variable<int>(positionIndex);
+    map['planned_sec'] = Variable<int>(plannedSec);
+    map['actual_sec'] = Variable<int>(actualSec);
+    map['outcome'] = Variable<int>(outcome);
+    return map;
+  }
+
+  YogaPoseLogsCompanion toCompanion(bool nullToAbsent) {
+    return YogaPoseLogsCompanion(
+      id: Value(id),
+      sessionId: Value(sessionId),
+      poseKey: Value(poseKey),
+      englishName: Value(englishName),
+      positionIndex: Value(positionIndex),
+      plannedSec: Value(plannedSec),
+      actualSec: Value(actualSec),
+      outcome: Value(outcome),
+    );
+  }
+
+  factory YogaPoseLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YogaPoseLog(
+      id: serializer.fromJson<int>(json['id']),
+      sessionId: serializer.fromJson<int>(json['sessionId']),
+      poseKey: serializer.fromJson<String>(json['poseKey']),
+      englishName: serializer.fromJson<String>(json['englishName']),
+      positionIndex: serializer.fromJson<int>(json['positionIndex']),
+      plannedSec: serializer.fromJson<int>(json['plannedSec']),
+      actualSec: serializer.fromJson<int>(json['actualSec']),
+      outcome: serializer.fromJson<int>(json['outcome']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'sessionId': serializer.toJson<int>(sessionId),
+      'poseKey': serializer.toJson<String>(poseKey),
+      'englishName': serializer.toJson<String>(englishName),
+      'positionIndex': serializer.toJson<int>(positionIndex),
+      'plannedSec': serializer.toJson<int>(plannedSec),
+      'actualSec': serializer.toJson<int>(actualSec),
+      'outcome': serializer.toJson<int>(outcome),
+    };
+  }
+
+  YogaPoseLog copyWith({
+    int? id,
+    int? sessionId,
+    String? poseKey,
+    String? englishName,
+    int? positionIndex,
+    int? plannedSec,
+    int? actualSec,
+    int? outcome,
+  }) => YogaPoseLog(
+    id: id ?? this.id,
+    sessionId: sessionId ?? this.sessionId,
+    poseKey: poseKey ?? this.poseKey,
+    englishName: englishName ?? this.englishName,
+    positionIndex: positionIndex ?? this.positionIndex,
+    plannedSec: plannedSec ?? this.plannedSec,
+    actualSec: actualSec ?? this.actualSec,
+    outcome: outcome ?? this.outcome,
+  );
+  YogaPoseLog copyWithCompanion(YogaPoseLogsCompanion data) {
+    return YogaPoseLog(
+      id: data.id.present ? data.id.value : this.id,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      poseKey: data.poseKey.present ? data.poseKey.value : this.poseKey,
+      englishName:
+          data.englishName.present ? data.englishName.value : this.englishName,
+      positionIndex:
+          data.positionIndex.present
+              ? data.positionIndex.value
+              : this.positionIndex,
+      plannedSec:
+          data.plannedSec.present ? data.plannedSec.value : this.plannedSec,
+      actualSec: data.actualSec.present ? data.actualSec.value : this.actualSec,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaPoseLog(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('englishName: $englishName, ')
+          ..write('positionIndex: $positionIndex, ')
+          ..write('plannedSec: $plannedSec, ')
+          ..write('actualSec: $actualSec, ')
+          ..write('outcome: $outcome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sessionId,
+    poseKey,
+    englishName,
+    positionIndex,
+    plannedSec,
+    actualSec,
+    outcome,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YogaPoseLog &&
+          other.id == this.id &&
+          other.sessionId == this.sessionId &&
+          other.poseKey == this.poseKey &&
+          other.englishName == this.englishName &&
+          other.positionIndex == this.positionIndex &&
+          other.plannedSec == this.plannedSec &&
+          other.actualSec == this.actualSec &&
+          other.outcome == this.outcome);
+}
+
+class YogaPoseLogsCompanion extends UpdateCompanion<YogaPoseLog> {
+  final Value<int> id;
+  final Value<int> sessionId;
+  final Value<String> poseKey;
+  final Value<String> englishName;
+  final Value<int> positionIndex;
+  final Value<int> plannedSec;
+  final Value<int> actualSec;
+  final Value<int> outcome;
+  const YogaPoseLogsCompanion({
+    this.id = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.poseKey = const Value.absent(),
+    this.englishName = const Value.absent(),
+    this.positionIndex = const Value.absent(),
+    this.plannedSec = const Value.absent(),
+    this.actualSec = const Value.absent(),
+    this.outcome = const Value.absent(),
+  });
+  YogaPoseLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required int sessionId,
+    required String poseKey,
+    this.englishName = const Value.absent(),
+    this.positionIndex = const Value.absent(),
+    this.plannedSec = const Value.absent(),
+    this.actualSec = const Value.absent(),
+    this.outcome = const Value.absent(),
+  }) : sessionId = Value(sessionId),
+       poseKey = Value(poseKey);
+  static Insertable<YogaPoseLog> custom({
+    Expression<int>? id,
+    Expression<int>? sessionId,
+    Expression<String>? poseKey,
+    Expression<String>? englishName,
+    Expression<int>? positionIndex,
+    Expression<int>? plannedSec,
+    Expression<int>? actualSec,
+    Expression<int>? outcome,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sessionId != null) 'session_id': sessionId,
+      if (poseKey != null) 'pose_key': poseKey,
+      if (englishName != null) 'english_name': englishName,
+      if (positionIndex != null) 'position_index': positionIndex,
+      if (plannedSec != null) 'planned_sec': plannedSec,
+      if (actualSec != null) 'actual_sec': actualSec,
+      if (outcome != null) 'outcome': outcome,
+    });
+  }
+
+  YogaPoseLogsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? sessionId,
+    Value<String>? poseKey,
+    Value<String>? englishName,
+    Value<int>? positionIndex,
+    Value<int>? plannedSec,
+    Value<int>? actualSec,
+    Value<int>? outcome,
+  }) {
+    return YogaPoseLogsCompanion(
+      id: id ?? this.id,
+      sessionId: sessionId ?? this.sessionId,
+      poseKey: poseKey ?? this.poseKey,
+      englishName: englishName ?? this.englishName,
+      positionIndex: positionIndex ?? this.positionIndex,
+      plannedSec: plannedSec ?? this.plannedSec,
+      actualSec: actualSec ?? this.actualSec,
+      outcome: outcome ?? this.outcome,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<int>(sessionId.value);
+    }
+    if (poseKey.present) {
+      map['pose_key'] = Variable<String>(poseKey.value);
+    }
+    if (englishName.present) {
+      map['english_name'] = Variable<String>(englishName.value);
+    }
+    if (positionIndex.present) {
+      map['position_index'] = Variable<int>(positionIndex.value);
+    }
+    if (plannedSec.present) {
+      map['planned_sec'] = Variable<int>(plannedSec.value);
+    }
+    if (actualSec.present) {
+      map['actual_sec'] = Variable<int>(actualSec.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<int>(outcome.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaPoseLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('englishName: $englishName, ')
+          ..write('positionIndex: $positionIndex, ')
+          ..write('plannedSec: $plannedSec, ')
+          ..write('actualSec: $actualSec, ')
+          ..write('outcome: $outcome')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $YogaFavoritesTable extends YogaFavorites
+    with TableInfo<$YogaFavoritesTable, YogaFavorite> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $YogaFavoritesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _poseKeyMeta = const VerificationMeta(
+    'poseKey',
+  );
+  @override
+  late final GeneratedColumn<String> poseKey = GeneratedColumn<String>(
+    'pose_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, poseKey, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'yoga_favorites';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<YogaFavorite> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('pose_key')) {
+      context.handle(
+        _poseKeyMeta,
+        poseKey.isAcceptableOrUnknown(data['pose_key']!, _poseKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_poseKeyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  YogaFavorite map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return YogaFavorite(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      poseKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}pose_key'],
+          )!,
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}created_at'],
+          )!,
+    );
+  }
+
+  @override
+  $YogaFavoritesTable createAlias(String alias) {
+    return $YogaFavoritesTable(attachedDatabase, alias);
+  }
+}
+
+class YogaFavorite extends DataClass implements Insertable<YogaFavorite> {
+  final int id;
+  final String poseKey;
+  final DateTime createdAt;
+  const YogaFavorite({
+    required this.id,
+    required this.poseKey,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['pose_key'] = Variable<String>(poseKey);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  YogaFavoritesCompanion toCompanion(bool nullToAbsent) {
+    return YogaFavoritesCompanion(
+      id: Value(id),
+      poseKey: Value(poseKey),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory YogaFavorite.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return YogaFavorite(
+      id: serializer.fromJson<int>(json['id']),
+      poseKey: serializer.fromJson<String>(json['poseKey']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'poseKey': serializer.toJson<String>(poseKey),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  YogaFavorite copyWith({int? id, String? poseKey, DateTime? createdAt}) =>
+      YogaFavorite(
+        id: id ?? this.id,
+        poseKey: poseKey ?? this.poseKey,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  YogaFavorite copyWithCompanion(YogaFavoritesCompanion data) {
+    return YogaFavorite(
+      id: data.id.present ? data.id.value : this.id,
+      poseKey: data.poseKey.present ? data.poseKey.value : this.poseKey,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaFavorite(')
+          ..write('id: $id, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, poseKey, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is YogaFavorite &&
+          other.id == this.id &&
+          other.poseKey == this.poseKey &&
+          other.createdAt == this.createdAt);
+}
+
+class YogaFavoritesCompanion extends UpdateCompanion<YogaFavorite> {
+  final Value<int> id;
+  final Value<String> poseKey;
+  final Value<DateTime> createdAt;
+  const YogaFavoritesCompanion({
+    this.id = const Value.absent(),
+    this.poseKey = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  YogaFavoritesCompanion.insert({
+    this.id = const Value.absent(),
+    required String poseKey,
+    this.createdAt = const Value.absent(),
+  }) : poseKey = Value(poseKey);
+  static Insertable<YogaFavorite> custom({
+    Expression<int>? id,
+    Expression<String>? poseKey,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (poseKey != null) 'pose_key': poseKey,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  YogaFavoritesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? poseKey,
+    Value<DateTime>? createdAt,
+  }) {
+    return YogaFavoritesCompanion(
+      id: id ?? this.id,
+      poseKey: poseKey ?? this.poseKey,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (poseKey.present) {
+      map['pose_key'] = Variable<String>(poseKey.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('YogaFavoritesCompanion(')
+          ..write('id: $id, ')
+          ..write('poseKey: $poseKey, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MusicFoldersTable extends MusicFolders
     with TableInfo<$MusicFoldersTable, MusicFolder> {
   @override
@@ -19281,6 +21457,18 @@ class $AlarmsTable extends Alarms with TableInfo<$AlarmsTable, Alarm> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _finalMessageMeta = const VerificationMeta(
+    'finalMessage',
+  );
+  @override
+  late final GeneratedColumn<String> finalMessage = GeneratedColumn<String>(
+    'final_message',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _musicIntervalSecMeta = const VerificationMeta(
     'musicIntervalSec',
   );
@@ -19353,6 +21541,7 @@ class $AlarmsTable extends Alarms with TableInfo<$AlarmsTable, Alarm> {
     vibrate,
     soundMode,
     message,
+    finalMessage,
     musicIntervalSec,
     voiceTiming,
     voicePauseSec,
@@ -19533,6 +21722,15 @@ class $AlarmsTable extends Alarms with TableInfo<$AlarmsTable, Alarm> {
         message.isAcceptableOrUnknown(data['message']!, _messageMeta),
       );
     }
+    if (data.containsKey('final_message')) {
+      context.handle(
+        _finalMessageMeta,
+        finalMessage.isAcceptableOrUnknown(
+          data['final_message']!,
+          _finalMessageMeta,
+        ),
+      );
+    }
     if (data.containsKey('music_interval_sec')) {
       context.handle(
         _musicIntervalSecMeta,
@@ -19685,6 +21883,11 @@ class $AlarmsTable extends Alarms with TableInfo<$AlarmsTable, Alarm> {
             DriftSqlType.string,
             data['${effectivePrefix}message'],
           )!,
+      finalMessage:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}final_message'],
+          )!,
       musicIntervalSec:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -19764,6 +21967,10 @@ class Alarm extends DataClass implements Insertable<Alarm> {
   /// keeps its own copy; empty means "no spoken message".
   final String message;
 
+  /// Spoken once after every dismissal challenge is passed. The screen stays
+  /// open until the user taps Done; empty skips this step.
+  final String finalMessage;
+
   /// Seconds of music played before the next spoken message in
   /// music + voice mode. Never determines how long the whole alarm runs.
   final int musicIntervalSec;
@@ -19798,6 +22005,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
     required this.vibrate,
     required this.soundMode,
     required this.message,
+    required this.finalMessage,
     required this.musicIntervalSec,
     required this.voiceTiming,
     required this.voicePauseSec,
@@ -19828,6 +22036,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
     map['vibrate'] = Variable<bool>(vibrate);
     map['sound_mode'] = Variable<int>(soundMode);
     map['message'] = Variable<String>(message);
+    map['final_message'] = Variable<String>(finalMessage);
     map['music_interval_sec'] = Variable<int>(musicIntervalSec);
     map['voice_timing'] = Variable<int>(voiceTiming);
     map['voice_pause_sec'] = Variable<int>(voicePauseSec);
@@ -19859,6 +22068,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
       vibrate: Value(vibrate),
       soundMode: Value(soundMode),
       message: Value(message),
+      finalMessage: Value(finalMessage),
       musicIntervalSec: Value(musicIntervalSec),
       voiceTiming: Value(voiceTiming),
       voicePauseSec: Value(voicePauseSec),
@@ -19896,6 +22106,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
       vibrate: serializer.fromJson<bool>(json['vibrate']),
       soundMode: serializer.fromJson<int>(json['soundMode']),
       message: serializer.fromJson<String>(json['message']),
+      finalMessage: serializer.fromJson<String>(json['finalMessage']),
       musicIntervalSec: serializer.fromJson<int>(json['musicIntervalSec']),
       voiceTiming: serializer.fromJson<int>(json['voiceTiming']),
       voicePauseSec: serializer.fromJson<int>(json['voicePauseSec']),
@@ -19928,6 +22139,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
       'vibrate': serializer.toJson<bool>(vibrate),
       'soundMode': serializer.toJson<int>(soundMode),
       'message': serializer.toJson<String>(message),
+      'finalMessage': serializer.toJson<String>(finalMessage),
       'musicIntervalSec': serializer.toJson<int>(musicIntervalSec),
       'voiceTiming': serializer.toJson<int>(voiceTiming),
       'voicePauseSec': serializer.toJson<int>(voicePauseSec),
@@ -19958,6 +22170,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
     bool? vibrate,
     int? soundMode,
     String? message,
+    String? finalMessage,
     int? musicIntervalSec,
     int? voiceTiming,
     int? voicePauseSec,
@@ -19985,6 +22198,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
     vibrate: vibrate ?? this.vibrate,
     soundMode: soundMode ?? this.soundMode,
     message: message ?? this.message,
+    finalMessage: finalMessage ?? this.finalMessage,
     musicIntervalSec: musicIntervalSec ?? this.musicIntervalSec,
     voiceTiming: voiceTiming ?? this.voiceTiming,
     voicePauseSec: voicePauseSec ?? this.voicePauseSec,
@@ -20041,6 +22255,10 @@ class Alarm extends DataClass implements Insertable<Alarm> {
       vibrate: data.vibrate.present ? data.vibrate.value : this.vibrate,
       soundMode: data.soundMode.present ? data.soundMode.value : this.soundMode,
       message: data.message.present ? data.message.value : this.message,
+      finalMessage:
+          data.finalMessage.present
+              ? data.finalMessage.value
+              : this.finalMessage,
       musicIntervalSec:
           data.musicIntervalSec.present
               ? data.musicIntervalSec.value
@@ -20080,6 +22298,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
           ..write('vibrate: $vibrate, ')
           ..write('soundMode: $soundMode, ')
           ..write('message: $message, ')
+          ..write('finalMessage: $finalMessage, ')
           ..write('musicIntervalSec: $musicIntervalSec, ')
           ..write('voiceTiming: $voiceTiming, ')
           ..write('voicePauseSec: $voicePauseSec, ')
@@ -20112,6 +22331,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
     vibrate,
     soundMode,
     message,
+    finalMessage,
     musicIntervalSec,
     voiceTiming,
     voicePauseSec,
@@ -20143,6 +22363,7 @@ class Alarm extends DataClass implements Insertable<Alarm> {
           other.vibrate == this.vibrate &&
           other.soundMode == this.soundMode &&
           other.message == this.message &&
+          other.finalMessage == this.finalMessage &&
           other.musicIntervalSec == this.musicIntervalSec &&
           other.voiceTiming == this.voiceTiming &&
           other.voicePauseSec == this.voicePauseSec &&
@@ -20172,6 +22393,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
   final Value<bool> vibrate;
   final Value<int> soundMode;
   final Value<String> message;
+  final Value<String> finalMessage;
   final Value<int> musicIntervalSec;
   final Value<int> voiceTiming;
   final Value<int> voicePauseSec;
@@ -20199,6 +22421,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
     this.vibrate = const Value.absent(),
     this.soundMode = const Value.absent(),
     this.message = const Value.absent(),
+    this.finalMessage = const Value.absent(),
     this.musicIntervalSec = const Value.absent(),
     this.voiceTiming = const Value.absent(),
     this.voicePauseSec = const Value.absent(),
@@ -20227,6 +22450,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
     this.vibrate = const Value.absent(),
     this.soundMode = const Value.absent(),
     this.message = const Value.absent(),
+    this.finalMessage = const Value.absent(),
     this.musicIntervalSec = const Value.absent(),
     this.voiceTiming = const Value.absent(),
     this.voicePauseSec = const Value.absent(),
@@ -20256,6 +22480,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
     Expression<bool>? vibrate,
     Expression<int>? soundMode,
     Expression<String>? message,
+    Expression<String>? finalMessage,
     Expression<int>? musicIntervalSec,
     Expression<int>? voiceTiming,
     Expression<int>? voicePauseSec,
@@ -20285,6 +22510,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
       if (vibrate != null) 'vibrate': vibrate,
       if (soundMode != null) 'sound_mode': soundMode,
       if (message != null) 'message': message,
+      if (finalMessage != null) 'final_message': finalMessage,
       if (musicIntervalSec != null) 'music_interval_sec': musicIntervalSec,
       if (voiceTiming != null) 'voice_timing': voiceTiming,
       if (voicePauseSec != null) 'voice_pause_sec': voicePauseSec,
@@ -20315,6 +22541,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
     Value<bool>? vibrate,
     Value<int>? soundMode,
     Value<String>? message,
+    Value<String>? finalMessage,
     Value<int>? musicIntervalSec,
     Value<int>? voiceTiming,
     Value<int>? voicePauseSec,
@@ -20343,6 +22570,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
       vibrate: vibrate ?? this.vibrate,
       soundMode: soundMode ?? this.soundMode,
       message: message ?? this.message,
+      finalMessage: finalMessage ?? this.finalMessage,
       musicIntervalSec: musicIntervalSec ?? this.musicIntervalSec,
       voiceTiming: voiceTiming ?? this.voiceTiming,
       voicePauseSec: voicePauseSec ?? this.voicePauseSec,
@@ -20419,6 +22647,9 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
     if (message.present) {
       map['message'] = Variable<String>(message.value);
     }
+    if (finalMessage.present) {
+      map['final_message'] = Variable<String>(finalMessage.value);
+    }
     if (musicIntervalSec.present) {
       map['music_interval_sec'] = Variable<int>(musicIntervalSec.value);
     }
@@ -20459,6 +22690,7 @@ class AlarmsCompanion extends UpdateCompanion<Alarm> {
           ..write('vibrate: $vibrate, ')
           ..write('soundMode: $soundMode, ')
           ..write('message: $message, ')
+          ..write('finalMessage: $finalMessage, ')
           ..write('musicIntervalSec: $musicIntervalSec, ')
           ..write('voiceTiming: $voiceTiming, ')
           ..write('voicePauseSec: $voicePauseSec, ')
@@ -25715,6 +27947,410 @@ class LearningProgressCompanion extends UpdateCompanion<LearningProgressData> {
   }
 }
 
+class $JarvisMemoriesTable extends JarvisMemories
+    with TableInfo<$JarvisMemoriesTable, JarvisMemory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JarvisMemoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('fact'),
+  );
+  static const VerificationMeta _confirmedMeta = const VerificationMeta(
+    'confirmed',
+  );
+  @override
+  late final GeneratedColumn<bool> confirmed = GeneratedColumn<bool>(
+    'confirmed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("confirmed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    content,
+    category,
+    confirmed,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'jarvis_memories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JarvisMemory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('confirmed')) {
+      context.handle(
+        _confirmedMeta,
+        confirmed.isAcceptableOrUnknown(data['confirmed']!, _confirmedMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  JarvisMemory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JarvisMemory(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      content:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content'],
+          )!,
+      category:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}category'],
+          )!,
+      confirmed:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}confirmed'],
+          )!,
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}created_at'],
+          )!,
+      updatedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}updated_at'],
+          )!,
+    );
+  }
+
+  @override
+  $JarvisMemoriesTable createAlias(String alias) {
+    return $JarvisMemoriesTable(attachedDatabase, alias);
+  }
+}
+
+class JarvisMemory extends DataClass implements Insertable<JarvisMemory> {
+  final int id;
+  final String content;
+
+  /// One of the [MemoryCategory] names: fact, preference, goal, person,
+  /// event, summary. Stored as text so new categories never need migrations.
+  final String category;
+  final bool confirmed;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const JarvisMemory({
+    required this.id,
+    required this.content,
+    required this.category,
+    required this.confirmed,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['content'] = Variable<String>(content);
+    map['category'] = Variable<String>(category);
+    map['confirmed'] = Variable<bool>(confirmed);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  JarvisMemoriesCompanion toCompanion(bool nullToAbsent) {
+    return JarvisMemoriesCompanion(
+      id: Value(id),
+      content: Value(content),
+      category: Value(category),
+      confirmed: Value(confirmed),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory JarvisMemory.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JarvisMemory(
+      id: serializer.fromJson<int>(json['id']),
+      content: serializer.fromJson<String>(json['content']),
+      category: serializer.fromJson<String>(json['category']),
+      confirmed: serializer.fromJson<bool>(json['confirmed']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'content': serializer.toJson<String>(content),
+      'category': serializer.toJson<String>(category),
+      'confirmed': serializer.toJson<bool>(confirmed),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  JarvisMemory copyWith({
+    int? id,
+    String? content,
+    String? category,
+    bool? confirmed,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => JarvisMemory(
+    id: id ?? this.id,
+    content: content ?? this.content,
+    category: category ?? this.category,
+    confirmed: confirmed ?? this.confirmed,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  JarvisMemory copyWithCompanion(JarvisMemoriesCompanion data) {
+    return JarvisMemory(
+      id: data.id.present ? data.id.value : this.id,
+      content: data.content.present ? data.content.value : this.content,
+      category: data.category.present ? data.category.value : this.category,
+      confirmed: data.confirmed.present ? data.confirmed.value : this.confirmed,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JarvisMemory(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('category: $category, ')
+          ..write('confirmed: $confirmed, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, content, category, confirmed, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JarvisMemory &&
+          other.id == this.id &&
+          other.content == this.content &&
+          other.category == this.category &&
+          other.confirmed == this.confirmed &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class JarvisMemoriesCompanion extends UpdateCompanion<JarvisMemory> {
+  final Value<int> id;
+  final Value<String> content;
+  final Value<String> category;
+  final Value<bool> confirmed;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const JarvisMemoriesCompanion({
+    this.id = const Value.absent(),
+    this.content = const Value.absent(),
+    this.category = const Value.absent(),
+    this.confirmed = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  JarvisMemoriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String content,
+    this.category = const Value.absent(),
+    this.confirmed = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : content = Value(content);
+  static Insertable<JarvisMemory> custom({
+    Expression<int>? id,
+    Expression<String>? content,
+    Expression<String>? category,
+    Expression<bool>? confirmed,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (content != null) 'content': content,
+      if (category != null) 'category': category,
+      if (confirmed != null) 'confirmed': confirmed,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  JarvisMemoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? content,
+    Value<String>? category,
+    Value<bool>? confirmed,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return JarvisMemoriesCompanion(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      category: category ?? this.category,
+      confirmed: confirmed ?? this.confirmed,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (confirmed.present) {
+      map['confirmed'] = Variable<bool>(confirmed.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JarvisMemoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('category: $category, ')
+          ..write('confirmed: $confirmed, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -25760,6 +28396,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $FitnessGoalsTable fitnessGoals = $FitnessGoalsTable(this);
+  late final $YogaPoseCacheTable yogaPoseCache = $YogaPoseCacheTable(this);
+  late final $YogaSessionsTable yogaSessions = $YogaSessionsTable(this);
+  late final $YogaPoseLogsTable yogaPoseLogs = $YogaPoseLogsTable(this);
+  late final $YogaFavoritesTable yogaFavorites = $YogaFavoritesTable(this);
   late final $MusicFoldersTable musicFolders = $MusicFoldersTable(this);
   late final $MusicTracksTable musicTracks = $MusicTracksTable(this);
   late final $PlaylistsTable playlists = $PlaylistsTable(this);
@@ -25790,6 +28430,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LearningProgressTable learningProgress = $LearningProgressTable(
     this,
   );
+  late final $JarvisMemoriesTable jarvisMemories = $JarvisMemoriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -25822,6 +28463,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     bodyMeasurements,
     personalRecords,
     fitnessGoals,
+    yogaPoseCache,
+    yogaSessions,
+    yogaPoseLogs,
+    yogaFavorites,
     musicFolders,
     musicTracks,
     playlists,
@@ -25841,6 +28486,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     vocabReviews,
     pronunciationAttempts,
     learningProgress,
+    jarvisMemories,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -25906,6 +28552,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('workout_plan_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'yoga_sessions',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('yoga_pose_logs', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -37706,6 +40359,1349 @@ typedef $$FitnessGoalsTableProcessedTableManager =
       FitnessGoal,
       PrefetchHooks Function()
     >;
+typedef $$YogaPoseCacheTableCreateCompanionBuilder =
+    YogaPoseCacheCompanion Function({
+      Value<int> id,
+      Value<int?> apiId,
+      required String poseKey,
+      required String englishName,
+      Value<String> sanskritName,
+      Value<String> translation,
+      Value<String> description,
+      Value<String> benefits,
+      Value<String> imageUrl,
+      Value<String> category,
+      Value<int> difficulty,
+      Value<DateTime> updatedAt,
+    });
+typedef $$YogaPoseCacheTableUpdateCompanionBuilder =
+    YogaPoseCacheCompanion Function({
+      Value<int> id,
+      Value<int?> apiId,
+      Value<String> poseKey,
+      Value<String> englishName,
+      Value<String> sanskritName,
+      Value<String> translation,
+      Value<String> description,
+      Value<String> benefits,
+      Value<String> imageUrl,
+      Value<String> category,
+      Value<int> difficulty,
+      Value<DateTime> updatedAt,
+    });
+
+class $$YogaPoseCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $YogaPoseCacheTable> {
+  $$YogaPoseCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get apiId => $composableBuilder(
+    column: $table.apiId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sanskritName => $composableBuilder(
+    column: $table.sanskritName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get translation => $composableBuilder(
+    column: $table.translation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get benefits => $composableBuilder(
+    column: $table.benefits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$YogaPoseCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $YogaPoseCacheTable> {
+  $$YogaPoseCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get apiId => $composableBuilder(
+    column: $table.apiId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sanskritName => $composableBuilder(
+    column: $table.sanskritName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get translation => $composableBuilder(
+    column: $table.translation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get benefits => $composableBuilder(
+    column: $table.benefits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$YogaPoseCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YogaPoseCacheTable> {
+  $$YogaPoseCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get apiId =>
+      $composableBuilder(column: $table.apiId, builder: (column) => column);
+
+  GeneratedColumn<String> get poseKey =>
+      $composableBuilder(column: $table.poseKey, builder: (column) => column);
+
+  GeneratedColumn<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sanskritName => $composableBuilder(
+    column: $table.sanskritName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get translation => $composableBuilder(
+    column: $table.translation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get benefits =>
+      $composableBuilder(column: $table.benefits, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$YogaPoseCacheTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YogaPoseCacheTable,
+          YogaPoseCacheData,
+          $$YogaPoseCacheTableFilterComposer,
+          $$YogaPoseCacheTableOrderingComposer,
+          $$YogaPoseCacheTableAnnotationComposer,
+          $$YogaPoseCacheTableCreateCompanionBuilder,
+          $$YogaPoseCacheTableUpdateCompanionBuilder,
+          (
+            YogaPoseCacheData,
+            BaseReferences<
+              _$AppDatabase,
+              $YogaPoseCacheTable,
+              YogaPoseCacheData
+            >,
+          ),
+          YogaPoseCacheData,
+          PrefetchHooks Function()
+        > {
+  $$YogaPoseCacheTableTableManager(_$AppDatabase db, $YogaPoseCacheTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$YogaPoseCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$YogaPoseCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$YogaPoseCacheTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> apiId = const Value.absent(),
+                Value<String> poseKey = const Value.absent(),
+                Value<String> englishName = const Value.absent(),
+                Value<String> sanskritName = const Value.absent(),
+                Value<String> translation = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> benefits = const Value.absent(),
+                Value<String> imageUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<int> difficulty = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => YogaPoseCacheCompanion(
+                id: id,
+                apiId: apiId,
+                poseKey: poseKey,
+                englishName: englishName,
+                sanskritName: sanskritName,
+                translation: translation,
+                description: description,
+                benefits: benefits,
+                imageUrl: imageUrl,
+                category: category,
+                difficulty: difficulty,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> apiId = const Value.absent(),
+                required String poseKey,
+                required String englishName,
+                Value<String> sanskritName = const Value.absent(),
+                Value<String> translation = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> benefits = const Value.absent(),
+                Value<String> imageUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<int> difficulty = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => YogaPoseCacheCompanion.insert(
+                id: id,
+                apiId: apiId,
+                poseKey: poseKey,
+                englishName: englishName,
+                sanskritName: sanskritName,
+                translation: translation,
+                description: description,
+                benefits: benefits,
+                imageUrl: imageUrl,
+                category: category,
+                difficulty: difficulty,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$YogaPoseCacheTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YogaPoseCacheTable,
+      YogaPoseCacheData,
+      $$YogaPoseCacheTableFilterComposer,
+      $$YogaPoseCacheTableOrderingComposer,
+      $$YogaPoseCacheTableAnnotationComposer,
+      $$YogaPoseCacheTableCreateCompanionBuilder,
+      $$YogaPoseCacheTableUpdateCompanionBuilder,
+      (
+        YogaPoseCacheData,
+        BaseReferences<_$AppDatabase, $YogaPoseCacheTable, YogaPoseCacheData>,
+      ),
+      YogaPoseCacheData,
+      PrefetchHooks Function()
+    >;
+typedef $$YogaSessionsTableCreateCompanionBuilder =
+    YogaSessionsCompanion Function({
+      Value<int> id,
+      Value<String> routineKey,
+      Value<String> title,
+      Value<int> difficulty,
+      required DateTime startedAt,
+      Value<DateTime?> endedAt,
+      Value<int> durationSec,
+      Value<int> poseCount,
+      Value<int> completedPoses,
+      Value<int> outcome,
+      Value<int> stepIndex,
+      Value<String> notes,
+    });
+typedef $$YogaSessionsTableUpdateCompanionBuilder =
+    YogaSessionsCompanion Function({
+      Value<int> id,
+      Value<String> routineKey,
+      Value<String> title,
+      Value<int> difficulty,
+      Value<DateTime> startedAt,
+      Value<DateTime?> endedAt,
+      Value<int> durationSec,
+      Value<int> poseCount,
+      Value<int> completedPoses,
+      Value<int> outcome,
+      Value<int> stepIndex,
+      Value<String> notes,
+    });
+
+final class $$YogaSessionsTableReferences
+    extends BaseReferences<_$AppDatabase, $YogaSessionsTable, YogaSession> {
+  $$YogaSessionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$YogaPoseLogsTable, List<YogaPoseLog>>
+  _yogaPoseLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.yogaPoseLogs,
+    aliasName: $_aliasNameGenerator(
+      db.yogaSessions.id,
+      db.yogaPoseLogs.sessionId,
+    ),
+  );
+
+  $$YogaPoseLogsTableProcessedTableManager get yogaPoseLogsRefs {
+    final manager = $$YogaPoseLogsTableTableManager(
+      $_db,
+      $_db.yogaPoseLogs,
+    ).filter((f) => f.sessionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_yogaPoseLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$YogaSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $YogaSessionsTable> {
+  $$YogaSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get routineKey => $composableBuilder(
+    column: $table.routineKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSec => $composableBuilder(
+    column: $table.durationSec,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get poseCount => $composableBuilder(
+    column: $table.poseCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get completedPoses => $composableBuilder(
+    column: $table.completedPoses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stepIndex => $composableBuilder(
+    column: $table.stepIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> yogaPoseLogsRefs(
+    Expression<bool> Function($$YogaPoseLogsTableFilterComposer f) f,
+  ) {
+    final $$YogaPoseLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.yogaPoseLogs,
+      getReferencedColumn: (t) => t.sessionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$YogaPoseLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.yogaPoseLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$YogaSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $YogaSessionsTable> {
+  $$YogaSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get routineKey => $composableBuilder(
+    column: $table.routineKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationSec => $composableBuilder(
+    column: $table.durationSec,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get poseCount => $composableBuilder(
+    column: $table.poseCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get completedPoses => $composableBuilder(
+    column: $table.completedPoses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stepIndex => $composableBuilder(
+    column: $table.stepIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$YogaSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YogaSessionsTable> {
+  $$YogaSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get routineKey => $composableBuilder(
+    column: $table.routineKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get durationSec => $composableBuilder(
+    column: $table.durationSec,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get poseCount =>
+      $composableBuilder(column: $table.poseCount, builder: (column) => column);
+
+  GeneratedColumn<int> get completedPoses => $composableBuilder(
+    column: $table.completedPoses,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  GeneratedColumn<int> get stepIndex =>
+      $composableBuilder(column: $table.stepIndex, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  Expression<T> yogaPoseLogsRefs<T extends Object>(
+    Expression<T> Function($$YogaPoseLogsTableAnnotationComposer a) f,
+  ) {
+    final $$YogaPoseLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.yogaPoseLogs,
+      getReferencedColumn: (t) => t.sessionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$YogaPoseLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.yogaPoseLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$YogaSessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YogaSessionsTable,
+          YogaSession,
+          $$YogaSessionsTableFilterComposer,
+          $$YogaSessionsTableOrderingComposer,
+          $$YogaSessionsTableAnnotationComposer,
+          $$YogaSessionsTableCreateCompanionBuilder,
+          $$YogaSessionsTableUpdateCompanionBuilder,
+          (YogaSession, $$YogaSessionsTableReferences),
+          YogaSession,
+          PrefetchHooks Function({bool yogaPoseLogsRefs})
+        > {
+  $$YogaSessionsTableTableManager(_$AppDatabase db, $YogaSessionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$YogaSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$YogaSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () =>
+                  $$YogaSessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> routineKey = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<int> difficulty = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime?> endedAt = const Value.absent(),
+                Value<int> durationSec = const Value.absent(),
+                Value<int> poseCount = const Value.absent(),
+                Value<int> completedPoses = const Value.absent(),
+                Value<int> outcome = const Value.absent(),
+                Value<int> stepIndex = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+              }) => YogaSessionsCompanion(
+                id: id,
+                routineKey: routineKey,
+                title: title,
+                difficulty: difficulty,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                durationSec: durationSec,
+                poseCount: poseCount,
+                completedPoses: completedPoses,
+                outcome: outcome,
+                stepIndex: stepIndex,
+                notes: notes,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> routineKey = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<int> difficulty = const Value.absent(),
+                required DateTime startedAt,
+                Value<DateTime?> endedAt = const Value.absent(),
+                Value<int> durationSec = const Value.absent(),
+                Value<int> poseCount = const Value.absent(),
+                Value<int> completedPoses = const Value.absent(),
+                Value<int> outcome = const Value.absent(),
+                Value<int> stepIndex = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+              }) => YogaSessionsCompanion.insert(
+                id: id,
+                routineKey: routineKey,
+                title: title,
+                difficulty: difficulty,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                durationSec: durationSec,
+                poseCount: poseCount,
+                completedPoses: completedPoses,
+                outcome: outcome,
+                stepIndex: stepIndex,
+                notes: notes,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$YogaSessionsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({yogaPoseLogsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (yogaPoseLogsRefs) db.yogaPoseLogs],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (yogaPoseLogsRefs)
+                    await $_getPrefetchedData<
+                      YogaSession,
+                      $YogaSessionsTable,
+                      YogaPoseLog
+                    >(
+                      currentTable: table,
+                      referencedTable: $$YogaSessionsTableReferences
+                          ._yogaPoseLogsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$YogaSessionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).yogaPoseLogsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.sessionId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$YogaSessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YogaSessionsTable,
+      YogaSession,
+      $$YogaSessionsTableFilterComposer,
+      $$YogaSessionsTableOrderingComposer,
+      $$YogaSessionsTableAnnotationComposer,
+      $$YogaSessionsTableCreateCompanionBuilder,
+      $$YogaSessionsTableUpdateCompanionBuilder,
+      (YogaSession, $$YogaSessionsTableReferences),
+      YogaSession,
+      PrefetchHooks Function({bool yogaPoseLogsRefs})
+    >;
+typedef $$YogaPoseLogsTableCreateCompanionBuilder =
+    YogaPoseLogsCompanion Function({
+      Value<int> id,
+      required int sessionId,
+      required String poseKey,
+      Value<String> englishName,
+      Value<int> positionIndex,
+      Value<int> plannedSec,
+      Value<int> actualSec,
+      Value<int> outcome,
+    });
+typedef $$YogaPoseLogsTableUpdateCompanionBuilder =
+    YogaPoseLogsCompanion Function({
+      Value<int> id,
+      Value<int> sessionId,
+      Value<String> poseKey,
+      Value<String> englishName,
+      Value<int> positionIndex,
+      Value<int> plannedSec,
+      Value<int> actualSec,
+      Value<int> outcome,
+    });
+
+final class $$YogaPoseLogsTableReferences
+    extends BaseReferences<_$AppDatabase, $YogaPoseLogsTable, YogaPoseLog> {
+  $$YogaPoseLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $YogaSessionsTable _sessionIdTable(_$AppDatabase db) =>
+      db.yogaSessions.createAlias(
+        $_aliasNameGenerator(db.yogaPoseLogs.sessionId, db.yogaSessions.id),
+      );
+
+  $$YogaSessionsTableProcessedTableManager get sessionId {
+    final $_column = $_itemColumn<int>('session_id')!;
+
+    final manager = $$YogaSessionsTableTableManager(
+      $_db,
+      $_db.yogaSessions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sessionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$YogaPoseLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $YogaPoseLogsTable> {
+  $$YogaPoseLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get positionIndex => $composableBuilder(
+    column: $table.positionIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedSec => $composableBuilder(
+    column: $table.plannedSec,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get actualSec => $composableBuilder(
+    column: $table.actualSec,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$YogaSessionsTableFilterComposer get sessionId {
+    final $$YogaSessionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.yogaSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$YogaSessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.yogaSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$YogaPoseLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $YogaPoseLogsTable> {
+  $$YogaPoseLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get positionIndex => $composableBuilder(
+    column: $table.positionIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plannedSec => $composableBuilder(
+    column: $table.plannedSec,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get actualSec => $composableBuilder(
+    column: $table.actualSec,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$YogaSessionsTableOrderingComposer get sessionId {
+    final $$YogaSessionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.yogaSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$YogaSessionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.yogaSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$YogaPoseLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YogaPoseLogsTable> {
+  $$YogaPoseLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get poseKey =>
+      $composableBuilder(column: $table.poseKey, builder: (column) => column);
+
+  GeneratedColumn<String> get englishName => $composableBuilder(
+    column: $table.englishName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get positionIndex => $composableBuilder(
+    column: $table.positionIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plannedSec => $composableBuilder(
+    column: $table.plannedSec,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get actualSec =>
+      $composableBuilder(column: $table.actualSec, builder: (column) => column);
+
+  GeneratedColumn<int> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  $$YogaSessionsTableAnnotationComposer get sessionId {
+    final $$YogaSessionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.yogaSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$YogaSessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.yogaSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$YogaPoseLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YogaPoseLogsTable,
+          YogaPoseLog,
+          $$YogaPoseLogsTableFilterComposer,
+          $$YogaPoseLogsTableOrderingComposer,
+          $$YogaPoseLogsTableAnnotationComposer,
+          $$YogaPoseLogsTableCreateCompanionBuilder,
+          $$YogaPoseLogsTableUpdateCompanionBuilder,
+          (YogaPoseLog, $$YogaPoseLogsTableReferences),
+          YogaPoseLog,
+          PrefetchHooks Function({bool sessionId})
+        > {
+  $$YogaPoseLogsTableTableManager(_$AppDatabase db, $YogaPoseLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$YogaPoseLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$YogaPoseLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () =>
+                  $$YogaPoseLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> sessionId = const Value.absent(),
+                Value<String> poseKey = const Value.absent(),
+                Value<String> englishName = const Value.absent(),
+                Value<int> positionIndex = const Value.absent(),
+                Value<int> plannedSec = const Value.absent(),
+                Value<int> actualSec = const Value.absent(),
+                Value<int> outcome = const Value.absent(),
+              }) => YogaPoseLogsCompanion(
+                id: id,
+                sessionId: sessionId,
+                poseKey: poseKey,
+                englishName: englishName,
+                positionIndex: positionIndex,
+                plannedSec: plannedSec,
+                actualSec: actualSec,
+                outcome: outcome,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int sessionId,
+                required String poseKey,
+                Value<String> englishName = const Value.absent(),
+                Value<int> positionIndex = const Value.absent(),
+                Value<int> plannedSec = const Value.absent(),
+                Value<int> actualSec = const Value.absent(),
+                Value<int> outcome = const Value.absent(),
+              }) => YogaPoseLogsCompanion.insert(
+                id: id,
+                sessionId: sessionId,
+                poseKey: poseKey,
+                englishName: englishName,
+                positionIndex: positionIndex,
+                plannedSec: plannedSec,
+                actualSec: actualSec,
+                outcome: outcome,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$YogaPoseLogsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({sessionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (sessionId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sessionId,
+                            referencedTable: $$YogaPoseLogsTableReferences
+                                ._sessionIdTable(db),
+                            referencedColumn:
+                                $$YogaPoseLogsTableReferences
+                                    ._sessionIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$YogaPoseLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YogaPoseLogsTable,
+      YogaPoseLog,
+      $$YogaPoseLogsTableFilterComposer,
+      $$YogaPoseLogsTableOrderingComposer,
+      $$YogaPoseLogsTableAnnotationComposer,
+      $$YogaPoseLogsTableCreateCompanionBuilder,
+      $$YogaPoseLogsTableUpdateCompanionBuilder,
+      (YogaPoseLog, $$YogaPoseLogsTableReferences),
+      YogaPoseLog,
+      PrefetchHooks Function({bool sessionId})
+    >;
+typedef $$YogaFavoritesTableCreateCompanionBuilder =
+    YogaFavoritesCompanion Function({
+      Value<int> id,
+      required String poseKey,
+      Value<DateTime> createdAt,
+    });
+typedef $$YogaFavoritesTableUpdateCompanionBuilder =
+    YogaFavoritesCompanion Function({
+      Value<int> id,
+      Value<String> poseKey,
+      Value<DateTime> createdAt,
+    });
+
+class $$YogaFavoritesTableFilterComposer
+    extends Composer<_$AppDatabase, $YogaFavoritesTable> {
+  $$YogaFavoritesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$YogaFavoritesTableOrderingComposer
+    extends Composer<_$AppDatabase, $YogaFavoritesTable> {
+  $$YogaFavoritesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poseKey => $composableBuilder(
+    column: $table.poseKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$YogaFavoritesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $YogaFavoritesTable> {
+  $$YogaFavoritesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get poseKey =>
+      $composableBuilder(column: $table.poseKey, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$YogaFavoritesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $YogaFavoritesTable,
+          YogaFavorite,
+          $$YogaFavoritesTableFilterComposer,
+          $$YogaFavoritesTableOrderingComposer,
+          $$YogaFavoritesTableAnnotationComposer,
+          $$YogaFavoritesTableCreateCompanionBuilder,
+          $$YogaFavoritesTableUpdateCompanionBuilder,
+          (
+            YogaFavorite,
+            BaseReferences<_$AppDatabase, $YogaFavoritesTable, YogaFavorite>,
+          ),
+          YogaFavorite,
+          PrefetchHooks Function()
+        > {
+  $$YogaFavoritesTableTableManager(_$AppDatabase db, $YogaFavoritesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$YogaFavoritesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$YogaFavoritesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$YogaFavoritesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> poseKey = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => YogaFavoritesCompanion(
+                id: id,
+                poseKey: poseKey,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String poseKey,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => YogaFavoritesCompanion.insert(
+                id: id,
+                poseKey: poseKey,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$YogaFavoritesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $YogaFavoritesTable,
+      YogaFavorite,
+      $$YogaFavoritesTableFilterComposer,
+      $$YogaFavoritesTableOrderingComposer,
+      $$YogaFavoritesTableAnnotationComposer,
+      $$YogaFavoritesTableCreateCompanionBuilder,
+      $$YogaFavoritesTableUpdateCompanionBuilder,
+      (
+        YogaFavorite,
+        BaseReferences<_$AppDatabase, $YogaFavoritesTable, YogaFavorite>,
+      ),
+      YogaFavorite,
+      PrefetchHooks Function()
+    >;
 typedef $$MusicFoldersTableCreateCompanionBuilder =
     MusicFoldersCompanion Function({
       Value<int> id,
@@ -39877,6 +43873,7 @@ typedef $$AlarmsTableCreateCompanionBuilder =
       Value<bool> vibrate,
       Value<int> soundMode,
       Value<String> message,
+      Value<String> finalMessage,
       Value<int> musicIntervalSec,
       Value<int> voiceTiming,
       Value<int> voicePauseSec,
@@ -39906,6 +43903,7 @@ typedef $$AlarmsTableUpdateCompanionBuilder =
       Value<bool> vibrate,
       Value<int> soundMode,
       Value<String> message,
+      Value<String> finalMessage,
       Value<int> musicIntervalSec,
       Value<int> voiceTiming,
       Value<int> voicePauseSec,
@@ -40028,6 +44026,11 @@ class $$AlarmsTableFilterComposer
 
   ColumnFilters<String> get message => $composableBuilder(
     column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finalMessage => $composableBuilder(
+    column: $table.finalMessage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -40171,6 +44174,11 @@ class $$AlarmsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get finalMessage => $composableBuilder(
+    column: $table.finalMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get musicIntervalSec => $composableBuilder(
     column: $table.musicIntervalSec,
     builder: (column) => ColumnOrderings(column),
@@ -40289,6 +44297,11 @@ class $$AlarmsTableAnnotationComposer
   GeneratedColumn<String> get message =>
       $composableBuilder(column: $table.message, builder: (column) => column);
 
+  GeneratedColumn<String> get finalMessage => $composableBuilder(
+    column: $table.finalMessage,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get musicIntervalSec => $composableBuilder(
     column: $table.musicIntervalSec,
     builder: (column) => column,
@@ -40358,6 +44371,7 @@ class $$AlarmsTableTableManager
                 Value<bool> vibrate = const Value.absent(),
                 Value<int> soundMode = const Value.absent(),
                 Value<String> message = const Value.absent(),
+                Value<String> finalMessage = const Value.absent(),
                 Value<int> musicIntervalSec = const Value.absent(),
                 Value<int> voiceTiming = const Value.absent(),
                 Value<int> voicePauseSec = const Value.absent(),
@@ -40385,6 +44399,7 @@ class $$AlarmsTableTableManager
                 vibrate: vibrate,
                 soundMode: soundMode,
                 message: message,
+                finalMessage: finalMessage,
                 musicIntervalSec: musicIntervalSec,
                 voiceTiming: voiceTiming,
                 voicePauseSec: voicePauseSec,
@@ -40414,6 +44429,7 @@ class $$AlarmsTableTableManager
                 Value<bool> vibrate = const Value.absent(),
                 Value<int> soundMode = const Value.absent(),
                 Value<String> message = const Value.absent(),
+                Value<String> finalMessage = const Value.absent(),
                 Value<int> musicIntervalSec = const Value.absent(),
                 Value<int> voiceTiming = const Value.absent(),
                 Value<int> voicePauseSec = const Value.absent(),
@@ -40441,6 +44457,7 @@ class $$AlarmsTableTableManager
                 vibrate: vibrate,
                 soundMode: soundMode,
                 message: message,
+                finalMessage: finalMessage,
                 musicIntervalSec: musicIntervalSec,
                 voiceTiming: voiceTiming,
                 voicePauseSec: voicePauseSec,
@@ -45365,6 +49382,232 @@ typedef $$LearningProgressTableProcessedTableManager =
       LearningProgressData,
       PrefetchHooks Function({bool lessonId})
     >;
+typedef $$JarvisMemoriesTableCreateCompanionBuilder =
+    JarvisMemoriesCompanion Function({
+      Value<int> id,
+      required String content,
+      Value<String> category,
+      Value<bool> confirmed,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$JarvisMemoriesTableUpdateCompanionBuilder =
+    JarvisMemoriesCompanion Function({
+      Value<int> id,
+      Value<String> content,
+      Value<String> category,
+      Value<bool> confirmed,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$JarvisMemoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $JarvisMemoriesTable> {
+  $$JarvisMemoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get confirmed => $composableBuilder(
+    column: $table.confirmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$JarvisMemoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $JarvisMemoriesTable> {
+  $$JarvisMemoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get confirmed => $composableBuilder(
+    column: $table.confirmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$JarvisMemoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JarvisMemoriesTable> {
+  $$JarvisMemoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<bool> get confirmed =>
+      $composableBuilder(column: $table.confirmed, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$JarvisMemoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $JarvisMemoriesTable,
+          JarvisMemory,
+          $$JarvisMemoriesTableFilterComposer,
+          $$JarvisMemoriesTableOrderingComposer,
+          $$JarvisMemoriesTableAnnotationComposer,
+          $$JarvisMemoriesTableCreateCompanionBuilder,
+          $$JarvisMemoriesTableUpdateCompanionBuilder,
+          (
+            JarvisMemory,
+            BaseReferences<_$AppDatabase, $JarvisMemoriesTable, JarvisMemory>,
+          ),
+          JarvisMemory,
+          PrefetchHooks Function()
+        > {
+  $$JarvisMemoriesTableTableManager(
+    _$AppDatabase db,
+    $JarvisMemoriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$JarvisMemoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$JarvisMemoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$JarvisMemoriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<bool> confirmed = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => JarvisMemoriesCompanion(
+                id: id,
+                content: content,
+                category: category,
+                confirmed: confirmed,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String content,
+                Value<String> category = const Value.absent(),
+                Value<bool> confirmed = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => JarvisMemoriesCompanion.insert(
+                id: id,
+                content: content,
+                category: category,
+                confirmed: confirmed,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$JarvisMemoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $JarvisMemoriesTable,
+      JarvisMemory,
+      $$JarvisMemoriesTableFilterComposer,
+      $$JarvisMemoriesTableOrderingComposer,
+      $$JarvisMemoriesTableAnnotationComposer,
+      $$JarvisMemoriesTableCreateCompanionBuilder,
+      $$JarvisMemoriesTableUpdateCompanionBuilder,
+      (
+        JarvisMemory,
+        BaseReferences<_$AppDatabase, $JarvisMemoriesTable, JarvisMemory>,
+      ),
+      JarvisMemory,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -45422,6 +49665,14 @@ class $AppDatabaseManager {
       $$PersonalRecordsTableTableManager(_db, _db.personalRecords);
   $$FitnessGoalsTableTableManager get fitnessGoals =>
       $$FitnessGoalsTableTableManager(_db, _db.fitnessGoals);
+  $$YogaPoseCacheTableTableManager get yogaPoseCache =>
+      $$YogaPoseCacheTableTableManager(_db, _db.yogaPoseCache);
+  $$YogaSessionsTableTableManager get yogaSessions =>
+      $$YogaSessionsTableTableManager(_db, _db.yogaSessions);
+  $$YogaPoseLogsTableTableManager get yogaPoseLogs =>
+      $$YogaPoseLogsTableTableManager(_db, _db.yogaPoseLogs);
+  $$YogaFavoritesTableTableManager get yogaFavorites =>
+      $$YogaFavoritesTableTableManager(_db, _db.yogaFavorites);
   $$MusicFoldersTableTableManager get musicFolders =>
       $$MusicFoldersTableTableManager(_db, _db.musicFolders);
   $$MusicTracksTableTableManager get musicTracks =>
@@ -45460,4 +49711,6 @@ class $AppDatabaseManager {
       $$PronunciationAttemptsTableTableManager(_db, _db.pronunciationAttempts);
   $$LearningProgressTableTableManager get learningProgress =>
       $$LearningProgressTableTableManager(_db, _db.learningProgress);
+  $$JarvisMemoriesTableTableManager get jarvisMemories =>
+      $$JarvisMemoriesTableTableManager(_db, _db.jarvisMemories);
 }

@@ -1,4 +1,5 @@
 import '../../../core/db/database.dart';
+import 'equipment_filter.dart';
 import 'workout_queue.dart';
 
 /// The part of a guided session a step belongs to.
@@ -44,29 +45,109 @@ class ReadinessReport {
 class SessionBuilder {
   const SessionBuilder._();
 
-  /// Warm-up exercises, chosen from the warm-up/cool-down category.
+  /// Warm-up exercises. The warm-up is built around a fixed core so every
+  /// session opens the same way: a push-up, bodyweight-only stretches, and a
+  /// plank, then any remaining slots are filled from the bodyweight mobility
+  /// pool. A non-zero [seed] offsets the filler so the warm-up and cool-down do
+  /// not repeat the same movements.
   static List<Exercise> selectWarmUps(
     List<Exercise> all, {
-    int count = 3,
+    int count = 6,
     int seed = 0,
   }) {
-    final pool =
-        all.where((e) => e.category == 8).toList()
+    final home =
+        all
+            .where((e) => isHomeCompatible(e.equipment, WorkoutMode.bodyweight))
+            .toList();
+
+    // Ordered core: push-up, plank, then stretches. Placed first so the fixed
+    // content survives the [count] clamp even on a tiny library.
+    final core = <Exercise?>[
+      _firstByName(home, _isPushUp),
+      _firstByName(home, _isPlank),
+      ..._stretches(home).take(2),
+    ].whereType<Exercise>().toList();
+
+    final chosen = <Exercise>[];
+    final usedIds = <int>{};
+    for (final e in core) {
+      if (chosen.length >= count) break;
+      if (usedIds.add(e.id)) chosen.add(e);
+    }
+
+    // Fill remaining slots with bodyweight mobility (category 7/8) and any
+    // other bodyweight movement, never repeating a core pick.
+    final filler =
+        home
+            .where(
+              (e) =>
+                  (e.category == 7 || e.category == 8) &&
+                  !usedIds.contains(e.id),
+            )
+            .toList()
           ..sort((a, b) => a.id.compareTo(b.id));
-    return _rotate(pool, count, seed);
+    for (final e in _rotate(filler, count, seed)) {
+      if (chosen.length >= count) break;
+      if (usedIds.add(e.id)) chosen.add(e);
+    }
+
+    if (chosen.length < count) {
+      final rest = home.where((e) => !usedIds.contains(e.id)).toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+      for (final e in _rotate(rest, count, seed)) {
+        if (chosen.length >= count) break;
+        if (usedIds.add(e.id)) chosen.add(e);
+      }
+    }
+    return chosen;
+  }
+
+  static bool _isPushUp(Exercise e) {
+    final name = e.name.toLowerCase();
+    return name.contains('push up') || name.contains('push-up') ||
+        name.contains('pushup');
+  }
+
+  static bool _isPlank(Exercise e) => e.name.toLowerCase().contains('plank');
+
+  static List<Exercise> _stretches(List<Exercise> home) =>
+      home
+          .where((e) => e.category == 8)
+          .toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+
+  static Exercise? _firstByName(
+    List<Exercise> pool,
+    bool Function(Exercise) test,
+  ) {
+    final matches = pool.where(test).toList()
+      ..sort((a, b) => a.id.compareTo(b.id));
+    return matches.isEmpty ? null : matches.first;
   }
 
   /// Cool-down exercises, preferring mobility work then stretches.
   static List<Exercise> selectCoolDowns(
     List<Exercise> all, {
-    int count = 2,
+    int count = 3,
     int seed = 0,
   }) {
     final mobility =
-        all.where((e) => e.category == 7).toList()
+        all
+            .where(
+              (e) =>
+                  e.category == 7 &&
+                  isHomeCompatible(e.equipment, WorkoutMode.bodyweight),
+            )
+            .toList()
           ..sort((a, b) => a.id.compareTo(b.id));
     final stretches =
-        all.where((e) => e.category == 8).toList()
+        all
+            .where(
+              (e) =>
+                  e.category == 8 &&
+                  isHomeCompatible(e.equipment, WorkoutMode.bodyweight),
+            )
+            .toList()
           ..sort((a, b) => a.id.compareTo(b.id));
     return _rotate([...mobility, ...stretches], count, seed);
   }
@@ -75,8 +156,8 @@ class SessionBuilder {
   static List<WorkoutStep> buildSession({
     required List<Exercise> allExercises,
     required List<WorkoutPlanItem> items,
-    int warmUpCount = 3,
-    int coolDownCount = 2,
+    int warmUpCount = 6,
+    int coolDownCount = 3,
     int seed = 0,
   }) {
     final warmUps = selectWarmUps(allExercises, count: warmUpCount, seed: seed);

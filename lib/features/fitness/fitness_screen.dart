@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
-import '../../core/providers/providers.dart';
 import '../../core/widgets/charts.dart';
 import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
+import 'domain/equipment_filter.dart';
 import 'domain/exercise_collections.dart';
 import 'domain/exercise_format.dart';
 import 'domain/fitness_goal.dart';
@@ -18,12 +18,21 @@ import 'domain/workout_queue.dart';
 import 'exercise_category_screen.dart';
 import 'exercise_detail_screen.dart';
 import 'run_walk_screen.dart';
-import 'weekly_planner_screen.dart';
 import 'widgets/daily_workout_card.dart';
-import 'widgets/exercise_art.dart';
+import 'widgets/exercise_gif.dart';
+import 'widgets/progress_summary.dart';
+import 'widgets/route_map.dart';
+import 'widgets/weekly_preview.dart';
 import 'workout_plan_screen.dart';
 import 'workout_player_screen.dart';
+import 'workout_preferences_screen.dart';
+import 'yoga_screen.dart';
 
+/// The Fitness module root: four tabs — Home, Workouts, Yoga, Progress.
+///
+/// Run/Walk is a prominent action on the Home tab, not a primary tab.
+/// Gym-only exercises are excluded from every generation, browsing, and
+/// substitution path via [isHomeCompatible].
 class FitnessScreen extends ConsumerWidget {
   const FitnessScreen({super.key});
 
@@ -31,107 +40,144 @@ class FitnessScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     return DefaultTabController(
-      length: 6,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.fitness),
           bottom: TabBar(
-            isScrollable: true,
             tabs: [
+              Tab(text: l10n.navHome),
               Tab(text: l10n.workout),
-              Tab(text: l10n.exercises),
-              Tab(text: l10n.plans),
-              Tab(text: l10n.goals),
-              Tab(text: l10n.water),
-              Tab(text: l10n.workoutHistory),
+              Tab(text: l10n.yoga),
+              Tab(text: l10n.progress),
             ],
           ),
         ),
         body: const TabBarView(
-          children: [
-            _WorkoutTab(),
-            _ExercisesTab(),
-            _PlansTab(),
-            _GoalsTab(),
-            _WaterTab(),
-            _HistoryTab(),
-          ],
+          children: [_HomeTab(), _WorkoutsTab(), _YogaTab(), _ProgressTab()],
         ),
       ),
     );
   }
 }
 
-class _WorkoutTab extends ConsumerWidget {
-  const _WorkoutTab();
+// ---------------------------------------------------------------------------
+// Home tab
+// ---------------------------------------------------------------------------
+
+class _HomeTab extends ConsumerWidget {
+  const _HomeTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final sessions = ref.watch(workoutSessionsProvider);
-    final plans = ref.watch(plansProvider).valueOrNull ?? const <WorkoutPlan>[];
     final active =
         sessions.valueOrNull?.where((s) => s.endedAt == null).toList() ??
         const <WorkoutSession>[];
+    final now = DateTime.now();
+    final dateStr = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).format(now);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const DailyWorkoutCard(),
+        // Header: title + date + settings.
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.fitness,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    dateStr,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton.filledTonal(
+              tooltip: l10n.workoutPreferences,
+              icon: const Icon(Icons.tune),
+              onPressed:
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const WorkoutPreferencesScreen(),
+                    ),
+                  ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
+        const DailyWorkoutCard(),
         if (active.isNotEmpty) ...[
-          _ResumeCard(session: active.first),
           const SizedBox(height: 12),
+          _ResumeCard(session: active.first),
         ],
-        FilledButton.icon(
+        const SizedBox(height: 16),
+        Text(
+          l10n.quickActions,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _QuickActionsRow(),
+        const SizedBox(height: 16),
+        const WeeklyPreview(),
+        const SizedBox(height: 16),
+        const ProgressSummary(),
+        const SizedBox(height: 16),
+        const _WeightTrendCard(),
+      ],
+    );
+  }
+}
+
+/// Row of quick-action buttons: Start Today, Customize, Yoga, Run/Walk.
+class _QuickActionsRow extends ConsumerWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilledButton.tonalIcon(
           onPressed: () => startQuickWorkout(context, ref),
           icon: const Icon(Icons.play_arrow),
           label: Text(l10n.startWorkout),
         ),
-        const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed:
               () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const WeeklyPlannerScreen(),
+                  builder: (_) => const WorkoutPreferencesScreen(),
                 ),
               ),
-          icon: const Icon(Icons.view_week_outlined),
-          label: Text(l10n.weeklyPlanner),
+          icon: const Icon(Icons.tune),
+          label: Text(l10n.customizeWorkout),
         ),
-        const SizedBox(height: 16),
-        const _WhoProgressCard(),
-        const SizedBox(height: 16),
-        if (plans.isNotEmpty) ...[
-          Text(l10n.plans, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          for (final plan in plans)
-            Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.fitness_center)),
-                title: Text(plan.name),
-                trailing: IconButton.filledTonal(
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () => startGuidedPlan(context, ref, plan),
-                ),
-                onTap:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => WorkoutPlanScreen(plan: plan),
-                      ),
-                    ),
-              ),
-            ),
-          const SizedBox(height: 8),
-        ],
-        const Divider(),
-        const SizedBox(height: 8),
         OutlinedButton.icon(
-          onPressed: () => showMeasurementEditor(context, ref),
-          icon: const Icon(Icons.monitor_weight_outlined),
-          label: Text(l10n.measurements),
+          onPressed:
+              () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const YogaScreen())),
+          icon: const Icon(Icons.self_improvement),
+          label: Text(l10n.yoga),
         ),
-        const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed:
               () => Navigator.of(
@@ -140,15 +186,12 @@ class _WorkoutTab extends ConsumerWidget {
           icon: const Icon(Icons.directions_run),
           label: Text('${l10n.run} / ${l10n.walk}'),
         ),
-        const SizedBox(height: 12),
-        const _WaterQuickAdd(),
-        const _WeightTrendCard(),
       ],
     );
   }
 }
 
-/// Card shown at the top of the workout tab when an un-finished session exists.
+/// Card shown at the top of the Home tab when an un-finished session exists.
 class _ResumeCard extends ConsumerWidget {
   const _ResumeCard({required this.session});
   final WorkoutSession session;
@@ -220,9 +263,480 @@ class _ResumeCard extends ConsumerWidget {
   }
 }
 
+class _WeightTrendCard extends ConsumerWidget {
+  const _WeightTrendCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final measurements = ref.watch(measurementsProvider);
+    final points =
+        (measurements.valueOrNull ?? const [])
+            .where((m) => m.weightGrams > 0)
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+    if (points.length < 2) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: SectionCard(
+        title: l10n.weightTrend,
+        icon: Icons.show_chart,
+        child: SimpleLineChart(
+          points: [
+            for (final m in points)
+              ChartSlice(
+                label: DateFormat.Md().format(m.date),
+                value: m.weightGrams / 1000,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Workouts tab
+// ---------------------------------------------------------------------------
+
+class _WorkoutsTab extends ConsumerStatefulWidget {
+  const _WorkoutsTab();
+
+  @override
+  ConsumerState<_WorkoutsTab> createState() => _WorkoutsTabState();
+}
+
+class _WorkoutsTabState extends ConsumerState<_WorkoutsTab> {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final exercises = ref.watch(exercisesProvider);
+    final plans = ref.watch(plansProvider).valueOrNull ?? const <WorkoutPlan>[];
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fitnessAddPlan',
+        onPressed: _createPlan,
+        icon: const Icon(Icons.add),
+        label: Text(l10n.newPlan),
+      ),
+      body: exercises.when(
+        loading: () => const LoadingState(),
+        error: (e, _) => ErrorState(message: e.toString()),
+        data: (list) {
+          final counts = <WorkoutCollection, int>{};
+          final custom = <Exercise>[];
+          for (final e in list) {
+            if (e.isCustom) custom.add(e);
+            final collection = exerciseCollection(e);
+            if (collection != null) {
+              counts.update(collection, (v) => v + 1, ifAbsent: () => 1);
+            }
+          }
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+            children: [
+              // Exercise library.
+              Text(
+                l10n.exercises,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _LibraryCard(
+                icon: Icons.grid_view_rounded,
+                title: l10n.all,
+                count: list.length,
+                onTap: () => _openCollection(null),
+              ),
+              const SizedBox(height: 8),
+              for (final collection in homeCollections())
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _LibraryCard(
+                    icon: _collectionIcon(collection),
+                    title: workoutCollectionLabel(l10n, collection),
+                    count: counts[collection] ?? 0,
+                    onTap: () => _openCollection(collection),
+                  ),
+                ),
+              if (custom.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.yourExercises,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final e in custom)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      leading: ExerciseGif(
+                        gifUrl: e.gifUrl,
+                        category: e.category,
+                        size: 52,
+                        borderRadius: 12,
+                        timed: e.isTimed,
+                      ),
+                      title: Text(e.name),
+                      subtitle:
+                          e.targetMuscles.isEmpty
+                              ? null
+                              : Text(e.targetMuscles),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap:
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder:
+                                  (_) => ExerciseDetailScreen(exercise: e),
+                            ),
+                          ),
+                    ),
+                  ),
+              ],
+              const SizedBox(height: 16),
+              // Saved routines / plans.
+              Text(
+                l10n.plans,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (plans.isEmpty)
+                EmptyState(
+                  icon: Icons.list_alt,
+                  message: l10n.plans,
+                  actionLabel: l10n.newPlan,
+                  onAction: _createPlan,
+                )
+              else
+                for (final plan in plans)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.fitness_center),
+                      ),
+                      title: Text(plan.name),
+                      trailing: IconButton.filledTonal(
+                        icon: const Icon(Icons.play_arrow),
+                        onPressed: () => startGuidedPlan(context, ref, plan),
+                      ),
+                      onTap:
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => WorkoutPlanScreen(plan: plan),
+                            ),
+                          ),
+                      onLongPress: () async {
+                        final ok = await confirmDialog(
+                          context,
+                          title: l10n.deleteConfirmTitle,
+                          body: l10n.deleteConfirmBody,
+                          confirmLabel: l10n.delete,
+                        );
+                        if (ok) {
+                          await ref
+                              .read(fitnessRepositoryProvider)
+                              .deletePlan(plan.id);
+                        }
+                      },
+                    ),
+                  ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _openCollection(WorkoutCollection? collection) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ExerciseCategoryScreen(collection: collection),
+      ),
+    );
+  }
+
+  static IconData _collectionIcon(WorkoutCollection collection) {
+    return switch (collection) {
+      WorkoutCollection.dumbbell => Icons.fitness_center,
+      WorkoutCollection.bodyweight => Icons.sports_gymnastics,
+      WorkoutCollection.stretching => Icons.self_improvement,
+      WorkoutCollection.band => Icons.waves,
+      WorkoutCollection.gym => Icons.warehouse_outlined,
+    };
+  }
+
+  Future<void> _createPlan() async {
+    final l10n = context.l10n;
+    final nameCtrl = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.newPlan),
+            content: TextField(
+              controller: nameCtrl,
+              autofocus: true,
+              decoration: InputDecoration(labelText: l10n.planName),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, nameCtrl.text.trim()),
+                child: Text(l10n.save),
+              ),
+            ],
+          ),
+    );
+    if (name == null || name.isEmpty) return;
+    await ref.read(fitnessRepositoryProvider).createPlan(name);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Yoga tab
+// ---------------------------------------------------------------------------
+
+class _YogaTab extends ConsumerWidget {
+  const _YogaTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return const YogaScreen();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Progress tab
+// ---------------------------------------------------------------------------
+
+class _ProgressTab extends ConsumerWidget {
+  const _ProgressTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final sessions = ref.watch(workoutSessionsProvider);
+    final runs = ref.watch(runsProvider);
+    final goals = ref.watch(fitnessGoalsProvider);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          l10n.progress,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Goals.
+        goals.when(
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => ErrorState(message: e.toString()),
+          data: (list) {
+            if (list.isEmpty) return const SizedBox.shrink();
+            final week = ref.watch(weeklyActivityProvider);
+            final water =
+                (ref.watch(waterTodayProvider).valueOrNull ?? const [])
+                    .fold<int>(0, (s, w) => s + w.amountMl);
+            return SectionCard(
+              title: l10n.goals,
+              icon: Icons.flag_outlined,
+              child: Column(
+                children: [
+                  for (final goal in list)
+                    _GoalTile(goal: goal, week: week, waterTodayMl: water),
+                ],
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        // Workout history.
+        Text(
+          l10n.workoutHistory,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        sessions.when(
+          loading: () => const LoadingState(),
+          error: (e, _) => ErrorState(message: e.toString()),
+          data: (list) {
+            final finishedRuns =
+                runs.hasValue
+                    ? runs.value!.where((s) => s.endedAt != null)
+                    : list.where(
+                      (s) =>
+                          s.endedAt != null && (s.type == 1 || s.type == 2),
+                    );
+            final done = [
+              ...list.where((s) => s.endedAt != null && s.type == 0),
+              ...finishedRuns,
+            ]..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+            if (done.isEmpty) {
+              return EmptyState(
+                icon: Icons.history,
+                message: l10n.emptyWorkouts,
+              );
+            }
+            return Column(
+              children: [
+                for (final s in done)
+                  _HistoryTile(session: s, locale: locale),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () => showMeasurementEditor(context, ref),
+          icon: const Icon(Icons.monitor_weight_outlined),
+          label: Text(l10n.measurements),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => showGoalEditor(context, ref),
+          icon: const Icon(Icons.flag_outlined),
+          label: Text(l10n.newGoal),
+        ),
+      ],
+    );
+  }
+}
+
+class _GoalTile extends ConsumerWidget {
+  const _GoalTile({
+    required this.goal,
+    required this.week,
+    required this.waterTodayMl,
+  });
+
+  final FitnessGoal goal;
+  final WeeklyActivity week;
+  final int waterTodayMl;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final current = goalCurrentValue(
+      metric: goal.metric,
+      workoutsThisWeek: week.workouts,
+      waterTodayMl: waterTodayMl,
+      distanceThisWeekMeters: week.distanceMeters,
+    );
+    final ratio = goalProgress(
+      metric: goal.metric,
+      targetValue: goal.targetValue,
+      workoutsThisWeek: week.workouts,
+      waterTodayMl: waterTodayMl,
+      distanceThisWeekMeters: week.distanceMeters,
+    );
+    final unit = goalUnit(goal.metric, ml: 'ml', meters: 'm');
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.flag_outlined),
+      title: Text(_goalMetricLabel(l10n, goal.metric)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          LinearProgressIndicator(value: ratio),
+          const SizedBox(height: 4),
+          Text('$current / ${goal.targetValue} $unit'.trim()),
+        ],
+      ),
+      onLongPress: () async {
+        final ok = await confirmDialog(
+          context,
+          title: l10n.deleteConfirmTitle,
+          body: l10n.deleteConfirmBody,
+          confirmLabel: l10n.delete,
+        );
+        if (ok) {
+          await ref.read(fitnessRepositoryProvider).deleteGoal(goal.id);
+        }
+      },
+    );
+  }
+}
+
+class _HistoryTile extends ConsumerWidget {
+  const _HistoryTile({required this.session, required this.locale});
+
+  final WorkoutSession session;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final mins = (session.durationSec / 60).round();
+    final icon = switch (session.type) {
+      1 => Icons.directions_run,
+      2 => Icons.directions_walk,
+      _ => Icons.fitness_center,
+    };
+    final trailing =
+        session.distanceMeters > 0
+            ? '${formatDistanceKm(session.distanceMeters.toDouble())} · $mins ${l10n.duration}'
+            : '$mins ${l10n.duration}';
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(session.name.isEmpty ? l10n.workout : session.name),
+      subtitle: Text(
+        DateFormat.yMMMd(locale).add_Hm().format(session.startedAt),
+      ),
+      trailing: Text(trailing),
+      onTap:
+          () =>
+              session.type == 1 || session.type == 2
+                  ? showRunRoute(context, session)
+                  : showSessionDetail(context, session),
+      onLongPress: () async {
+        final ok = await confirmDialog(
+          context,
+          title: l10n.deleteConfirmTitle,
+          body: l10n.deleteConfirmBody,
+          confirmLabel: l10n.delete,
+        );
+        if (ok) {
+          await ref.read(fitnessRepositoryProvider).deleteSession(session.id);
+        }
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared helpers (exported for use by other modules)
+// ---------------------------------------------------------------------------
+
 /// Starts an ad-hoc workout from a set of exercises chosen by the user.
+/// Only home-compatible exercises are offered.
 Future<void> startQuickWorkout(BuildContext context, WidgetRef ref) async {
-  final exercises = await ref.read(exercisesProvider.future);
+  final prefs = ref.read(workoutPreferencesProvider).valueOrNull;
+  final mode =
+      prefs != null
+          ? workoutModeFromEquipment(prefs.equipment)
+          : WorkoutMode.bodyweight;
+  final allExercises = await ref.read(exercisesProvider.future);
+  final exercises = filterHomeExercises(allExercises, mode);
   if (!context.mounted) return;
   if (exercises.isEmpty) {
     final l10n = context.l10n;
@@ -257,6 +771,42 @@ Future<void> startGuidedPlan(
   final repo = ref.read(fitnessRepositoryProvider);
   final items = await repo.watchPlanItems(plan.id).first;
   final exercises = await ref.read(exercisesProvider.future);
+  if (!context.mounted) return;
+  final existing = await repo.activeSessionForPlan(plan.id);
+  if (existing != null && context.mounted) {
+    final saved = WorkoutQueue.decodeSteps(existing.routeJson);
+    if (saved.isNotEmpty) {
+      final l10n = context.l10n;
+      final resume = await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(l10n.resumeWorkout),
+              content: Text(l10n.unfinishedPlan),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.startFresh),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(l10n.resume),
+                ),
+              ],
+            ),
+      );
+      if (!context.mounted || resume == null) return;
+      if (resume) {
+        await resumeWorkout(context, ref, existing);
+        return;
+      }
+      await repo.finishSession(
+        existing.id,
+        durationSec: existing.durationSec,
+        outcome: SessionOutcome.cancelled.index,
+      );
+    }
+  }
   if (!context.mounted) return;
   final steps = SessionBuilder.buildSession(
     allExercises: exercises,
@@ -369,7 +919,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                               _selected.remove(e.id);
                             }
                           }),
-                      secondary: ExerciseArt(
+                      secondary: ExerciseGif(
+                        gifUrl: e.gifUrl,
                         category: e.category,
                         size: 44,
                         borderRadius: 10,
@@ -394,661 +945,49 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   }
 }
 
-class _WeightTrendCard extends ConsumerWidget {
-  const _WeightTrendCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final measurements = ref.watch(measurementsProvider);
-    final points =
-        (measurements.valueOrNull ?? const [])
-            .where((m) => m.weightGrams > 0)
-            .toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
-    if (points.length < 2) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: SectionCard(
-        title: l10n.weightTrend,
-        icon: Icons.show_chart,
-        child: SimpleLineChart(
-          points: [
-            for (final m in points)
-              ChartSlice(
-                label: DateFormat.Md().format(m.date),
-                value: m.weightGrams / 1000,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+/// Shows the recorded GPS track for a finished run or walk.
+Future<void> showRunRoute(BuildContext context, WorkoutSession session) {
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (context) => _RunRouteSheet(session: session),
+  );
 }
 
-class _WaterQuickAdd extends ConsumerWidget {
-  const _WaterQuickAdd();
+class _RunRouteSheet extends StatelessWidget {
+  const _RunRouteSheet({required this.session});
+  final WorkoutSession session;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final water = ref.watch(waterTodayProvider);
-    final goal = ref.watch(appPreferencesProvider).dailyWaterGoalMl;
-    final total = (water.valueOrNull ?? const []).fold<int>(
-      0,
-      (s, w) => s + w.amountMl,
-    );
-    final ratio = goal <= 0 ? 0.0 : (total / goal).clamp(0.0, 1.0);
-    return SectionCard(
-      title: l10n.waterIntake,
-      icon: Icons.water_drop_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LinearProgressIndicator(value: ratio.toDouble()),
-          const SizedBox(height: 8),
-          Text('$total / $goal ml'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final ml in [200, 300, 500])
-                ActionChip(
-                  label: Text('+$ml ml'),
-                  onPressed:
-                      () => ref.read(fitnessRepositoryProvider).addWater(ml),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ExercisesTab extends ConsumerStatefulWidget {
-  const _ExercisesTab();
-
-  @override
-  ConsumerState<_ExercisesTab> createState() => _ExercisesTabState();
-}
-
-class _ExercisesTabState extends ConsumerState<_ExercisesTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final exercises = ref.watch(exercisesProvider);
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fitnessAddExercise',
-        onPressed: () => _addCustomExercise(context),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.newExercise),
-      ),
-      body: exercises.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(message: e.toString()),
-        data: (list) {
-          final counts = <WorkoutCollection, int>{};
-          final custom = <Exercise>[];
-          for (final e in list) {
-            if (e.isCustom) custom.add(e);
-            final collection = exerciseCollection(e);
-            if (collection != null) {
-              counts.update(collection, (v) => v + 1, ifAbsent: () => 1);
-            }
-          }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+    final points = decodeRoute(session.routeJson);
+    final pace = paceSecondsPerKm(session.distanceMeters, session.durationSec);
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.7,
+      maxChildSize: 0.95,
+      builder:
+          (context, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
-              _LibraryCard(
-                icon: Icons.grid_view_rounded,
-                title: l10n.all,
-                count: list.length,
-                onTap: () => _openCollection(context, null),
+              Text(
+                session.name.isEmpty ? l10n.route : session.name,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${formatDistanceKm(session.distanceMeters.toDouble())} · ${formatRunDuration(session.durationSec)} · ${formatPace(pace)}',
               ),
               const SizedBox(height: 16),
-              Text(
-                l10n.category,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              for (final collection in WorkoutCollection.values)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _LibraryCard(
-                    icon: _collectionIcon(collection),
-                    title: workoutCollectionLabel(l10n, collection),
-                    count: counts[collection] ?? 0,
-                    onTap: () => _openCollection(context, collection),
-                  ),
-                ),
-              if (custom.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  l10n.yourExercises,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                for (final e in custom)
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListTile(
-                      leading: ExerciseArt(
-                        category: e.category,
-                        size: 52,
-                        borderRadius: 12,
-                        timed: e.isTimed,
-                      ),
-                      title: Text(e.name),
-                      subtitle:
-                          e.targetMuscles.isEmpty
-                              ? null
-                              : Text(e.targetMuscles),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap:
-                          () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => ExerciseDetailScreen(exercise: e),
-                            ),
-                          ),
-                    ),
-                  ),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _openCollection(BuildContext context, WorkoutCollection? collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ExerciseCategoryScreen(collection: collection),
-      ),
-    );
-  }
-
-  static IconData _collectionIcon(WorkoutCollection collection) {
-    return switch (collection) {
-      WorkoutCollection.dumbbell => Icons.fitness_center,
-      WorkoutCollection.bodyweight => Icons.sports_gymnastics,
-      WorkoutCollection.stretching => Icons.self_improvement,
-      WorkoutCollection.band => Icons.waves,
-      WorkoutCollection.gym => Icons.warehouse_outlined,
-    };
-  }
-
-  Future<void> _addCustomExercise(BuildContext context) async {
-    final l10n = context.l10n;
-    final nameCtrl = TextEditingController();
-    final musclesCtrl = TextEditingController();
-    final equipmentCtrl = TextEditingController();
-    final instructionsCtrl = TextEditingController();
-    var category = 0;
-    var isTimed = false;
-    final saved = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => StatefulBuilder(
-            builder:
-                (context, setState) => AlertDialog(
-                  title: Text(l10n.newExercise),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: nameCtrl,
-                          autofocus: true,
-                          decoration: InputDecoration(labelText: l10n.name),
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<int>(
-                          value: category,
-                          decoration: InputDecoration(labelText: l10n.category),
-                          items: [
-                            for (var c = 0; c <= 8; c++)
-                              DropdownMenuItem(
-                                value: c,
-                                child: Text(exerciseCategoryLabel(l10n, c)),
-                              ),
-                          ],
-                          onChanged:
-                              (v) => setState(() => category = v ?? category),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: musclesCtrl,
-                          decoration: InputDecoration(
-                            labelText: l10n.targetMuscles,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: equipmentCtrl,
-                          decoration: InputDecoration(
-                            labelText: l10n.equipment,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: instructionsCtrl,
-                          maxLines: 3,
-                          decoration: InputDecoration(labelText: l10n.howTo),
-                        ),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: isTimed,
-                          onChanged: (v) => setState(() => isTimed = v),
-                          title: Text(l10n.timedExercise),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(l10n.save),
-                    ),
-                  ],
-                ),
-          ),
-    );
-    if (saved != true || nameCtrl.text.trim().isEmpty) return;
-    await ref
-        .read(fitnessRepositoryProvider)
-        .addCustomExercise(
-          name: nameCtrl.text.trim(),
-          category: category,
-          targetMuscles: musclesCtrl.text.trim(),
-          equipment: equipmentCtrl.text.trim(),
-          instructions: instructionsCtrl.text.trim(),
-          isTimed: isTimed,
-          reps: isTimed ? 0 : 10,
-          durationSec: isTimed ? 30 : 0,
-        );
-  }
-}
-
-/// A tappable entry on the exercise library index.
-class _LibraryCard extends StatelessWidget {
-  const _LibraryCard({
-    required this.icon,
-    required this.title,
-    required this.count,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final int count;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        leading: CircleAvatar(child: Icon(icon)),
-        title: Text(title),
-        subtitle: Text('$count ${context.l10n.exercises}'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _PlansTab extends ConsumerWidget {
-  const _PlansTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final plans = ref.watch(plansProvider);
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fitnessAddPlan',
-        onPressed: () => _createPlan(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.newPlan),
-      ),
-      body: plans.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(message: e.toString()),
-        data: (list) {
-          if (list.isEmpty) {
-            return EmptyState(
-              icon: Icons.list_alt,
-              message: l10n.plans,
-              actionLabel: l10n.newPlan,
-              onAction: () => _createPlan(context, ref),
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 96),
-            itemCount: list.length,
-            itemBuilder: (context, i) {
-              final plan = list[i];
-              return ListTile(
-                leading: const Icon(Icons.fitness_center),
-                title: Text(plan.name),
-                trailing: IconButton.filledTonal(
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () => startGuidedPlan(context, ref, plan),
-                ),
-                onTap:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => WorkoutPlanScreen(plan: plan),
-                      ),
-                    ),
-                onLongPress: () async {
-                  final ok = await confirmDialog(
-                    context,
-                    title: l10n.deleteConfirmTitle,
-                    body: l10n.deleteConfirmBody,
-                    confirmLabel: l10n.delete,
-                  );
-                  if (ok) {
-                    await ref
-                        .read(fitnessRepositoryProvider)
-                        .deletePlan(plan.id);
-                  }
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> _createPlan(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final nameCtrl = TextEditingController();
-    final name = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(l10n.newPlan),
-            content: TextField(
-              controller: nameCtrl,
-              autofocus: true,
-              decoration: InputDecoration(labelText: l10n.planName),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, nameCtrl.text.trim()),
-                child: Text(l10n.save),
+              SizedBox(
+                height: 320,
+                child: RouteMapView(points: points, emptyHint: l10n.none),
               ),
             ],
           ),
-    );
-    if (name == null || name.isEmpty) return;
-    await ref.read(fitnessRepositoryProvider).createPlan(name);
-  }
-}
-
-class _GoalsTab extends ConsumerWidget {
-  const _GoalsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final goals = ref.watch(fitnessGoalsProvider);
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fitnessAddGoal',
-        onPressed: () => showGoalEditor(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.newGoal),
-      ),
-      body: goals.when(
-        loading: () => const LoadingState(),
-        error: (e, _) => ErrorState(message: e.toString()),
-        data: (list) {
-          if (list.isEmpty) {
-            return EmptyState(
-              icon: Icons.flag_outlined,
-              message: l10n.goals,
-              actionLabel: l10n.newGoal,
-              onAction: () => showGoalEditor(context, ref),
-            );
-          }
-          final week = ref.watch(weeklyActivityProvider);
-          final water = (ref.watch(waterTodayProvider).valueOrNull ?? const [])
-              .fold<int>(0, (s, w) => s + w.amountMl);
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 96),
-            itemCount: list.length,
-            itemBuilder: (context, i) {
-              final goal = list[i];
-              final current = goalCurrentValue(
-                metric: goal.metric,
-                workoutsThisWeek: week.workouts,
-                waterTodayMl: water,
-                distanceThisWeekMeters: week.distanceMeters,
-              );
-              final ratio = goalProgress(
-                metric: goal.metric,
-                targetValue: goal.targetValue,
-                workoutsThisWeek: week.workouts,
-                waterTodayMl: water,
-                distanceThisWeekMeters: week.distanceMeters,
-              );
-              final unit = goalUnit(goal.metric, ml: 'ml', meters: 'm');
-              return ListTile(
-                leading: const Icon(Icons.flag_outlined),
-                title: Text(_goalMetricLabel(l10n, goal.metric)),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    LinearProgressIndicator(value: ratio),
-                    const SizedBox(height: 4),
-                    Text('$current / ${goal.targetValue} $unit'.trim()),
-                  ],
-                ),
-                onLongPress: () async {
-                  final ok = await confirmDialog(
-                    context,
-                    title: l10n.deleteConfirmTitle,
-                    body: l10n.deleteConfirmBody,
-                    confirmLabel: l10n.delete,
-                  );
-                  if (ok) {
-                    await ref
-                        .read(fitnessRepositoryProvider)
-                        .deleteGoal(goal.id);
-                  }
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-String _goalMetricLabel(AppLocalizations l10n, int metric) {
-  final m =
-      FitnessGoalMetric.values[metric.clamp(
-        0,
-        FitnessGoalMetric.values.length - 1,
-      )];
-  return switch (m) {
-    FitnessGoalMetric.workoutsPerWeek => l10n.goalWorkoutsPerWeek,
-    FitnessGoalMetric.waterDaily => l10n.goalWaterDaily,
-    FitnessGoalMetric.distanceWeekly => l10n.goalDistanceWeekly,
-  };
-}
-
-Future<void> showGoalEditor(BuildContext context, WidgetRef ref) async {
-  final l10n = context.l10n;
-  final targetCtrl = TextEditingController();
-  var metric = FitnessGoalMetric.workoutsPerWeek;
-  DateTime? targetDate;
-  final saved = await showDialog<bool>(
-    context: context,
-    builder:
-        (context) => StatefulBuilder(
-          builder:
-              (context, setState) => AlertDialog(
-                title: Text(l10n.newGoal),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DropdownButtonFormField<FitnessGoalMetric>(
-                        value: metric,
-                        decoration: InputDecoration(labelText: l10n.metric),
-                        items: [
-                          for (final m in FitnessGoalMetric.values)
-                            DropdownMenuItem(
-                              value: m,
-                              child: Text(_goalMetricLabel(l10n, m.index)),
-                            ),
-                        ],
-                        onChanged: (v) => setState(() => metric = v ?? metric),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: targetCtrl,
-                        autofocus: true,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(labelText: l10n.target),
-                      ),
-                      const SizedBox(height: 12),
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.event),
-                        title: Text(l10n.taskDue),
-                        subtitle: Text(
-                          targetDate == null
-                              ? '—'
-                              : MaterialLocalizations.of(
-                                context,
-                              ).formatMediumDate(targetDate!),
-                        ),
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate:
-                                targetDate ??
-                                DateTime.now().add(const Duration(days: 30)),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null) {
-                            setState(() => targetDate = picked);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.save),
-                  ),
-                ],
-              ),
-        ),
-  );
-  final target = int.tryParse(targetCtrl.text.trim()) ?? 0;
-  if (saved == true && target > 0) {
-    await ref
-        .read(fitnessRepositoryProvider)
-        .createGoal(
-          metric: metric.index,
-          targetValue: target,
-          targetDate: targetDate,
-        );
-  }
-}
-
-class _WaterTab extends ConsumerWidget {
-  const _WaterTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return const _WaterQuickAdd();
-  }
-}
-
-class _HistoryTab extends ConsumerWidget {
-  const _HistoryTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final locale = Localizations.localeOf(context).toString();
-    final sessions = ref.watch(workoutSessionsProvider);
-    return sessions.when(
-      loading: () => const LoadingState(),
-      error: (e, _) => ErrorState(message: e.toString()),
-      data: (list) {
-        final done = list.where((s) => s.endedAt != null).toList();
-        if (done.isEmpty) {
-          return EmptyState(icon: Icons.history, message: l10n.emptyWorkouts);
-        }
-        return ListView.builder(
-          itemCount: done.length,
-          itemBuilder: (context, i) {
-            final s = done[i];
-            final mins = (s.durationSec / 60).round();
-            final icon = switch (s.type) {
-              1 => Icons.directions_run,
-              2 => Icons.directions_walk,
-              _ => Icons.fitness_center,
-            };
-            final trailing =
-                s.distanceMeters > 0
-                    ? '${formatDistanceKm(s.distanceMeters.toDouble())} · $mins ${l10n.duration}'
-                    : '$mins ${l10n.duration}';
-            return ListTile(
-              leading: Icon(icon),
-              title: Text(s.name.isEmpty ? l10n.workout : s.name),
-              subtitle: Text(
-                DateFormat.yMMMd(locale).add_Hm().format(s.startedAt),
-              ),
-              trailing: Text(trailing),
-              onTap: s.type == 0 ? () => showSessionDetail(context, s) : null,
-              onLongPress: () async {
-                final ok = await confirmDialog(
-                  context,
-                  title: l10n.deleteConfirmTitle,
-                  body: l10n.deleteConfirmBody,
-                  confirmLabel: l10n.delete,
-                );
-                if (ok) {
-                  await ref.read(fitnessRepositoryProvider).deleteSession(s.id);
-                }
-              },
-            );
-          },
-        );
-      },
     );
   }
 }
@@ -1111,8 +1050,12 @@ class _SessionDetailSheet extends ConsumerWidget {
                                 l10n.exercise,
                           ),
                           subtitle: Text(
-                            '${log.reps} ${l10n.reps}'
-                            '${log.weightGrams > 0 ? ' · ${(log.weightGrams / 1000).toStringAsFixed(1)} kg' : ''}',
+                            [
+                              if (log.reps > 0) '${log.reps} ${l10n.reps}',
+                              if (log.durationSec > 0) '${log.durationSec}s',
+                              if (log.weightGrams > 0)
+                                '${(log.weightGrams / 1000).toStringAsFixed(1)} kg',
+                            ].join(' · '),
                           ),
                         ),
                     ],
@@ -1190,183 +1133,133 @@ Future<void> showMeasurementEditor(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// Weekly activity progress framed against the WHO physical-activity guidance.
-/// Advisory only — never presented as medical advice or a "WHO certification".
-class _WhoProgressCard extends ConsumerWidget {
-  const _WhoProgressCard();
+String _goalMetricLabel(AppLocalizations l10n, int metric) {
+  final m =
+      FitnessGoalMetric.values[metric.clamp(
+        0,
+        FitnessGoalMetric.values.length - 1,
+      )];
+  return switch (m) {
+    FitnessGoalMetric.workoutsPerWeek => l10n.goalWorkoutsPerWeek,
+    FitnessGoalMetric.waterDaily => l10n.goalWaterDaily,
+    FitnessGoalMetric.distanceWeekly => l10n.goalDistanceWeekly,
+  };
+}
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final progress = ref.watch(whoWeeklyProgressProvider);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.directions_walk,
-                  size: 20,
-                  color: theme.colorScheme.secondary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.activityGuidance,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+Future<void> showGoalEditor(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final targetCtrl = TextEditingController();
+  var metric = FitnessGoalMetric.workoutsPerWeek;
+  DateTime? targetDate;
+  final saved = await showDialog<bool>(
+    context: context,
+    builder:
+        (context) => StatefulBuilder(
+          builder:
+              (context, setState) => AlertDialog(
+                title: Text(l10n.newGoal),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<FitnessGoalMetric>(
+                        value: metric,
+                        decoration: InputDecoration(labelText: l10n.metric),
+                        items: [
+                          for (final m in FitnessGoalMetric.values)
+                            DropdownMenuItem(
+                              value: m,
+                              child: Text(_goalMetricLabel(l10n, m.index)),
+                            ),
+                        ],
+                        onChanged: (v) => setState(() => metric = v ?? metric),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: targetCtrl,
+                        autofocus: true,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(labelText: l10n.target),
+                      ),
+                      const SizedBox(height: 12),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.event),
+                        title: Text(l10n.targetDate),
+                        subtitle: Text(
+                          targetDate == null
+                              ? '—'
+                              : MaterialLocalizations.of(
+                                context,
+                              ).formatMediumDate(targetDate!),
+                        ),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                targetDate ??
+                                DateTime.now().add(const Duration(days: 30)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            setState(() => targetDate = picked);
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                if (progress.meetsAll)
-                  Chip(
-                    label: Text(l10n.whoGoalMet),
-                    avatar: const Icon(Icons.check_circle, size: 16),
-                    visualDensity: VisualDensity.compact,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(l10n.cancel),
                   ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.whoAttribution,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _WhoRow(
-              icon: Icons.favorite_outline,
-              label: l10n.whoAerobicLabel,
-              value: l10n.whoAerobicValue(progress.moderateEquivalentMinutes),
-              goal: l10n.whoAerobicGoal,
-              met: progress.meetsAerobic,
-              progress: progress.aerobicProgress,
-            ),
-            const SizedBox(height: 12),
-            _WhoRow(
-              icon: Icons.fitness_center,
-              label: l10n.whoStrengthLabel,
-              value: l10n.whoStrengthValue(progress.strengthDays),
-              goal: l10n.whoStrengthGoal,
-              met: progress.meetsStrength,
-              progress: progress.strengthProgress,
-            ),
-            const SizedBox(height: 12),
-            Theme(
-              data: theme.copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: 8),
-                leading: const Icon(Icons.tips_and_updates_outlined, size: 20),
-                title: Text(
-                  l10n.whoTips,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(l10n.save),
                   ),
-                ),
-                children: [
-                  _WhoTip(text: l10n.whoTipProgression),
-                  _WhoTip(text: l10n.whoTipWalking),
-                  _WhoTip(text: l10n.whoTipStrength),
-                  _WhoTip(text: l10n.whoTipAdapt),
                 ],
               ),
-            ),
-            Text(
-              l10n.whoDisclaimer,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
         ),
-      ),
-    );
+  );
+  final target = int.tryParse(targetCtrl.text.trim()) ?? 0;
+  if (saved == true && target > 0) {
+    await ref
+        .read(fitnessRepositoryProvider)
+        .createGoal(
+          metric: metric.index,
+          targetValue: target,
+          targetDate: targetDate,
+        );
   }
 }
 
-class _WhoRow extends StatelessWidget {
-  const _WhoRow({
+/// A tappable entry on the exercise library index.
+class _LibraryCard extends StatelessWidget {
+  const _LibraryCard({
     required this.icon,
-    required this.label,
-    required this.value,
-    required this.goal,
-    required this.met,
-    required this.progress,
+    required this.title,
+    required this.count,
+    required this.onTap,
   });
 
   final IconData icon;
-  final String label;
-  final String value;
-  final String goal;
-  final bool met;
-  final double progress;
+  final String title;
+  final int count;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              met ? Icons.check_circle : icon,
-              size: 18,
-              color:
-                  met ? theme.colorScheme.primary : theme.colorScheme.outline,
-            ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(label)),
-            Text(
-              value,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(value: progress, minHeight: 6),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          goal,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _WhoTip extends StatelessWidget {
-  const _WhoTip({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.circle,
-            size: 6,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
-        ],
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        leading: CircleAvatar(child: Icon(icon)),
+        title: Text(title),
+        subtitle: Text('$count ${context.l10n.exercises}'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

@@ -6,7 +6,7 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
 import 'domain/session_flow.dart';
-import 'widgets/exercise_art.dart';
+import 'widgets/exercise_gif.dart';
 import 'workout_player_screen.dart';
 
 /// Details of a saved workout plan: its exercises (reorderable, editable), an
@@ -97,7 +97,8 @@ class WorkoutPlanScreen extends ConsumerWidget {
                             : '${item.sets} × ${item.reps} ${l10n.reps}';
                     return ListTile(
                       key: ValueKey(item.id),
-                      leading: ExerciseArt(
+                      leading: ExerciseGif(
+                        gifUrl: exercise?.gifUrl ?? '',
                         category: exercise?.category ?? 0,
                         size: 48,
                         borderRadius: 10,
@@ -212,7 +213,8 @@ class WorkoutPlanScreen extends ConsumerWidget {
             children: [
               for (final e in exercises)
                 ListTile(
-                  leading: ExerciseArt(
+                  leading: ExerciseGif(
+                    gifUrl: e.gifUrl,
                     category: e.category,
                     size: 44,
                     borderRadius: 10,

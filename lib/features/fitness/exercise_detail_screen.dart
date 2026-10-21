@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/database.dart';
 import '../../core/localization/l10n_extension.dart';
+import 'data/fitness_repository.dart';
 import 'domain/exercise_collections.dart';
 import 'domain/exercise_format.dart';
 import 'widgets/exercise_art.dart';
@@ -94,6 +96,7 @@ class ExerciseDetailScreen extends StatelessWidget {
               style: _bodyStyle(theme),
             ),
           ),
+          _PersonalBests(exerciseId: exercise.id),
           _Section(
             title: l10n.howTo,
             child: _Instructions(
@@ -149,6 +152,51 @@ TextStyle _bodyStyle(ThemeData theme) {
 }
 
 /// The dataset's instructions, one numbered step per line.
+class _PersonalBests extends ConsumerWidget {
+  const _PersonalBests({required this.exerciseId});
+
+  final int exerciseId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final records = ref.watch(exerciseRecordsProvider(exerciseId));
+    return records.maybeWhen(
+      data: (list) {
+        if (list.isEmpty) return const SizedBox.shrink();
+        String? line(
+          PersonalRecordKind kind,
+          String Function(int value) format,
+        ) {
+          final values = [
+            for (final record in list)
+              if (record.recordType == kind.index) record.value,
+          ];
+          if (values.isEmpty) return null;
+          final best = values.reduce((a, b) => a > b ? a : b);
+          return format(best);
+        }
+
+        final lines =
+            [
+              line(
+                PersonalRecordKind.weightGrams,
+                (value) => '${(value / 1000).toStringAsFixed(1)} kg',
+              ),
+              line(PersonalRecordKind.reps, (value) => '$value ${l10n.reps}'),
+              line(PersonalRecordKind.durationSec, (value) => '${value}s'),
+            ].whereType<String>();
+        if (lines.isEmpty) return const SizedBox.shrink();
+        return _Section(
+          title: l10n.personalBest,
+          child: Text(lines.join('\n'), style: _bodyStyle(Theme.of(context))),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
 class _Instructions extends StatelessWidget {
   const _Instructions({required this.text, required this.emptyLabel});
 
