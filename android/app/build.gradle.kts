@@ -23,8 +23,8 @@ android {
 
     defaultConfig {
         applicationId = "com.aalumai.aalumai"
-        // 26 (Android 8.0) is required by the llama_flutter_android plugin
-        // (SharedMemory-based inference bridge). Previously 24.
+        // 26 (Android 8.0) keeps the on-device notifications, alarms and
+        // foreground services available. Previously 24.
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -14,8 +14,8 @@ enum Decision {
   /// executing. Used for sensitive/destructive/external actions.
   confirm,
 
-  /// The tool does not exist — the model hallucinated it; feed an error
-  /// back so it can correct itself.
+  /// The tool does not exist — the request could not be understood; report
+  /// it back so the user can rephrase.
   unknownTool,
 }
 

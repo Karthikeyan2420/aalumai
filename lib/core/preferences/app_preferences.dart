@@ -23,14 +23,24 @@ class AppPreferences {
   static const _kLastBackupAt = 'last_backup_at';
   static const _kQuickWaterMl = 'quick_water_ml';
   static const _kJarvisReminderSeq = 'jarvis_reminder_seq';
-  static const _kJarvisModelFile = 'jarvis_model_file';
-  static const _kJarvisModelSha = 'jarvis_model_sha256';
-  static const _kJarvisModelThreads = 'jarvis_model_threads';
-  static const _kJarvisModelContext = 'jarvis_model_context';
   static const _kJarvisBriefingEnabled = 'jarvis_briefing_enabled';
   static const _kJarvisBriefingId = 'jarvis_briefing_id';
   static const _kRecentQuickActions = 'recent_quick_actions';
   static const _kDashboardHidden = 'dashboard_hidden';
+
+  // Jarvis assistant voice preferences (shared by chat & wake-word flow).
+  static const _kAssistantSpeechEnabled = 'assistant_speech_enabled';
+  static const _kAssistantWakeWordEnabled = 'assistant_wake_word_enabled';
+  static const _kAssistantBackgroundListening =
+      'assistant_background_listening';
+  static const _kAssistantOnlineSearchEnabled =
+      'assistant_online_search_enabled';
+  static const _kAssistantSpeechRate = 'assistant_speech_rate';
+  static const _kAssistantSpeechPitch = 'assistant_speech_pitch';
+  static const _kAssistantSpeechVolume = 'assistant_speech_volume';
+  static const _kAssistantVoiceName = 'assistant_voice_name';
+  static const _kAssistantSpeechLanguage = 'assistant_speech_language';
+  static const _kAssistantUserName = 'assistant_user_name';
 
   // Global alarm voice preferences (shared by every ringing alarm).
   static const _kVoiceLanguage = 'alarm_voice_language';
@@ -181,45 +191,79 @@ class AppPreferences {
     return 5000000 + seq;
   }
 
-  // ------------------------------------------------------ Jarvis AI model
+  // ------------------------------------------------------ Jarvis assistant
 
-  /// File name of the installed GGUF model inside the app-private models
-  /// directory. Empty = no model installed yet.
-  String get jarvisModelFile => _prefs.getString(_kJarvisModelFile) ?? '';
+  /// Whether the assistant speaks its replies aloud.
+  bool get assistantSpeechEnabled =>
+      _prefs.getBool(_kAssistantSpeechEnabled) ?? true;
 
-  Future<void> setJarvisModelFile(String value) =>
-      _prefs.setString(_kJarvisModelFile, value);
+  Future<void> setAssistantSpeechEnabled(bool value) =>
+      _prefs.setBool(_kAssistantSpeechEnabled, value);
 
-  /// SHA-256 of the installed model, recorded at install time so later runs
-  /// can detect silent corruption.
-  String get jarvisModelSha256 => _prefs.getString(_kJarvisModelSha) ?? '';
+  /// Whether "Hey Jarvis" wake-word detection is enabled.
+  bool get assistantWakeWordEnabled =>
+      _prefs.getBool(_kAssistantWakeWordEnabled) ?? false;
 
-  Future<void> setJarvisModelSha256(String value) =>
-      _prefs.setString(_kJarvisModelSha, value);
+  Future<void> setAssistantWakeWordEnabled(bool value) =>
+      _prefs.setBool(_kAssistantWakeWordEnabled, value);
 
-  /// CPU threads for inference. Clamped to 1–8 (the practical range for the
-  /// mid-range phones this app targets). Defaults to 6: on the big.LITTLE
-  /// phones this app targets the small cores drag, so 8 is usually slower
-  /// than 6, but 4 leaves throughput on the table.
-  int get jarvisModelThreads {
-    final value = _prefs.getInt(_kJarvisModelThreads) ?? 6;
-    return value.clamp(1, 8);
-  }
+  /// Whether the assistant keeps listening in the background. Only honoured
+  /// when a foreground service is running; Android restrictions may still
+  /// suspend it.
+  bool get assistantBackgroundListening =>
+      _prefs.getBool(_kAssistantBackgroundListening) ?? false;
 
-  Future<void> setJarvisModelThreads(int value) =>
-      _prefs.setInt(_kJarvisModelThreads, value.clamp(1, 8));
+  Future<void> setAssistantBackgroundListening(bool value) =>
+      _prefs.setBool(_kAssistantBackgroundListening, value);
 
-  /// Context window passed to llama.cpp (affects memory use, not file size).
-  /// Defaults to 2048: Qwen3-1.7B needs ~112 KB of KV cache per token, so
-  /// 4096 tokens (~460 MB) pushes an 8 GB phone into swap and tanks decode
-  /// speed. 2048 still fits the ~1.2k-token system prompt plus a reply.
-  int get jarvisModelContextSize {
-    final value = _prefs.getInt(_kJarvisModelContext) ?? 2048;
-    return value.clamp(1024, 8192);
-  }
+  /// Whether questions not covered locally may be answered with online
+  /// research (Wikipedia, weather, etc.).
+  bool get assistantOnlineSearchEnabled =>
+      _prefs.getBool(_kAssistantOnlineSearchEnabled) ?? true;
 
-  Future<void> setJarvisModelContextSize(int value) =>
-      _prefs.setInt(_kJarvisModelContext, value.clamp(1024, 8192));
+  Future<void> setAssistantOnlineSearchEnabled(bool value) =>
+      _prefs.setBool(_kAssistantOnlineSearchEnabled, value);
+
+  double get assistantSpeechRate =>
+      _prefs.getDouble(_kAssistantSpeechRate) ?? 1.0;
+
+  Future<void> setAssistantSpeechRate(double value) =>
+      _prefs.setDouble(_kAssistantSpeechRate, value);
+
+  double get assistantSpeechPitch =>
+      _prefs.getDouble(_kAssistantSpeechPitch) ?? 1.0;
+
+  Future<void> setAssistantSpeechPitch(double value) =>
+      _prefs.setDouble(_kAssistantSpeechPitch, value);
+
+  /// Speech volume, 0.0 (silent) – 1.0 (loudest). Defaults to full.
+  double get assistantSpeechVolume =>
+      _prefs.getDouble(_kAssistantSpeechVolume) ?? 1.0;
+
+  Future<void> setAssistantSpeechVolume(double value) =>
+      _prefs.setDouble(_kAssistantSpeechVolume, value);
+
+  /// Installed TTS voice name to use, or empty for the device default.
+  String get assistantVoiceName =>
+      _prefs.getString(_kAssistantVoiceName) ?? '';
+
+  Future<void> setAssistantVoiceName(String value) =>
+      _prefs.setString(_kAssistantVoiceName, value);
+
+  /// BCP-47 language tag for assistant speech, or empty to follow the app.
+  String get assistantSpeechLanguage =>
+      _prefs.getString(_kAssistantSpeechLanguage) ?? '';
+
+  Future<void> setAssistantSpeechLanguage(String value) =>
+      _prefs.setString(_kAssistantSpeechLanguage, value);
+
+  /// The user's preferred name, used to answer "who am I?"; empty when the
+  /// user has not configured one.
+  String get assistantUserName =>
+      _prefs.getString(_kAssistantUserName) ?? '';
+
+  Future<void> setAssistantUserName(String value) =>
+      _prefs.setString(_kAssistantUserName, value);
 
   /// Whether the morning briefing notification is armed (default on).
   bool get jarvisBriefingEnabled =>

@@ -4364,7 +4364,7 @@ abstract class AppLocalizations {
   /// No description provided for @jarvisSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'On-device AI assistant'**
+  /// **'On-device assistant'**
   String get jarvisSubtitle;
 
   /// No description provided for @jarvisChat.
@@ -4373,11 +4373,11 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get jarvisChat;
 
-  /// No description provided for @jarvisModel.
+  /// No description provided for @jarvisSettings.
   ///
   /// In en, this message translates to:
-  /// **'Model'**
-  String get jarvisModel;
+  /// **'Voice'**
+  String get jarvisSettings;
 
   /// No description provided for @jarvisMemories.
   ///
@@ -4388,7 +4388,7 @@ abstract class AppLocalizations {
   /// No description provided for @jarvisChatEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Ask anything — Jarvis runs entirely on this device.'**
+  /// **'Ask anything — Jarvis runs on this device, no language model needed.'**
   String get jarvisChatEmpty;
 
   /// No description provided for @jarvisInputHint.
@@ -4439,84 +4439,6 @@ abstract class AppLocalizations {
   /// **'Decline'**
   String get jarvisDecline;
 
-  /// No description provided for @jarvisNoModel.
-  ///
-  /// In en, this message translates to:
-  /// **'No model installed yet.'**
-  String get jarvisNoModel;
-
-  /// No description provided for @jarvisModelInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'Model installed'**
-  String get jarvisModelInstalled;
-
-  /// No description provided for @jarvisModelLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Model loaded — ready for chat'**
-  String get jarvisModelLoaded;
-
-  /// No description provided for @jarvisModelNotLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Model not loaded'**
-  String get jarvisModelNotLoaded;
-
-  /// No description provided for @jarvisDownloadModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Download model (~1.3 GB)'**
-  String get jarvisDownloadModel;
-
-  /// No description provided for @jarvisImportModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Import a GGUF file'**
-  String get jarvisImportModel;
-
-  /// No description provided for @jarvisDeleteModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete model'**
-  String get jarvisDeleteModel;
-
-  /// No description provided for @jarvisLoadModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Load model'**
-  String get jarvisLoadModel;
-
-  /// No description provided for @jarvisUnloadModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Unload model'**
-  String get jarvisUnloadModel;
-
-  /// No description provided for @jarvisDownloading.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading…'**
-  String get jarvisDownloading;
-
-  /// No description provided for @jarvisVerifying.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifying…'**
-  String get jarvisVerifying;
-
-  /// No description provided for @jarvisCpuThreads.
-  ///
-  /// In en, this message translates to:
-  /// **'CPU threads'**
-  String get jarvisCpuThreads;
-
-  /// No description provided for @jarvisContextSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Context size'**
-  String get jarvisContextSize;
-
   /// No description provided for @jarvisNoMemories.
   ///
   /// In en, this message translates to:
@@ -4553,23 +4475,125 @@ abstract class AppLocalizations {
   /// **'A fact or preference Jarvis should remember'**
   String get jarvisMemoryHint;
 
-  /// No description provided for @jarvisDeleteModelWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete the installed model? You can download or import it again later.'**
-  String get jarvisDeleteModelWarning;
-
   /// No description provided for @jarvisMicHold.
   ///
   /// In en, this message translates to:
   /// **'Hold to speak'**
   String get jarvisMicHold;
 
+  /// No description provided for @jarvisMicTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to speak'**
+  String get jarvisMicTap;
+
   /// No description provided for @jarvisSpeakReplies.
   ///
   /// In en, this message translates to:
   /// **'Speak replies'**
   String get jarvisSpeakReplies;
+
+  /// No description provided for @jarvisWakeWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Wake word'**
+  String get jarvisWakeWord;
+
+  /// No description provided for @jarvisWakeWordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"Hey Jarvis\" to activate hands-free. Uses more battery.'**
+  String get jarvisWakeWordHint;
+
+  /// No description provided for @jarvisOnlineSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Online answers'**
+  String get jarvisOnlineSearch;
+
+  /// No description provided for @jarvisOnlineSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow general questions to be answered from trusted web sources when not in the offline knowledge base.'**
+  String get jarvisOnlineSearchHint;
+
+  /// No description provided for @jarvisVoiceSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice output'**
+  String get jarvisVoiceSection;
+
+  /// No description provided for @jarvisSpeechLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get jarvisSpeechLanguage;
+
+  /// No description provided for @jarvisSpeechLanguageDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get jarvisSpeechLanguageDefault;
+
+  /// No description provided for @jarvisSpeechRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get jarvisSpeechRate;
+
+  /// No description provided for @jarvisSpeechPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch'**
+  String get jarvisSpeechPitch;
+
+  /// No description provided for @jarvisSpeechVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get jarvisSpeechVolume;
+
+  /// No description provided for @jarvisVoicePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview voice'**
+  String get jarvisVoicePreview;
+
+  /// No description provided for @jarvisStopSpeaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop speaking'**
+  String get jarvisStopSpeaking;
+
+  /// No description provided for @jarvisUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get jarvisUserName;
+
+  /// No description provided for @jarvisUserNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used when you ask who you are.'**
+  String get jarvisUserNameHint;
+
+  /// No description provided for @jarvisSourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get jarvisSourcesTitle;
+
+  /// No description provided for @jarvisOfflineBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get jarvisOfflineBadge;
+
+  /// No description provided for @jarvisOnlineBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get jarvisOnlineBadge;
 
   /// No description provided for @jarvisBriefingTitle.
   ///

@@ -1,13 +1,15 @@
 /// Memory records and retrieval ranking (pure, testable).
 ///
 /// Rows come from the `jarvis_memories` table via the repository; this
-/// layer owns the domain shape and the scoring used to decide what gets
-/// injected into the system prompt.
+/// layer owns the domain shape and the scoring used to pick the most
+/// relevant memories to surface for a query.
 library;
 
 import 'dart:math' as math;
 
-import 'prompt_builder.dart' show estimateTokens;
+/// Rough token estimate (~4 characters per token). Used only to cap how
+/// much memory text is pulled into a single answer, not for any model work.
+int _estimateTokens(String text) => (text.length / 4).ceil();
 
 enum MemoryCategory { fact, preference, goal, person, event, summary }
 
@@ -33,7 +35,7 @@ class MemoryRecord {
   final MemoryCategory category;
 
   /// true = the user acknowledged this memory (via the memory manager UI
-  /// or by saving it explicitly), false = the model saved it on its own.
+  /// or by saving it explicitly).
   final bool confirmed;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -145,7 +147,7 @@ List<MemoryHit> rankMemories({
   var used = 0;
   for (final hit in scored) {
     if (picked.length >= limit) break;
-    final cost = estimateTokens(hit.record.content) + 8;
+    final cost = _estimateTokens(hit.record.content) + 8;
     if (used + cost > tokenBudget && picked.isNotEmpty) break;
     picked.add(hit);
     used += cost;

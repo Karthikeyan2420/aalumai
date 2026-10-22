@@ -1,28 +1,27 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/localization/l10n_extension.dart';
-import '../../core/providers/providers.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/providers/providers.dart';
 import '../../core/theme/module_theme.dart';
 import '../../core/widgets/common.dart';
 import '../alarms/data/alarm_repository.dart';
 import '../schedule/data/event_repository.dart';
 import '../tasks/data/task_repository.dart';
+import 'conversation/assistant_providers.dart';
+import 'conversation/assistant_reply.dart';
 import 'data/briefing_scheduler.dart';
-import 'data/llama_runtime.dart';
 import 'data/memory_repository.dart';
-import 'data/model_manager.dart';
-import 'domain/chat_models.dart';
 import 'domain/memory_retrieval.dart';
 import 'presentation/jarvis_controller.dart';
 
-/// The Jarvis assistant: chat, model management, and memory management in
-/// one screen. Everything runs on-device; the model tab is the only place
-/// that ever touches the network (a single explicit download).
+/// The assistant: chat, voice settings and memory management.
+///
+/// Everything runs on-device with no language model. Online lookups happen
+/// only for questions outside the local knowledge base, and only when the
+/// user has left online answers enabled.
 class JarvisScreen extends ConsumerWidget {
   const JarvisScreen({super.key});
 
@@ -37,13 +36,13 @@ class JarvisScreen extends ConsumerWidget {
           bottom: TabBar(
             tabs: [
               Tab(text: l10n.jarvisChat),
-              Tab(text: l10n.jarvisModel),
+              Tab(text: l10n.jarvisSettings),
               Tab(text: l10n.jarvisMemories),
             ],
           ),
         ),
         body: const TabBarView(
-          children: [_ChatTab(), _ModelTab(), _MemoriesTab()],
+          children: [_ChatTab(), _VoiceTab(), _MemoriesTab()],
         ),
       ),
     );
@@ -65,15 +64,8 @@ class _ChatTabState extends ConsumerState<_ChatTab>
     with AutomaticKeepAliveClientMixin {
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
-  final _speech = SpeechToText();
-  final _tts = FlutterTts();
   bool _confirmationOpen = false;
-
-  /// Whether a speech recognition service was discovered; false in widget
-  /// tests and on devices without one — the mic button simply stays hidden.
-  bool _speechReady = false;
-  bool _listening = false;
-  bool _speakReplies = false;
+  bool _voiceReady = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -81,22 +73,16 @@ class _ChatTabState extends ConsumerState<_ChatTab>
   @override
   void initState() {
     super.initState();
-    _initSpeech();
+    _initVoice();
   }
 
-  Future<void> _initSpeech() async {
-    try {
-      final ok = await _speech.initialize();
-      if (mounted) setState(() => _speechReady = ok);
-    } catch (_) {
-      // No speech service here; the mic button stays hidden.
-    }
+  Future<void> _initVoice() async {
+    final ok = await ref.read(voiceServiceProvider).initialize();
+    if (mounted) setState(() => _voiceReady = ok);
   }
 
   @override
   void dispose() {
-    _speech.stop();
-    _tts.stop();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -155,7 +141,9 @@ class _ChatTabState extends ConsumerState<_ChatTab>
     );
     _confirmationOpen = false;
     if (!mounted) return;
-    ref.read(jarvisChatProvider.notifier).resolveConfirmation(confirmed ?? false);
+    ref
+        .read(jarvisChatProvider.notifier)
+        .resolveConfirmation(confirmed ?? false);
   }
 
   void _send() {
@@ -164,70 +152,21 @@ class _ChatTabState extends ConsumerState<_ChatTab>
     ref.read(jarvisChatProvider.notifier).send(text);
   }
 
-  /// Push-to-talk: starts recognition while the mic is held. Partial results
-  /// stream into the input field; the final result is sent automatically.
-  Future<void> _startListening() async {
-    if (!_speechReady || _listening || ref.read(jarvisChatProvider).busy) {
+  Future<void> _toggleMic() async {
+    final notifier = ref.read(jarvisChatProvider.notifier);
+    final state = ref.read(jarvisChatProvider);
+    if (state.listening) {
+      await notifier.stopListening();
       return;
     }
-    _listening = true;
-    final notifier = ref.read(jarvisChatProvider.notifier);
-    try {
-      await _speech.listen(
-        listenOptions: SpeechListenOptions(partialResults: true),
-        onResult: (result) {
-          if (!mounted) return;
-          setState(() => _inputController.text = result.recognizedWords);
-          if (result.finalResult) {
-            _listening = false;
-            final text = _inputController.text;
-            if (text.trim().isNotEmpty) {
-              _inputController.clear();
-              notifier.send(text);
-            }
-          }
-        },
-      );
-    } catch (_) {
-      _listening = false;
-    }
-  }
-
-  Future<void> _stopListening() async {
-    if (!_listening) return;
-    try {
-      await _speech.stop();
-    } catch (_) {
-      _listening = false;
-    }
-  }
-
-  /// Best-effort read-aloud of the latest assistant reply.
-  Future<void> _speakLastReply() async {
-    if (!_speakReplies) return;
-    final messages = ref.read(jarvisChatProvider).messages;
-    String? text;
-    for (final message in messages.reversed) {
-      if (message.role == ChatRole.assistant && !message.isToolResult) {
-        text = message.text;
-        break;
-      }
-    }
-    if (text == null || text.trim().isEmpty) return;
-    try {
-      await _tts.stop();
-      final locale = ref.read(localeCodeProvider);
-      if (locale != null) {
-        try {
-          await _tts.setLanguage(locale);
-        } catch (_) {
-          // Fall back to the device's default TTS voice.
-        }
-      }
-      await _tts.speak(text);
-    } catch (_) {
-      // TTS unavailable: chat stays fully usable without it.
-    }
+    // Stream transcripts into the field; final results send automatically.
+    final voice = ref.read(voiceServiceProvider);
+    if (!_voiceReady && !await voice.initialize()) return;
+    ref.read(voiceServiceProvider).transcripts.listen((text) {
+      if (!mounted) return;
+      setState(() => _inputController.text = text);
+    });
+    await notifier.startListening();
   }
 
   @override
@@ -245,10 +184,6 @@ class _ChatTabState extends ConsumerState<_ChatTab>
       if (next != null) _showConfirmation(next);
     });
 
-    ref.listen(jarvisChatProvider.select((s) => s.busy), (previous, next) {
-      if (previous == true && next == false) _speakLastReply();
-    });
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
 
     return Column(
@@ -258,46 +193,31 @@ class _ChatTabState extends ConsumerState<_ChatTab>
             content: Text(state.error!),
             leading: Icon(Icons.error_outline, color: theme.colorScheme.error),
             actions: [
-              TextButton(
-                onPressed: notifier.clearError,
-                child: Text(l10n.ok),
-              ),
+              TextButton(onPressed: notifier.clearError, child: Text(l10n.ok)),
             ],
           ),
         Expanded(
-          child:
-              state.messages.isEmpty
-                  ? EmptyState(
-                    icon: Icons.smart_toy_outlined,
-                    message: l10n.jarvisChatEmpty,
-                  )
-                  : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                    itemCount: state.messages.length,
-                    itemBuilder:
-                        (context, index) =>
-                            _MessageBubble(message: state.messages[index]),
-                  ),
+          child: state.messages.isEmpty
+              ? EmptyState(
+                  icon: Icons.smart_toy_outlined,
+                  message: l10n.jarvisChatEmpty,
+                )
+              : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  itemCount: state.messages.length,
+                  itemBuilder: (context, index) =>
+                      _MessageBubble(message: state.messages[index]),
+                ),
         ),
-        if (state.busy)
+        if (state.listening)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+                Icon(Icons.mic, size: 14, color: theme.colorScheme.error),
                 const SizedBox(width: 8),
-                Text(
-                  l10n.jarvisThinking,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(l10n.jarvisThinking, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -329,50 +249,30 @@ class _ChatTabState extends ConsumerState<_ChatTab>
                   ),
                 ),
                 const SizedBox(width: 6),
-                if (_speechReady)
+                if (_voiceReady)
                   Tooltip(
-                    message: l10n.jarvisMicHold,
-                    child: GestureDetector(
-                      onLongPressStart: (_) => _startListening(),
-                      onLongPressEnd: (_) => _stopListening(),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 12,
-                        ),
-                        child: Icon(
-                          _listening ? Icons.mic : Icons.mic_none,
-                          color:
-                              _listening
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.onSurfaceVariant,
-                        ),
+                    message: l10n.jarvisMicTap,
+                    child: IconButton(
+                      icon: Icon(
+                        state.listening ? Icons.mic : Icons.mic_none,
+                        color: state.listening
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
+                      onPressed: _toggleMic,
                     ),
                   ),
                 IconButton(
-                  tooltip: l10n.jarvisSpeakReplies,
-                  icon: Icon(
-                    _speakReplies ? Icons.volume_up : Icons.volume_off,
-                    color:
-                        _speakReplies
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () {
-                    setState(() => _speakReplies = !_speakReplies);
-                    if (!_speakReplies) _tts.stop();
-                  },
+                  tooltip: l10n.jarvisStopSpeaking,
+                  icon: const Icon(Icons.volume_off),
+                  onPressed: notifier.stopSpeaking,
                 ),
                 IconButton.filled(
                   tooltip: state.busy ? l10n.jarvisStop : l10n.jarvisSend,
-                  icon: Icon(state.busy ? Icons.stop : Icons.send),
-                  onPressed:
-                      state.busy
-                          ? notifier.stop
-                          : (_inputController.text.trim().isEmpty
-                              ? null
-                              : _send),
+                  icon: const Icon(Icons.send),
+                  onPressed: _inputController.text.trim().isEmpty
+                      ? null
+                      : _send,
                 ),
               ],
             ),
@@ -391,43 +291,25 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final isUser = message.isUser;
 
-    if (message.isToolResult) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          children: [
-            const SizedBox(width: 8),
-            Icon(Icons.handyman_outlined, size: 13, color: theme.hintColor),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                message.text,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.hintColor,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final bubbleColor = isUser
+        ? theme.colorScheme.primaryContainer
+        : message.isError
+            ? theme.colorScheme.errorContainer.withValues(alpha: 0.35)
+            : softTint(context, ModuleAccents.jarvis, 0.10);
 
-    final isUser = message.role == ChatRole.user;
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.82,
+          maxWidth: MediaQuery.of(context).size.width * 0.85,
         ),
         decoration: BoxDecoration(
-          color:
-              isUser
-                  ? theme.colorScheme.primaryContainer
-                  : softTint(context, ModuleAccents.jarvis, 0.10),
+          color: bubbleColor,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -435,101 +317,129 @@ class _MessageBubble extends StatelessWidget {
             bottomRight: Radius.circular(isUser ? 4 : 16),
           ),
         ),
-        child: Text(message.text, style: theme.textTheme.bodyMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!isUser && message.kind == ReplyKind.online) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.public, size: 13, color: theme.hintColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.jarvisOnlineBadge,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.hintColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+            ],
+            if (!isUser && message.kind == ReplyKind.knowledge) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.menu_book_outlined, size: 13, color: theme.hintColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.jarvisOfflineBadge,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.hintColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+            ],
+            SelectableText(message.text, style: theme.textTheme.bodyMedium),
+            if (message.hasSources) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.jarvisSourcesTitle,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.hintColor,
+                ),
+              ),
+              const SizedBox(height: 2),
+              for (final source in message.sources)
+                InkWell(
+                  onTap: () => _openUrl(source.sourceUrl),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.link,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            source.sourceName,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Model tab
+// Voice / settings tab
 // ---------------------------------------------------------------------------
 
-class _ModelTab extends ConsumerStatefulWidget {
-  const _ModelTab();
+class _VoiceTab extends ConsumerStatefulWidget {
+  const _VoiceTab();
 
   @override
-  ConsumerState<_ModelTab> createState() => _ModelTabState();
+  ConsumerState<_VoiceTab> createState() => _VoiceTabState();
 }
 
-class _ModelTabState extends ConsumerState<_ModelTab>
+class _VoiceTabState extends ConsumerState<_VoiceTab>
     with AutomaticKeepAliveClientMixin {
-  ModelInstallProgress? _progress;
-  String? _installError;
+  List<String> _languages = const [];
+  bool _loadingLanguages = true;
 
   @override
   bool get wantKeepAlive => true;
 
-  Future<void> _download() async {
-    final manager = ref.read(jarvisModelManagerProvider);
-    setState(() {
-      _progress = null;
-      _installError = null;
-    });
-    try {
-      await for (final progress in manager.download()) {
-        if (!mounted) return;
-        setState(() => _progress = progress);
-      }
-      if (!mounted) return;
-      setState(() => _progress = null);
-      await ref.read(jarvisChatProvider.notifier).refreshModelReady();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _progress = null;
-        _installError = '$e';
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguages();
   }
 
-  Future<void> _import() async {
-    final picked = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      dialogTitle: context.l10n.jarvisImportModel,
-    );
-    final path = picked?.files.single.path;
-    if (path == null) return;
+  Future<void> _loadLanguages() async {
+    final langs = await ref
+        .read(assistantVoiceServiceProvider)
+        .availableLanguages();
     if (!mounted) return;
-    setState(() => _installError = null);
-    try {
-      await ref.read(jarvisModelManagerProvider).importFromFile(path);
-      if (!mounted) return;
-      await ref.read(jarvisChatProvider.notifier).refreshModelReady();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _installError = '$e');
-    }
-  }
-
-  Future<void> _delete() async {
-    final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: Text(l10n.jarvisDeleteModel),
-            content: Text(l10n.jarvisDeleteModelWarning),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(dialogContext).colorScheme.error,
-                ),
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(l10n.delete),
-              ),
-            ],
-          ),
-    );
-    if (confirmed != true) return;
-    final notifier = ref.read(jarvisChatProvider.notifier);
-    await notifier.unloadModel();
-    await ref.read(jarvisModelManagerProvider).deleteModel();
-    await notifier.refreshModelReady();
+    setState(() {
+      _languages = langs;
+      _loadingLanguages = false;
+    });
   }
 
   @override
@@ -537,110 +447,45 @@ class _ModelTabState extends ConsumerState<_ModelTab>
     super.build(context);
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final state = ref.watch(jarvisChatProvider);
     final prefs = ref.watch(appPreferencesProvider);
+    final engine = ref.read(assistantEngineProvider);
 
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.memory, color: ModuleAccents.jarvis),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        state.modelReady
-                            ? l10n.jarvisModelInstalled
-                            : l10n.jarvisNoModel,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                    ),
-                    Chip(
-                      label: Text(
-                        state.engineState == LlamaRuntimeState.ready
-                            ? l10n.jarvisModelLoaded
-                            : l10n.jarvisModelNotLoaded,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: _progress == null ? _download : null,
-                      icon: const Icon(Icons.download),
-                      label: Text(l10n.jarvisDownloadModel),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: _import,
-                      icon: const Icon(Icons.file_open_outlined),
-                      label: Text(l10n.jarvisImportModel),
-                    ),
-                    if (state.modelReady)
-                      state.engineState == LlamaRuntimeState.ready
-                          ? OutlinedButton.icon(
-                            onPressed: ref
-                                .read(jarvisChatProvider.notifier)
-                                .unloadModel,
-                            icon: const Icon(Icons.power_settings_new),
-                            label: Text(l10n.jarvisUnloadModel),
-                          )
-                          : FilledButton.tonalIcon(
-                            onPressed:
-                                () => ref
-                                    .read(jarvisChatProvider.notifier)
-                                    .loadModel(),
-                            icon: const Icon(Icons.play_arrow),
-                            label: Text(l10n.jarvisLoadModel),
-                          ),
-                    if (state.modelReady)
-                      IconButton.outlined(
-                        tooltip: l10n.jarvisDeleteModel,
-                        icon: Icon(
-                          Icons.delete_outline,
-                          color: theme.colorScheme.error,
-                        ),
-                        onPressed: _delete,
-                      ),
-                  ],
-                ),
-                if (_progress != null) ...[
-                  const SizedBox(height: 16),
-                  LinearProgressIndicator(value: _progress!.fraction),
-                  const SizedBox(height: 6),
-                  Text(
-                    switch (_progress!.phase) {
-                      ModelInstallPhase.downloading =>
-                        '${l10n.jarvisDownloading} '
-                            '${_formatBytes(_progress!.receivedBytes)}'
-                            '${_progress!.totalBytes > 0 ? ' / ${_formatBytes(_progress!.totalBytes)}' : ''}',
-                      ModelInstallPhase.verifying => l10n.jarvisVerifying,
-                      ModelInstallPhase.installed => l10n.jarvisModelInstalled,
-                    },
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-                if (_installError != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _installError!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(Icons.record_voice_over_outlined),
+                title: Text(l10n.jarvisSpeakReplies),
+                value: prefs.assistantSpeechEnabled,
+                onChanged: (value) async {
+                  await prefs.setAssistantSpeechEnabled(value);
+                  setState(() {});
+                },
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.mic_none),
+                title: Text(l10n.jarvisWakeWord),
+                subtitle: Text(l10n.jarvisWakeWordHint),
+                value: prefs.assistantWakeWordEnabled,
+                onChanged: (value) async {
+                  await prefs.setAssistantWakeWordEnabled(value);
+                  setState(() {});
+                },
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.public),
+                title: Text(l10n.jarvisOnlineSearch),
+                subtitle: Text(l10n.jarvisOnlineSearchHint),
+                value: prefs.assistantOnlineSearchEnabled,
+                onChanged: (value) async {
+                  await prefs.setAssistantOnlineSearchEnabled(value);
+                  setState(() {});
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -650,42 +495,95 @@ class _ModelTabState extends ConsumerState<_ModelTab>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.jarvisCpuThreads, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 4),
-                DropdownButton<int>(
-                  isExpanded: true,
-                  value: prefs.jarvisModelThreads,
-                  items: [
-                    for (var i = 1; i <= 8; i++)
-                      DropdownMenuItem(value: i, child: Text('$i')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      prefs.setJarvisModelThreads(value);
+                Text(l10n.jarvisVoiceSection, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 12),
+                if (_loadingLanguages)
+                  const LinearProgressIndicator()
+                else
+                  DropdownButtonFormField<String>(
+                    value: prefs.assistantSpeechLanguage.isEmpty
+                        ? ''
+                        : prefs.assistantSpeechLanguage,
+                    decoration: InputDecoration(
+                      labelText: l10n.jarvisSpeechLanguage,
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: '',
+                        child: Text(l10n.jarvisSpeechLanguageDefault),
+                      ),
+                      for (final code in _languages)
+                        DropdownMenuItem(value: code, child: Text(code)),
+                    ],
+                    onChanged: (value) async {
+                      await prefs.setAssistantSpeechLanguage(value ?? '');
+                      await ref
+                          .read(assistantVoiceServiceProvider)
+                          .refreshSettings();
                       setState(() {});
-                    }
+                    },
+                  ),
+                const SizedBox(height: 16),
+                _SliderRow(
+                  label: l10n.jarvisSpeechRate,
+                  value: prefs.assistantSpeechRate,
+                  min: 0.3,
+                  max: 1.8,
+                  onChanged: (v) async {
+                    await prefs.setAssistantSpeechRate(v);
+                    await ref
+                        .read(assistantVoiceServiceProvider)
+                        .refreshSettings();
+                    setState(() {});
                   },
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.jarvisContextSize,
-                  style: theme.textTheme.titleSmall,
+                _SliderRow(
+                  label: l10n.jarvisSpeechPitch,
+                  value: prefs.assistantSpeechPitch,
+                  min: 0.5,
+                  max: 1.6,
+                  onChanged: (v) async {
+                    await prefs.setAssistantSpeechPitch(v);
+                    await ref
+                        .read(assistantVoiceServiceProvider)
+                        .refreshSettings();
+                    setState(() {});
+                  },
                 ),
-                const SizedBox(height: 4),
-                DropdownButton<int>(
-                  isExpanded: true,
-                  value: prefs.jarvisModelContextSize,
-                  items: const [
-                    DropdownMenuItem(value: 1024, child: Text('1024')),
-                    DropdownMenuItem(value: 2048, child: Text('2048')),
-                    DropdownMenuItem(value: 4096, child: Text('4096')),
-                    DropdownMenuItem(value: 8192, child: Text('8192')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      prefs.setJarvisModelContextSize(value);
-                      setState(() {});
-                    }
+                _SliderRow(
+                  label: l10n.jarvisSpeechVolume,
+                  value: prefs.assistantSpeechVolume,
+                  min: 0.2,
+                  max: 1.0,
+                  onChanged: (v) async {
+                    await prefs.setAssistantSpeechVolume(v);
+                    await ref
+                        .read(assistantVoiceServiceProvider)
+                        .refreshSettings();
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(l10n.jarvisVoicePreview),
+                    onPressed: () =>
+                        ref.read(assistantVoiceServiceProvider).preview(),
+                  ),
+                ),
+                const Divider(height: 24),
+                TextField(
+                  controller: TextEditingController.fromValue(
+                    TextEditingValue(text: prefs.assistantUserName),
+                  ),
+                  decoration: InputDecoration(
+                    labelText: l10n.jarvisUserName,
+                    helperText: l10n.jarvisUserNameHint,
+                  ),
+                  onSubmitted: (value) async {
+                    await prefs.setAssistantUserName(value.trim());
                   },
                 ),
               ],
@@ -715,9 +613,16 @@ class _ModelTabState extends ConsumerState<_ModelTab>
                   alarms: ref.read(alarmRepositoryProvider),
                 );
               } catch (_) {
-                // Swallowed like the other best-effort reconciles.
+                // Best-effort, like the other reconciles.
               }
             },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            '${engine.knowledge.entries.length} offline knowledge topics',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
           ),
         ),
       ],
@@ -725,15 +630,37 @@ class _ModelTabState extends ConsumerState<_ModelTab>
   }
 }
 
-String _formatBytes(int bytes) {
-  if (bytes >= 1024 * 1024 * 1024) {
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+class _SliderRow extends StatelessWidget {
+  const _SliderRow({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+  });
+
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 72, child: Text(label)),
+        Expanded(
+          child: Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
   }
-  if (bytes >= 1024 * 1024) {
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-  if (bytes >= 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-  return '$bytes B';
 }
 
 // ---------------------------------------------------------------------------
@@ -757,28 +684,26 @@ class _MemoriesTabState extends ConsumerState<_MemoriesTab>
     final controller = TextEditingController();
     final content = await showDialog<String>(
       context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: Text(l10n.jarvisAddMemory),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              minLines: 1,
-              maxLines: 3,
-              decoration: InputDecoration(hintText: l10n.jarvisMemoryHint),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                onPressed:
-                    () => Navigator.of(dialogContext).pop(controller.text),
-                child: Text(l10n.save),
-              ),
-            ],
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.jarvisAddMemory),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          minLines: 1,
+          maxLines: 3,
+          decoration: InputDecoration(hintText: l10n.jarvisMemoryHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.cancel),
           ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
     );
     final text = content?.trim();
     if (text == null || text.isEmpty) return;
@@ -817,32 +742,31 @@ class _MemoriesTabState extends ConsumerState<_MemoriesTab>
                 final memory = memories[index];
                 return _MemoryTile(
                   memory: memory,
-                  onConfirm:
-                      () => repo.setConfirmed(memory.id, !memory.confirmed),
+                  onConfirm: () =>
+                      repo.setConfirmed(memory.id, !memory.confirmed),
                   onForget: () async {
                     final confirmed = await showDialog<bool>(
                       context: context,
-                      builder:
-                          (dialogContext) => AlertDialog(
-                            title: Text(l10n.jarvisForgetMemory),
-                            content: Text(memory.content),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(dialogContext).pop(false),
-                                child: Text(l10n.cancel),
-                              ),
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(dialogContext).colorScheme.error,
-                                ),
-                                onPressed: () =>
-                                    Navigator.of(dialogContext).pop(true),
-                                child: Text(l10n.delete),
-                              ),
-                            ],
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(l10n.jarvisForgetMemory),
+                        content: Text(memory.content),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(false),
+                            child: Text(l10n.cancel),
                           ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(dialogContext).colorScheme.error,
+                            ),
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(true),
+                            child: Text(l10n.delete),
+                          ),
+                        ],
+                      ),
                     );
                     if (confirmed == true) await repo.delete(memory.id);
                   },
@@ -920,7 +844,7 @@ class _MemoryTile extends StatelessWidget {
                   ),
                 IconButton(
                   tooltip: l10n.jarvisForgetMemory,
-                  icon: Icon(Icons.delete_outline, size: 20),
+                  icon: const Icon(Icons.delete_outline, size: 20),
                   onPressed: onForget,
                 ),
               ],

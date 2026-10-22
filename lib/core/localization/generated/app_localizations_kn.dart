@@ -2192,7 +2192,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get jarvisChat => 'Chat';
 
   @override
-  String get jarvisModel => 'Model';
+  String get jarvisSettings => 'Voice';
 
   @override
   String get jarvisMemories => 'Memories';
@@ -2225,45 +2225,6 @@ class AppLocalizationsKn extends AppLocalizations {
   String get jarvisDecline => 'Decline';
 
   @override
-  String get jarvisNoModel => 'No model installed yet.';
-
-  @override
-  String get jarvisModelInstalled => 'Model installed';
-
-  @override
-  String get jarvisModelLoaded => 'Model loaded — ready for chat';
-
-  @override
-  String get jarvisModelNotLoaded => 'Model not loaded';
-
-  @override
-  String get jarvisDownloadModel => 'Download model (~1.3 GB)';
-
-  @override
-  String get jarvisImportModel => 'Import a GGUF file';
-
-  @override
-  String get jarvisDeleteModel => 'Delete model';
-
-  @override
-  String get jarvisLoadModel => 'Load model';
-
-  @override
-  String get jarvisUnloadModel => 'Unload model';
-
-  @override
-  String get jarvisDownloading => 'Downloading…';
-
-  @override
-  String get jarvisVerifying => 'Verifying…';
-
-  @override
-  String get jarvisCpuThreads => 'CPU threads';
-
-  @override
-  String get jarvisContextSize => 'Context size';
-
-  @override
   String get jarvisNoMemories => 'No memories saved yet.';
 
   @override
@@ -2282,13 +2243,64 @@ class AppLocalizationsKn extends AppLocalizations {
   String get jarvisMemoryHint => 'A fact or preference Jarvis should remember';
 
   @override
-  String get jarvisDeleteModelWarning => 'Delete the installed model? You can download or import it again later.';
-
-  @override
   String get jarvisMicHold => 'Hold to speak';
 
   @override
+  String get jarvisMicTap => 'Tap to speak';
+
+  @override
   String get jarvisSpeakReplies => 'Speak replies';
+
+  @override
+  String get jarvisWakeWord => 'Wake word';
+
+  @override
+  String get jarvisWakeWordHint => 'Say \"Hey Jarvis\" to activate hands-free. Uses more battery.';
+
+  @override
+  String get jarvisOnlineSearch => 'Online answers';
+
+  @override
+  String get jarvisOnlineSearchHint => 'Allow general questions to be answered from trusted web sources when not in the offline knowledge base.';
+
+  @override
+  String get jarvisVoiceSection => 'Voice output';
+
+  @override
+  String get jarvisSpeechLanguage => 'Language';
+
+  @override
+  String get jarvisSpeechLanguageDefault => 'System default';
+
+  @override
+  String get jarvisSpeechRate => 'Rate';
+
+  @override
+  String get jarvisSpeechPitch => 'Pitch';
+
+  @override
+  String get jarvisSpeechVolume => 'Volume';
+
+  @override
+  String get jarvisVoicePreview => 'Preview voice';
+
+  @override
+  String get jarvisStopSpeaking => 'Stop speaking';
+
+  @override
+  String get jarvisUserName => 'Your name';
+
+  @override
+  String get jarvisUserNameHint => 'Used when you ask who you are.';
+
+  @override
+  String get jarvisSourcesTitle => 'Sources';
+
+  @override
+  String get jarvisOfflineBadge => 'Offline';
+
+  @override
+  String get jarvisOnlineBadge => 'Online';
 
   @override
   String get jarvisBriefingTitle => 'Morning briefing';

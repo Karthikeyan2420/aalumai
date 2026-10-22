@@ -1,5 +1,5 @@
-/// Result of one executed (or refused) tool call — the model-facing outcome
-/// that the chat loop feeds back as a `TOOL RESULT [tool]` turn.
+/// Result of one executed (or refused) tool call — the outcome the
+/// assistant engine relays back to the user and uses to shape its reply.
 library;
 
 enum ToolOutcomeKind {
@@ -9,15 +9,14 @@ enum ToolOutcomeKind {
 
   /// Several records matched the request. The assistant must ask the user
   /// which one before doing anything — each [ToolChoice] carries the id the
-  /// model can pass back as `match`.
+  /// user can pick.
   ambiguous,
 
   /// Nothing matched — the assistant should say so plainly, never guess.
   notFound,
 
   /// The action could not be performed (bad arguments, missing capability,
-  /// repository failure). [ToolOutcome.message] explains why in language the
-  /// model can relay or retry from.
+  /// repository failure). [ToolOutcome.message] explains why.
   error,
 }
 
@@ -49,7 +48,8 @@ class ToolOutcome {
 
   final ToolOutcomeKind kind;
 
-  /// Model-facing English text. Never localized — it is protocol, not UI.
+  /// User-facing English text describing what happened. Kept plain so it can
+  /// be shown directly or spoken aloud.
   final String message;
 
   final List<ToolChoice> choices;

@@ -1,9 +1,10 @@
-/// Catalog of actions Jarvis may request, with strict argument validation.
+/// Catalog of actions the assistant may perform, with strict argument
+/// validation.
 ///
-/// Specs are the single source of truth: they feed the system prompt's
-/// action catalogue, validate model output before anything touches a
-/// repository, and drive the confirmation policy. Model-supplied values are
-/// never trusted — every arg is coerced and range-checked here.
+/// Specs are the single source of truth: the deterministic intent engine
+/// fills them in, [validateToolArgs] coerces and range-checks every value
+/// before anything touches a repository, and they drive the confirmation
+/// policy. Values are never trusted — every arg is validated here.
 library;
 
 /// How risky an action is. Drives the confirmation policy.
@@ -63,7 +64,7 @@ class ToolSpec {
 
   final String name;
 
-  /// Model-facing English description used in the system prompt.
+  /// Short English description of what the action does.
   final String description;
   final ToolRisk risk;
   final List<ArgSpec> params;
@@ -71,7 +72,7 @@ class ToolSpec {
 
 /// Validation outcome: on success [args] contains only declared params with
 /// coerced values; on failure [errors] lists every problem found (so the
-/// model gets one complete, actionable feedback message).
+/// caller gets one complete, actionable feedback message).
 class ToolValidation {
   const ToolValidation.ok(Map<String, Object?> args)
     : this._(args, const []);
@@ -392,8 +393,8 @@ final Map<String, ToolSpec> kJarvisToolsByName = Map.unmodifiable(
 /// Coerces and validates [args] against [spec].
 ///
 /// Deliberately strict about unknown parameters (they are reported as
-/// errors so the model learns the schema) and lenient about JSON typing
-/// details models get wrong (numbers quoted as strings, etc.).
+/// errors) and lenient about JSON typing details (numbers quoted as
+/// strings, etc.).
 ToolValidation validateToolArgs(ToolSpec spec, Map<String, Object?> args) {
   final errors = <String>[];
   final out = <String, Object?>{};
