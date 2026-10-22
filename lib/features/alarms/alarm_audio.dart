@@ -244,6 +244,7 @@ class AlarmAudio {
 
   bool _ringing = false;
   bool _loopActive = false;
+  bool _voiceNative = false;
   AlarmTone? _tone;
   double _volume = 1;
   AlarmPlaybackConfig? _config;
@@ -276,21 +277,26 @@ class AlarmAudio {
   /// Starts a ring using the full [config] (sound mode, message and timing).
   ///
   /// When [musicAlreadyPlaying] is true (the native ring service is already
-  /// looping the tone), only the spoken message is started here so TTS runs on
-  /// the Flutter main isolate where `flutter_tts` is reliable.
+  /// looping the tone), the music player is not started again here. When
+  /// [voiceAlreadyPlaying] is true the native service is also speaking, so no
+  /// Dart voice loop is started either — the ring stays entirely native, which
+  /// keeps the speech on the alarm audio stream the platform will not silence
+  /// as background playback.
   Future<void> start(
     AlarmPlaybackConfig config, {
     bool musicAlreadyPlaying = false,
+    bool voiceAlreadyPlaying = false,
   }) async {
     await _resetSession();
     _config = config;
     _tone = AlarmSounds.resolveTone(config.soundId);
     _volume = (config.volumePercent / 100).clamp(0.0, 1.0).toDouble();
     _ringing = true;
+    _voiceNative = voiceAlreadyPlaying;
     _startVibration(config.vibrate && !musicAlreadyPlaying);
     if (config.playsMusic && !musicAlreadyPlaying) await _ensurePlaying();
     _startWatchdog();
-    _startVoiceLoop();
+    if (!voiceAlreadyPlaying) _startVoiceLoop();
   }
 
   Future<void> _ensurePlaying() async {
@@ -325,8 +331,13 @@ class AlarmAudio {
       if (config.playsMusic && !_player.isPlaying) {
         _ensurePlaying();
       }
-      // If the voice loop ended for any reason while still ringing, restart it.
-      if (config.speaks && !_loopActive && _tts != null) {
+      // If the voice loop ended for any reason while still ringing, restart it
+      // — but only when this coordinator owns speech. When the native service
+      // speaks, its own watchdog keeps the voice alive.
+      if (config.speaks &&
+          !_voiceNative &&
+          !_loopActive &&
+          _tts != null) {
         _startVoiceLoop();
       }
     });
@@ -428,7 +439,9 @@ class AlarmAudio {
     final config = _config;
     if (config == null) return;
     if (config.playsMusic) await _ensurePlaying();
-    if (config.speaks && !_loopActive && _tts != null) _startVoiceLoop();
+    if (config.speaks && !_voiceNative && !_loopActive && _tts != null) {
+      _startVoiceLoop();
+    }
   }
 
   /// Plays a single short preview of [soundId] without looping.
@@ -463,6 +476,7 @@ class AlarmAudio {
     if (pending != null && !pending.isCompleted) pending.complete();
     _config = null;
     _loopActive = false;
+    _voiceNative = false;
   }
 
   /// Stops any playback, speech and vibration immediately.

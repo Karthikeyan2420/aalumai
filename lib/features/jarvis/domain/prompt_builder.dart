@@ -47,6 +47,36 @@ class PromptContext {
   final List<String> workspaceFacts;
 }
 
+/// Appended to the newest user turn to force Qwen3's non-thinking mode.
+///
+/// Qwen3 is a hybrid-reasoning model: unless told otherwise it emits a
+/// `Thinking Process:` / fenced think block before the answer, which is slow
+/// and noisy for an on-device assistant. The plugin's bundled ChatML template
+/// emits a bare `im_start` assistant generation prompt (no empty think pair),
+/// so the model defaults to thinking. The documented soft switch `/no_think`
+/// in the *user message* is the reliable way to turn it off when
+/// `enable_thinking` cannot be passed through the plugin.
+const String kNoThinkDirective = '/no_think';
+
+/// Open fence of a Qwen3 reasoning block (`<` + `think` + `>`).
+final String kThinkStart = '${String.fromCharCode(60)}think${String.fromCharCode(62)}';
+
+/// Close fence of a Qwen3 reasoning block (`<` + `/think` + `>`).
+final String kThinkEnd =
+    '${String.fromCharCode(60)}/think${String.fromCharCode(62)}';
+
+/// Returns [turn] with [kNoThinkDirective] appended when it is the newest
+/// user message and does not already carry a `/think` switch.
+///
+/// Only touched at send time; the stored history keeps the user's original
+/// text so the transcript stays clean.
+ChatTurn withNoThinkDirective(ChatTurn turn) {
+  if (turn.role != ChatRole.user) return turn;
+  final body = turn.content.trimRight();
+  if (body.contains('/no_think') || body.contains('/think')) return turn;
+  return turn.copyWith(content: '$body $kNoThinkDirective');
+}
+
 String _two(int n) => n.toString().padLeft(2, '0');
 
 String formatNow(DateTime now, {String timeZoneLabel = ''}) {
@@ -139,15 +169,18 @@ String buildSystemPrompt(
     ..writeln('- Do not invent data about the user; only what the tools '
         'return or what the context blocks above state.')
     ..writeln()
-    ..writeln('Action list:');
+    ..writeln('Action list (name(signature): intent; "!" required, "?" '
+        'optional):');
 
   for (final tool in catalog) {
-    buffer.writeln('- ${tool.name}: ${tool.description}');
+    buffer.writeln('- ${_compactToolLine(tool)}');
   }
 
   buffer
     ..writeln()
     ..writeln('STYLE')
+    ..writeln('- Answer directly. Do not show your reasoning or write '
+        'down a "Thinking Process" — the user only sees your final answer.')
     ..writeln('- Keep replies short and speakable: 1-4 sentences, plain '
         'text, no markdown headings, no bullet walls.')
     ..writeln('- Mention concrete values (times, titles, amounts) exactly '
@@ -156,11 +189,90 @@ String buildSystemPrompt(
   return buffer.toString().trimRight();
 }
 
+/// One compact catalogue line: `name(signature): intent`.
+///
+/// The full prose in [ToolSpec.description] spends most of its length
+/// spelling out arguments in "Args: …" form. The native prefill is the
+/// dominant cost on-device (~20 tok/s measured), so we keep the intent
+/// sentence and move the argument detail into a terser, machine-parsable
+/// signature rendered from [ToolSpec.params].
+String _compactToolLine(ToolSpec tool) {
+  final gloss = tool.description.split('Args:').first.trim();
+  final signature = tool.params.map(_compactParam).join(', ');
+  return '${tool.name}($signature): $gloss';
+}
+
+String _compactParam(ArgSpec p) {
+  final req = p.required ? '!' : '?';
+  switch (p.type) {
+    case ArgType.enumValue:
+      return '${p.name}$req=${p.allowed.join('|')}';
+    case ArgType.datetime:
+      return '${p.name}$req=ISO';
+    case ArgType.intNum:
+      final range = (p.min != null && p.max != null)
+          ? '${p.min}-${p.max}'
+          : '';
+      return '${p.name}$req=int$range';
+    case ArgType.doubleNum:
+      return '${p.name}$req=number';
+    case ArgType.boolType:
+      return '${p.name}$req=true|false';
+    case ArgType.intList:
+      return '${p.name}$req=int-list';
+    case ArgType.string:
+      return '${p.name}$req';
+  }
+}
+
 /// Wraps a tool result the way the model is told to expect it (a user
 /// message starting with the fixed marker).
 ChatTurn toolResultTurn(String toolName, String result) {
   final body = result.trim();
   return ChatTurn.user('TOOL RESULT [$toolName]\n$body');
+}
+
+/// Removes a leaked Qwen3 reasoning block from generated [text].
+///
+/// The `/no_think` soft switch is only a strong hint; small models still
+/// occasionally prefix the answer with a fenced think block or a
+/// "Thinking Process:" preamble. This defensively returns just the final
+/// answer so the UI never shows the scratchpad. Text with no reasoning
+/// block is returned unchanged (trimmed).
+String stripThinking(String text) {
+  var body = text;
+
+  // 1. Fenced think pair(s): keep only what follows the last close tag.
+  //    This also covers the empty think pair Qwen3 emits in non-thinking
+  //    mode.
+  if (body.contains(kThinkEnd)) {
+    body = body.split(kThinkEnd).last;
+  } else if (body.trimLeft().startsWith(kThinkStart)) {
+    // Opening tag with no close yet (mid-stream): drop the leading run of
+    // think tags / blank lines so suppression keeps improving as tokens
+    // arrive.
+    body = body.replaceFirst(RegExp('^\\s*(?:${RegExp.escape(kThinkStart)}\\s*)+'), '');
+  }
+
+  // 2. Explicit prose reasoning prefix.
+  const markers = [
+    'Thinking Process:',
+    'thinking process:',
+    'Thinking:',
+    'Reasoning:',
+  ];
+  for (final marker in markers) {
+    if (body.contains(marker)) {
+      final after = body.substring(body.indexOf(marker) + marker.length);
+      final split = after.split(RegExp(r'\n\s*\n'));
+      body = split.length > 1 ? split.last : after;
+    }
+  }
+
+  // 3. Bare `think` fence the model sometimes emits.
+  body = body.replaceAll(RegExp(r'^\s*think\s*\n', multiLine: true), '');
+
+  return body.trim();
 }
 
 /// The context window actually sent to the model: one system turn plus the

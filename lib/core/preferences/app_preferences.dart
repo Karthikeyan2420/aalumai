@@ -198,9 +198,11 @@ class AppPreferences {
       _prefs.setString(_kJarvisModelSha, value);
 
   /// CPU threads for inference. Clamped to 1–8 (the practical range for the
-  /// mid-range phones this app targets).
+  /// mid-range phones this app targets). Defaults to 6: on the big.LITTLE
+  /// phones this app targets the small cores drag, so 8 is usually slower
+  /// than 6, but 4 leaves throughput on the table.
   int get jarvisModelThreads {
-    final value = _prefs.getInt(_kJarvisModelThreads) ?? 4;
+    final value = _prefs.getInt(_kJarvisModelThreads) ?? 6;
     return value.clamp(1, 8);
   }
 
@@ -208,8 +210,11 @@ class AppPreferences {
       _prefs.setInt(_kJarvisModelThreads, value.clamp(1, 8));
 
   /// Context window passed to llama.cpp (affects memory use, not file size).
+  /// Defaults to 2048: Qwen3-1.7B needs ~112 KB of KV cache per token, so
+  /// 4096 tokens (~460 MB) pushes an 8 GB phone into swap and tanks decode
+  /// speed. 2048 still fits the ~1.2k-token system prompt plus a reply.
   int get jarvisModelContextSize {
-    final value = _prefs.getInt(_kJarvisModelContext) ?? 4096;
+    final value = _prefs.getInt(_kJarvisModelContext) ?? 2048;
     return value.clamp(1024, 8192);
   }
 

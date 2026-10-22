@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:aalumai/features/alarms/alarm_audio.dart';
+import 'package:aalumai/features/alarms/alarm_playback.dart';
+import 'package:aalumai/features/alarms/alarm_tts.dart';
+import 'package:aalumai/features/alarms/data/alarm_voice_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A recording player so the loop/watchdog lifecycle can be asserted without
@@ -33,6 +36,32 @@ class _FakePlayer implements AlarmAudioPlayer {
   Future<void> dispose() async {
     playing = false;
   }
+}
+
+/// A recording TTS backend, so the voice loop's start can be observed without
+/// the platform.
+class _FakeTts implements AlarmTts {
+  int speakCount = 0;
+
+  @override
+  Future<bool> isLanguageAvailable(String languageCode) async => true;
+
+  @override
+  Future<List<TtsVoice>> voices() async => const [];
+
+  @override
+  Future<void> configure(AlarmVoiceSettings settings, String languageCode) async {}
+
+  @override
+  Future<void> speak(String text) async {
+    speakCount++;
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
 }
 
 void main() {
@@ -109,6 +138,60 @@ void main() {
     expect(player.playing, isTrue);
     expect(player.loop, isFalse);
     expect(audio.isRinging, isFalse);
+
+    await audio.dispose();
+  });
+
+  testWidgets(
+    'a native-owned ring starts neither Dart music nor the Dart voice loop',
+    (tester) async {
+      final player = _FakePlayer();
+      final tts = _FakeTts();
+      final audio = AlarmAudio(player: player, tts: tts);
+
+      // The native service is playing music and speaking the message.
+      await audio.start(
+        const AlarmPlaybackConfig(
+          mode: AlarmSoundMode.musicAndVoice,
+          soundId: 'classic',
+          message: 'Wake up and shine',
+          musicIntervalSec: 1,
+          vibrate: false,
+        ),
+        musicAlreadyPlaying: true,
+        voiceAlreadyPlaying: true,
+      );
+
+      expect(audio.isRinging, isTrue);
+      // No second music player and no Dart speech: the native service owns both.
+      expect(player.playCount, 0);
+      await tester.pump(const Duration(seconds: 3));
+      expect(tts.speakCount, 0);
+
+      await audio.dispose();
+    },
+  );
+
+  testWidgets('a Dart-owned ring speaks the message on the interval', (
+    tester,
+  ) async {
+    final player = _FakePlayer();
+    final tts = _FakeTts();
+    final audio = AlarmAudio(player: player, tts: tts);
+
+    await audio.start(
+      const AlarmPlaybackConfig(
+        mode: AlarmSoundMode.musicAndVoice,
+        soundId: 'classic',
+        message: 'Wake up and shine',
+        musicIntervalSec: 1,
+        vibrate: false,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 1200));
+    expect(tts.speakCount, greaterThanOrEqualTo(1));
+    expect(player.playing, isTrue);
 
     await audio.dispose();
   });

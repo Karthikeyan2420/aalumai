@@ -226,13 +226,22 @@ class JarvisChatController extends Notifier<JarvisChatState> {
         tokenBudget: prefs.jarvisModelContextSize,
       );
 
+      // Nudge the newest user turn out of Qwen3's thinking mode (the plugin
+      // cannot pass `enable_thinking=false`; the `/no_think` soft switch is
+      // the only lever). The stored history stays untouched.
+      if (conversation.isNotEmpty &&
+          conversation.last.role == ChatRole.user) {
+        conversation[conversation.length - 1] =
+            withNoThinkDirective(conversation.last);
+      }
+
       final assistantId = _addMessage(role: ChatRole.assistant, text: '');
       final buffer = StringBuffer();
       await for (final token in runtime.chat(history: conversation)) {
         buffer.write(token);
-        _updateMessage(assistantId, buffer.toString());
+        _updateMessage(assistantId, stripThinking(buffer.toString()));
       }
-      final raw = buffer.toString().trim();
+      final raw = stripThinking(buffer.toString());
 
       if (_stopRequested) {
         _history.add(ChatTurn.assistant(raw));

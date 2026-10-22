@@ -352,6 +352,77 @@ void main() {
       expect(turn.content, startsWith('TOOL RESULT [task.list]'));
       expect(turn.content, contains('- Buy milk'));
     });
+
+    test('system prompt tells the model not to show reasoning', () {
+      final prompt = buildSystemPrompt(PromptContext(now: now, uiLocale: 'en'));
+      expect(prompt, contains('Do not show your reasoning'));
+    });
+
+    test('tool catalogue is compact (signature, no verbose Args prose)', () {
+      final prompt = buildSystemPrompt(PromptContext(now: now, uiLocale: 'en'));
+      // Signature form derived from the spec, with required/optional marks.
+      expect(prompt, contains('task.create(title!, due?=ISO'));
+      expect(prompt, contains('alarm.set(hour!=int0-23'));
+      // The old verbose "Args:" prose must be gone (it dominated prefill).
+      expect(prompt, isNot(contains('Args:')));
+      // Still compact enough to keep prefill cheap on-device.
+      expect(estimateTokens(prompt), lessThan(1100));
+    });
+  });
+
+  group('thinking suppression', () {
+    test('withNoThinkDirective appends the switch to a user turn', () {
+      final turn = withNoThinkDirective(ChatTurn.user('what time is it?'));
+      expect(turn.content, endsWith(kNoThinkDirective));
+      expect(turn.content, startsWith('what time is it?'));
+    });
+
+    test('withNoThinkDirective never doubles up or touches non-user turns', () {
+      final already = withNoThinkDirective(
+        ChatTurn.user('hi /no_think'),
+      );
+      expect(already.content, 'hi /no_think');
+      expect(
+        withNoThinkDirective(ChatTurn.assistant('hello')).content,
+        'hello',
+      );
+    });
+
+    test('withNoThinkDirective leaves an explicit /think alone', () {
+      final turn = withNoThinkDirective(ChatTurn.user('think hard /think'));
+      expect(turn.content, 'think hard /think');
+    });
+
+    test('stripThinking removes a Thinking Process block', () {
+      const raw = 'Thinking Process:\n'
+          '1. Look up the current time.\n'
+          '2. The clock says 4:36.\n\n'
+          'It is 4:36 PM right now.';
+      expect(stripThinking(raw), 'It is 4:36 PM right now.');
+    });
+
+    test('stripThinking removes a fenced think block', () {
+      final raw = '$kThinkStart\n'
+          'The user asked the time. The system prompt says 16:36.\n'
+          '$kThinkEnd\n'
+          'The time is 4:36 PM.';
+      expect(stripThinking(raw), 'The time is 4:36 PM.');
+    });
+
+    test('stripThinking drops a mid-stream open think fence', () {
+      final raw = '$kThinkStart\nThe user asked the time. The clock says';
+      expect(stripThinking(raw), 'The user asked the time. The clock says');
+    });
+
+    test('stripThinking passes clean text through untouched', () {
+      const raw = 'Your next alarm is at 07:00.';
+      expect(stripThinking(raw), raw);
+    });
+
+    test('stripThinking strips a leaked think fence', () {
+      const raw = 'think\nDone — task created.';
+      expect(stripThinking(raw), 'Done — task created.');
+    });
   });
 
   group('history windowing', () {

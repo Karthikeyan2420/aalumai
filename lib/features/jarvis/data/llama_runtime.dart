@@ -158,8 +158,8 @@ class LlamaRuntime implements LlamaEngine {
   @override
   Future<void> load({
     required String modelPath,
-    int contextSize = 4096,
-    int threads = 4,
+    int contextSize = 2048,
+    int threads = 6,
   }) async {
     if (!Platform.isAndroid) {
       _setState(LlamaRuntimeState.unavailable);

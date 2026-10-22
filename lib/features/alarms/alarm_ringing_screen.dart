@@ -139,14 +139,18 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
       return;
     }
     // The native ring service may already be looping the tone from the moment
-    // the alarm triggered. Starting music again would double the alarm, but TTS
-    // still runs here on the Flutter main isolate where speech is reliable.
+    // the alarm triggered. It also speaks the message through the alarm audio
+    // stream. Flutter must then stay silent for both, otherwise the music plays
+    // twice and the speech is routed over STREAM_MUSIC, which Android silences
+    // as background playback while the foreground ring service owns the alarm
+    // stream. We only drive audio here when no native ring is active.
     final native = await AlarmTriggerChannel.ringState();
-    final nativeMusic = native.isFor(widget.alarm.id);
-    if (nativeMusic && config.speaks) {
-      await AlarmTriggerChannel.delegateSpeechToFlutter();
-    }
-    await _audio.start(config, musicAlreadyPlaying: nativeMusic);
+    final nativeRinging = native.isFor(widget.alarm.id);
+    await _audio.start(
+      config,
+      musicAlreadyPlaying: nativeRinging,
+      voiceAlreadyPlaying: nativeRinging && config.speaks,
+    );
   }
 
   /// Builds the playback configuration from the alarm's own sound settings and

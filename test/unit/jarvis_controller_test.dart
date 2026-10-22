@@ -239,4 +239,35 @@ void main() {
     notifier.clearChat();
     expect(container.read(jarvisChatProvider).messages, isEmpty);
   });
+
+  test('the sent conversation nudges the newest user turn out of thinking',
+      () async {
+    engine.queuedReplies.add(['It is 4:36 PM.']);
+
+    await notifier.send('what time is it?');
+
+    final sent = engine.conversations.single;
+    expect(sent.first.role, ChatRole.system);
+    expect(sent.last.role, ChatRole.user);
+    expect(sent.last.content, endsWith('/no_think'));
+    // The visible transcript keeps the user's original wording.
+    expect(
+      container.read(jarvisChatProvider).messages.first.text,
+      'what time is it?',
+    );
+  });
+
+  test('a leaked thinking block is stripped from the visible reply', () async {
+    engine.queuedReplies.add([
+      'Thinking Process:\nThe clock says 16:36.\n\n',
+      'It is 4:36 PM.',
+    ]);
+
+    await notifier.send('what time is it?');
+
+    expect(
+      container.read(jarvisChatProvider).messages.last.text,
+      'It is 4:36 PM.',
+    );
+  });
 }
