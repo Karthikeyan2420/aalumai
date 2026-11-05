@@ -8,6 +8,7 @@ abstract class ReminderNotifier {
     required String title,
     required String body,
     required DateTime when,
+    String? payload,
   });
 
   /// Schedules a reminder that repeats every day at [hour]:[minute], or every

@@ -1,3 +1,4 @@
+import 'package:aalumai/core/preferences/app_preferences.dart';
 import 'package:aalumai/core/db/database.dart';
 import 'package:aalumai/core/services/alarm_scheduler.dart';
 import 'package:aalumai/core/services/reminder_notifier.dart';
@@ -11,6 +12,8 @@ import 'package:aalumai/features/schedule/data/event_repository.dart';
 import 'package:aalumai/features/tasks/data/task_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_preferences.dart';
 
 class _FakeAlarmScheduler implements AlarmScheduler {
   _FakeAlarmScheduler({this.failSchedule = false});
@@ -88,6 +91,7 @@ class _FakeNotifier implements ReminderNotifier {
     required String title,
     required String body,
     required DateTime when,
+    String? payload,
   }) async {
     oneOff.add(_OneOff(id, when));
   }
@@ -121,10 +125,16 @@ void main() {
   late HabitRepository habitRepo;
   late EventRepository eventRepo;
 
+  late AppPreferences prefs;
+
+  setUpAll(() async {
+    prefs = await testAppPreferences();
+  });
+
   void build({bool failSchedule = false}) {
     alarmScheduler = _FakeAlarmScheduler(failSchedule: failSchedule);
     notifier = _FakeNotifier();
-    reminders = ReminderScheduler(notifier);
+    reminders = ReminderScheduler(notifier, prefs);
     alarmRepo = AlarmRepository(db, alarmScheduler);
     taskRepo = TaskRepository(db, reminders);
     habitRepo = HabitRepository(db, reminders);

@@ -283,37 +283,82 @@ class _GymWorkoutTabState extends ConsumerState<GymWorkoutTab> {
     BuildContext context,
     List<GymFocusKey> order,
   ) async {
-    final updated = [...order];
-    await showModalBottomSheet<void>(
+    final saved = await showModalBottomSheet<List<GymFocusKey>>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) {
-        return SafeArea(
-          child: ReorderableListView(
-            onReorder: (oldIndex, newIndex) {
-              setState(() {
-                if (newIndex > oldIndex) newIndex--;
-                final item = updated.removeAt(oldIndex);
-                updated.insert(newIndex, item);
-              });
-            },
-            children: [
-              for (final f in updated)
-                ListTile(
-                  key: ValueKey(f.storageKey),
-                  title: Text(f.title),
-                  trailing: const Icon(Icons.drag_handle),
-                ),
-            ],
-          ),
-        );
-      },
+      builder: (ctx) => _FocusReorderSheet(initial: order),
     );
+    if (saved == null || !context.mounted) return;
     final prefs = ref.read(workoutPreferencesProvider).valueOrNull;
     if (prefs == null) return;
     await ref.read(fitnessRepositoryProvider).savePreferences(
       prefs.copyWith(
-        focusAreaOrder: updated.map((e) => e.storageKey).toList(),
+        focusAreaOrder: saved.map((e) => e.storageKey).toList(),
+      ),
+    );
+  }
+}
+
+class _FocusReorderSheet extends StatefulWidget {
+  const _FocusReorderSheet({required this.initial});
+
+  final List<GymFocusKey> initial;
+
+  @override
+  State<_FocusReorderSheet> createState() => _FocusReorderSheetState();
+}
+
+class _FocusReorderSheetState extends State<_FocusReorderSheet> {
+  late List<GymFocusKey> _order = [...widget.initial];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Reorder focus areas',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, _order),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: ReorderableListView(
+              shrinkWrap: true,
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex--;
+                  final item = _order.removeAt(oldIndex);
+                  _order.insert(newIndex, item);
+                });
+              },
+              children: [
+                for (final f in _order)
+                  ListTile(
+                    key: ValueKey(f.storageKey),
+                    title: Text(f.title),
+                    trailing: const Icon(Icons.drag_handle),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

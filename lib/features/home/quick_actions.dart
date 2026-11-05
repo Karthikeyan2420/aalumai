@@ -293,16 +293,19 @@ Future<void> _startWorkout(BuildContext context, WidgetRef ref) async {
 }
 
 Future<void> _completeHabit(BuildContext context, WidgetRef ref) {
+  final host = context;
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (context) => const _HabitQuickSheet(),
+    builder: (sheetContext) => _HabitQuickSheet(hostContext: host),
   );
 }
 
 class _HabitQuickSheet extends ConsumerWidget {
-  const _HabitQuickSheet();
+  const _HabitQuickSheet({required this.hostContext});
+
+  final BuildContext hostContext;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -333,7 +336,9 @@ class _HabitQuickSheet extends ConsumerWidget {
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      showHabitEditor(context);
+                      if (hostContext.mounted) {
+                        showHabitEditor(hostContext);
+                      }
                     },
                     icon: const Icon(Icons.add),
                     label: Text(l10n.habits),

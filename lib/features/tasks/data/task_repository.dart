@@ -159,6 +159,10 @@ class TaskRepository {
                     t.isCompleted.equals(false),
               )).get();
           if (exists.isEmpty) {
+            final nextReminder = ReminderScheduler.nextReminderFor(
+              task,
+              nextDate,
+            );
             await create(
               title: task.title,
               notes: task.notes,
@@ -167,6 +171,7 @@ class TaskRepository {
               priority: TaskPriority.fromIndex(task.priority),
               recurrence: rule,
               tagIds: task.tagIds,
+              reminderAt: nextReminder,
             );
           }
         }
@@ -198,6 +203,8 @@ class TaskRepository {
       return;
     }
     await reschedule(task, rule.next(task.dueDate!));
+    final updated = await getById(task.id);
+    if (updated != null) await _reminders?.syncTask(updated);
   }
 }
 

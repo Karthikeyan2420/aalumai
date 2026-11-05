@@ -116,6 +116,9 @@ abstract class AlarmTts {
   /// Every installed voice, across all languages.
   Future<List<TtsVoice>> voices();
 
+  /// Clears cached voice list so the next [voices] call re-queries the engine.
+  void clearVoiceCache() {}
+
   /// Applies [settings] for [languageCode] (already resolved to a concrete code,
   /// never empty). Selects an installed voice when one matches, otherwise lets
   /// the engine use its default voice for the language.
@@ -189,12 +192,18 @@ class FlutterTtsAlarmTts implements AlarmTts {
           }
         }
       }
-      _cachedVoices = result;
+      if (result.isNotEmpty) {
+        _cachedVoices = result;
+      }
       return result;
     } catch (_) {
-      _cachedVoices = const [];
-      return _cachedVoices!;
+      return const [];
     }
+  }
+
+  @override
+  void clearVoiceCache() {
+    _cachedVoices = null;
   }
 
   @override

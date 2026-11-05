@@ -833,6 +833,21 @@ class FitnessRepository {
   Future<void> deleteScheduleEntry(int id) =>
       (_db.delete(_db.workoutSchedules)..where((t) => t.id.equals(id))).go();
 
+  /// Removes a schedule row and its linked generated plan (if any).
+  Future<void> deleteScheduleEntryAndPlan(int id) async {
+    final entry =
+        await (_db.select(_db.workoutSchedules)
+          ..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (entry == null) return;
+    final planId = entry.planId;
+    await deleteScheduleEntry(id);
+    if (planId != null) {
+      await (_db.delete(_db.workoutPlanItems)
+        ..where((t) => t.planId.equals(planId))).go();
+      await deletePlan(planId);
+    }
+  }
+
   /// Copies an entry to [toDate] (defaulting to its own day).
   Future<int> duplicateScheduleEntry(int id, {DateTime? toDate}) async {
     final source =
@@ -910,7 +925,7 @@ class FitnessRepository {
     final now = DateTime.now();
     final start =
         startDate ??
-        DateTime(now.year, now.month, 1);
+        DateTime(now.year, now.month, now.day);
     final dayStart = DateTime(start.year, start.month, start.day);
     var created = 0;
     for (var offset = 0; offset < days; offset++) {
@@ -921,7 +936,7 @@ class FitnessRepository {
       }
       for (final e in existing) {
         if (e.status != ScheduleStatus.completed.index) {
-          await deleteScheduleEntry(e.id);
+          await deleteScheduleEntryAndPlan(e.id);
         }
       }
       final planned = DailySessionBuilder.buildDay(

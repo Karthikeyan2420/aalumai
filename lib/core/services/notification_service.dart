@@ -14,6 +14,7 @@ import '../../features/alarms/alarm_playback.dart';
 import 'alarm_trigger_channel.dart';
 import 'alarm_scheduler.dart';
 import 'reminder_notifier.dart';
+import 'reminder_scheduler.dart';
 
 /// Wraps local notification / alarm scheduling.
 ///
@@ -50,6 +51,9 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
   /// Invoked when the user taps an alarm (or snooze) notification, with the
   /// alarm id. Set before [init] is first called.
   void Function(int alarmId)? onAlarmNotificationTap;
+
+  /// Fired when a task or event reminder notification is opened or delivered.
+  void Function(String payload)? onReminderPayload;
 
   /// Supplies the global voice preferences used to build native trigger
   /// payloads. Wired once from `main.dart`, because scheduling runs outside the
@@ -155,6 +159,17 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
       int.tryParse(payload ?? '');
 
   void _dispatchPayload(String? payload) {
+    if (payload == null || payload.isEmpty) return;
+    final eventId = ReminderPayload.parseEventId(payload);
+    if (eventId != null) {
+      onReminderPayload?.call(payload);
+      return;
+    }
+    final taskId = ReminderPayload.parseTaskId(payload);
+    if (taskId != null) {
+      onReminderPayload?.call(payload);
+      return;
+    }
     final id = alarmIdFromPayload(payload);
     if (id != null) onAlarmNotificationTap?.call(id);
   }
@@ -402,6 +417,7 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
     required String title,
     required String body,
     required DateTime when,
+    String? payload,
   }) async {
     if (!isSupportedPlatform || when.isBefore(DateTime.now())) return;
     await init();
@@ -423,6 +439,7 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
       );
     } catch (e) {
       debugPrint('Failed to schedule reminder $id: $e');

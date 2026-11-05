@@ -57,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -163,16 +163,7 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(alarms, alarms.finalMessage);
       }
       if (from < 10) {
-        await customStatement('''
-CREATE TABLE IF NOT EXISTS jarvis_memories (
-  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  content TEXT NOT NULL,
-  category TEXT NOT NULL DEFAULT 'fact',
-  confirmed INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-''');
+        // Legacy Jarvis table removed; no longer created on upgrade.
       }
       if (from < 11) {
         await m.addColumn(workoutPrefs, workoutPrefs.gender);
@@ -222,6 +213,31 @@ CREATE TABLE IF NOT EXISTS health_samples (
         await customStatement('DROP TABLE IF EXISTS recipes');
         await customStatement('DROP TABLE IF EXISTS health_samples');
         await customStatement('DROP TABLE IF EXISTS watch_devices');
+      }
+      if (from < 14) {
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_habit_completions_habit_day '
+          'ON habit_completions (habit_id, day)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks (parent_id)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_tasks_due ON tasks (due_date)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks (is_completed)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_events_start ON events (start_at)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_transactions_type_date '
+          'ON transactions (type, date)',
+        );
       }
     },
     beforeOpen: (details) async {

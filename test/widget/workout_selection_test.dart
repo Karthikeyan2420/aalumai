@@ -131,6 +131,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           fitnessRepositoryProvider.overrideWithValue(repo),
           appDatabaseProvider.overrideWithValue(db),
         ],

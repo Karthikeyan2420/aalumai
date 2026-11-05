@@ -195,10 +195,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     Task task,
   ) async {
     final l10n = context.l10n;
+    final host = context;
     await showModalBottomSheet<void>(
       context: context,
       builder:
-          (context) => SafeArea(
+          (sheetContext) => SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -206,15 +207,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   leading: const Icon(Icons.edit_outlined),
                   title: Text(l10n.edit),
                   onTap: () {
-                    Navigator.pop(context);
-                    showTaskEditor(context, task: task);
+                    Navigator.pop(sheetContext);
+                    if (host.mounted) showTaskEditor(host, task: task);
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.skip_next_outlined),
                   title: Text(l10n.skip),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     repo.skipOccurrence(task);
                   },
                 ),
@@ -222,9 +223,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   leading: const Icon(Icons.delete_outline),
                   title: Text(l10n.delete),
                   onTap: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
+                    if (!host.mounted) return;
                     final ok = await confirmDialog(
-                      context,
+                      host,
                       title: l10n.deleteConfirmTitle,
                       body: l10n.deleteConfirmBody,
                       confirmLabel: l10n.delete,

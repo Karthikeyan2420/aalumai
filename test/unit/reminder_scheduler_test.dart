@@ -1,8 +1,11 @@
+import 'package:aalumai/core/preferences/app_preferences.dart';
 import 'package:aalumai/core/db/database.dart';
 import 'package:aalumai/core/services/reminder_notifier.dart';
 import 'package:aalumai/core/services/reminder_scheduler.dart';
 import 'package:aalumai/core/utils/recurrence.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/test_preferences.dart';
 
 class _OneOff {
   _OneOff(this.id, this.title, this.body, this.when);
@@ -31,6 +34,7 @@ class FakeReminderNotifier implements ReminderNotifier {
     required String title,
     required String body,
     required DateTime when,
+    String? payload,
   }) async {
     oneOff.add(_OneOff(id, title, body, when));
   }
@@ -111,6 +115,12 @@ Event _event({
 );
 
 void main() {
+  late AppPreferences prefs;
+
+  setUpAll(() async {
+    prefs = await testAppPreferences();
+  });
+
   group('nextReminderTime', () {
     test('returns null when no reminder is configured', () {
       final e = _event(start: DateTime(2024, 1, 1, 9), reminderMinutes: -1);
@@ -147,10 +157,18 @@ void main() {
     });
   });
 
+  group('ReminderPayload', () {
+    test('round-trips event and task ids', () {
+      expect(ReminderPayload.parseEventId('event:12'), 12);
+      expect(ReminderPayload.parseTaskId('task:99'), 99);
+      expect(ReminderPayload.parseEventId('task:1'), isNull);
+    });
+  });
+
   group('ReminderScheduler.syncTask', () {
     test('schedules a future reminder', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       final when = DateTime.now().add(const Duration(hours: 2));
       await scheduler.syncTask(_task(id: 7, reminderAt: when));
       expect(fake.cancelled, contains(ReminderScheduler.taskReminderId(7)));
@@ -161,7 +179,7 @@ void main() {
 
     test('does not schedule a completed task', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncTask(
         _task(
           reminderAt: DateTime.now().add(const Duration(hours: 2)),
@@ -174,7 +192,7 @@ void main() {
 
     test('does not schedule a reminder in the past', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncTask(
         _task(reminderAt: DateTime.now().subtract(const Duration(hours: 2))),
       );
@@ -183,7 +201,7 @@ void main() {
 
     test('clears the reminder when none is set', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncTask(_task());
       expect(fake.oneOff, isEmpty);
       expect(fake.cancelled, contains(ReminderScheduler.taskReminderId(1)));
@@ -193,7 +211,7 @@ void main() {
   group('ReminderScheduler.syncHabit', () {
     test('schedules a single daily reminder for a daily habit', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncHabit(_habit(reminderMinuteOfDay: 7 * 60 + 30));
       expect(fake.daily, hasLength(1));
       expect(fake.daily.single.hour, 7);
@@ -203,7 +221,7 @@ void main() {
 
     test('schedules one reminder per selected weekday', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       // Monday + Wednesday.
       await scheduler.syncHabit(
         _habit(
@@ -218,7 +236,7 @@ void main() {
 
     test('clears reminders when the habit has no time set', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncHabit(_habit(reminderMinuteOfDay: -1));
       expect(fake.daily, isEmpty);
       expect(fake.cancelled, isNotEmpty);
@@ -226,7 +244,7 @@ void main() {
 
     test('clears reminders for an archived habit', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncHabit(
         _habit(reminderMinuteOfDay: 8 * 60, isArchived: true),
       );
@@ -237,7 +255,7 @@ void main() {
   group('ReminderScheduler.syncEvent', () {
     test('schedules a future event reminder', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       final start = DateTime.now().add(const Duration(days: 1));
       await scheduler.syncEvent(
         _event(id: 3, start: start, reminderMinutes: 10),
@@ -252,7 +270,7 @@ void main() {
 
     test('clears the reminder when none is configured', () async {
       final fake = FakeReminderNotifier();
-      final scheduler = ReminderScheduler(fake);
+      final scheduler = ReminderScheduler(fake, prefs);
       await scheduler.syncEvent(
         _event(start: DateTime.now().add(const Duration(days: 1))),
       );

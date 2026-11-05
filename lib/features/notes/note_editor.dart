@@ -209,12 +209,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             ],
           ),
     );
-    if (discard == true) return true;
-    if (discard == false) {
-      await _persist(popAfter: false);
-      return true;
-    }
-    return false;
+    return discard == true;
   }
 
   Future<void> _toggleLock() async {
@@ -275,65 +270,65 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 icon: const Icon(Icons.delete_outline),
                 onPressed: _delete,
               ),
-          IconButton(
-            tooltip: l10n.journalEntry,
-            icon: Icon(_isJournal ? Icons.book : Icons.book_outlined),
-            onPressed: () => setState(() => _isJournal = !_isJournal),
-          ),
-          if (_isJournal)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Center(
-                child: Text(
-                  l10n.journalEntry,
-                  style: Theme.of(context).textTheme.labelSmall,
+            IconButton(
+              tooltip: l10n.journalEntry,
+              icon: Icon(_isJournal ? Icons.book : Icons.book_outlined),
+              onPressed: () => setState(() => _isJournal = !_isJournal),
+            ),
+            if (_isJournal)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Center(
+                  child: Text(
+                    l10n.journalEntry,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
                 ),
               ),
+            IconButton(
+              tooltip: l10n.noteLock,
+              icon: Icon(locked ? Icons.lock : Icons.lock_open),
+              onPressed: _note == null ? null : _toggleLock,
             ),
-          IconButton(
-            tooltip: l10n.noteLock,
-            icon: Icon(locked ? Icons.lock : Icons.lock_open),
-            onPressed: _note == null ? null : _toggleLock,
-          ),
-          IconButton(
-            tooltip: l10n.save,
-            icon: const Icon(Icons.check),
-            onPressed: _save,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _title,
-              style: Theme.of(context).textTheme.titleLarge,
-              decoration: InputDecoration(
-                hintText: l10n.title,
-                border: InputBorder.none,
-                filled: false,
-              ),
-              onChanged: (_) => _markDirty(),
+            IconButton(
+              tooltip: l10n.save,
+              icon: const Icon(Icons.check),
+              onPressed: _save,
             ),
-            const Divider(),
-            Expanded(
-              child: TextField(
-                controller: _body,
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: _title,
+                style: Theme.of(context).textTheme.titleLarge,
                 decoration: InputDecoration(
-                  hintText: l10n.notes,
+                  hintText: l10n.title,
                   border: InputBorder.none,
                   filled: false,
                 ),
                 onChanged: (_) => _markDirty(),
               ),
-            ),
-          ],
+              const Divider(),
+              Expanded(
+                child: TextField(
+                  controller: _body,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  decoration: InputDecoration(
+                    hintText: l10n.notes,
+                    border: InputBorder.none,
+                    filled: false,
+                  ),
+                  onChanged: (_) => _markDirty(),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

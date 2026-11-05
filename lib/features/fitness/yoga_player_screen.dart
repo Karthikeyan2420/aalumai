@@ -34,6 +34,8 @@ class YogaPlayerScreen extends ConsumerStatefulWidget {
   ConsumerState<YogaPlayerScreen> createState() => _YogaPlayerScreenState();
 }
 
+enum _YogaPhase { prepare, hold }
+
 class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
   static const _prepareSeconds = 5;
 
@@ -51,6 +53,7 @@ class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
   String? _error;
   int _completed = 0;
   YogaSessionOutcome? _outcome;
+  _YogaPhase _phase = _YogaPhase.hold;
 
   List<YogaPlanItem> get _items => widget.routine.items;
   bool get _done => _index >= _items.length;
@@ -108,7 +111,13 @@ class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
 
   void _startPrepare() {
     _timer?.cancel();
+    _phase = _YogaPhase.prepare;
     setState(() => _preparing = _prepareSeconds);
+    _runPrepareTimer();
+  }
+
+  void _runPrepareTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _paused) return;
       if (_preparing <= 1) {
@@ -122,6 +131,7 @@ class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
 
   void _enterStep() {
     _timer?.cancel();
+    _phase = _YogaPhase.hold;
     _step
       ..stop()
       ..reset();
@@ -196,8 +206,8 @@ class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
     } else {
       _total.start();
       _step.start();
-      if (_index >= _items.length && _preparing > 0) {
-        _startPrepare();
+      if (_phase == _YogaPhase.prepare) {
+        _runPrepareTimer();
       } else {
         _startTimer();
       }
@@ -282,7 +292,10 @@ class _YogaPlayerScreenState extends ConsumerState<YogaPlayerScreen> {
 
   Widget _player(AppLocalizations l10n) {
     final theme = Theme.of(context);
-    final seconds = _index >= _items.length ? 0 : _remaining;
+    final seconds =
+        _phase == _YogaPhase.prepare
+            ? _preparing
+            : (_index < _items.length ? _remaining : 0);
     final progress =
         _items.isEmpty ? 0.0 : _index / _items.length;
     return Padding(

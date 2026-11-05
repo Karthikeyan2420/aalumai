@@ -1,3 +1,4 @@
+import 'package:aalumai/core/preferences/app_preferences.dart';
 import 'package:aalumai/core/db/database.dart';
 import 'package:aalumai/core/services/reminder_scheduler.dart';
 import 'package:aalumai/core/utils/recurrence.dart';
@@ -8,6 +9,7 @@ import 'package:aalumai/features/tasks/data/task_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_preferences.dart';
 import 'reminder_scheduler_test.dart' show FakeReminderNotifier;
 
 void main() {
@@ -15,10 +17,13 @@ void main() {
   late FakeReminderNotifier fake;
   late ReminderScheduler scheduler;
 
-  setUp(() {
+  late AppPreferences prefs;
+
+  setUp(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     fake = FakeReminderNotifier();
-    scheduler = ReminderScheduler(fake);
+    prefs = await testAppPreferences();
+    scheduler = ReminderScheduler(fake, prefs);
   });
 
   tearDown(() => db.close());

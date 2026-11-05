@@ -46,6 +46,7 @@ class _AlarmVoiceSettingsScreenState
       _failed = false;
     });
     try {
+      ref.read(alarmTtsProvider).clearVoiceCache();
       final voices = await ref.read(alarmTtsProvider).voices();
       if (mounted) {
         setState(() {

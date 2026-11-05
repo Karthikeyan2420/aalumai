@@ -29,42 +29,56 @@ class DashboardConfigScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.customizeDashboard)),
-      body: ReorderableListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screen,
-          8,
-          AppSpacing.screen,
-          32,
-        ),
-        onReorder: (oldIndex, newIndex) {
-          final next = [...order];
-          if (newIndex > oldIndex) newIndex -= 1;
-          final item = next.removeAt(oldIndex);
-          next.insert(newIndex, item);
-          controller.setOrder(next);
-        },
+      body: Column(
         children: [
           Padding(
-            key: const ValueKey('dashboard_config_hint'),
-            padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
-            child: Text(
-              'Drag to reorder · toggle to show or hide',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              8,
+              AppSpacing.screen,
+              12,
+            ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Drag to reorder · toggle to show or hide',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
-          for (final section in order)
-            Card(
-              key: ValueKey(section.name),
-              margin: const EdgeInsets.only(bottom: AppSpacing.cardGap),
-              child: SwitchListTile(
-                value: !config.hidden.contains(section),
-                title: Text(_sectionLabel(context, section)),
-                secondary: const Icon(Icons.drag_handle),
-                onChanged: (visible) => controller.setVisible(section, visible),
+          Expanded(
+            child: ReorderableListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                0,
+                AppSpacing.screen,
+                32,
               ),
+              onReorder: (oldIndex, newIndex) {
+                final next = [...order];
+                if (newIndex > oldIndex) newIndex -= 1;
+                final item = next.removeAt(oldIndex);
+                next.insert(newIndex, item);
+                controller.setOrder(next);
+              },
+              children: [
+                for (final section in order)
+                  Card(
+                    key: ValueKey(section.name),
+                    margin: const EdgeInsets.only(bottom: AppSpacing.cardGap),
+                    child: SwitchListTile(
+                      value: !config.hidden.contains(section),
+                      title: Text(_sectionLabel(context, section)),
+                      secondary: const Icon(Icons.drag_handle),
+                      onChanged:
+                          (visible) => controller.setVisible(section, visible),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

@@ -643,12 +643,13 @@ class _DebtTile extends ConsumerWidget {
 Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
   final l10n = context.l10n;
   final locale = Localizations.localeOf(context).toString();
+  final host = context;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
     builder:
-        (context) => DraggableScrollableSheet(
+        (sheetContext) => DraggableScrollableSheet(
           expand: false,
           initialChildSize: 0.6,
           builder:
@@ -730,8 +731,10 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
                             const SizedBox(height: 8),
                             FilledButton.icon(
                               onPressed: () async {
-                                Navigator.pop(context);
-                                await showAccountEditor(context, ref);
+                                Navigator.pop(sheetContext);
+                                if (host.mounted) {
+                                  await showAccountEditor(host, ref);
+                                }
                               },
                               icon: const Icon(Icons.add),
                               label: Text(l10n.add),
@@ -1058,12 +1061,13 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
   final locale = Localizations.localeOf(context).toString();
   final accounts = ref.read(accountsProvider).valueOrNull ?? const <Account>[];
   final accountNames = {for (final a in accounts) a.id: a.name};
+  final host = context;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
     builder:
-        (context) => DraggableScrollableSheet(
+        (sheetContext) => DraggableScrollableSheet(
           expand: false,
           initialChildSize: 0.6,
           builder:
@@ -1088,8 +1092,10 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
                                 ),
                                 FilledButton.icon(
                                   onPressed: () async {
-                                    Navigator.pop(context);
-                                    await showRecurringEditor(context, ref);
+                                    Navigator.pop(sheetContext);
+                                    if (host.mounted) {
+                                      await showRecurringEditor(host, ref);
+                                    }
                                   },
                                   icon: const Icon(Icons.add),
                                   label: Text(l10n.add),
@@ -1121,12 +1127,14 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
                                       tooltip: l10n.edit,
                                       icon: const Icon(Icons.edit_outlined),
                                       onPressed: () async {
-                                        Navigator.pop(context);
-                                        await showRecurringEditor(
-                                          context,
-                                          ref,
-                                          rule: rule,
-                                        );
+                                        Navigator.pop(sheetContext);
+                                        if (host.mounted) {
+                                          await showRecurringEditor(
+                                            host,
+                                            ref,
+                                            rule: rule,
+                                          );
+                                        }
                                       },
                                     ),
                                     IconButton(

@@ -18,6 +18,7 @@ import 'features/expenses/data/finance_repository.dart';
 import 'features/fitness/data/fitness_repository.dart';
 import 'features/habits/data/habit_repository.dart';
 import 'features/music/data/player_service.dart';
+import 'core/services/reminder_scheduler.dart';
 import 'features/schedule/data/event_repository.dart';
 import 'features/tasks/data/task_repository.dart';
 
@@ -94,6 +95,8 @@ Future<void> _bootstrap(ProviderContainer container) async {
     final notifications = container.read(notificationServiceProvider);
     notifications.onAlarmNotificationTap =
         (alarmId) => _openAlarm(container, alarmId);
+    notifications.onReminderPayload =
+        (payload) => _resyncReminderPayload(container, payload);
     notifications.voiceSettingsResolver = () => _nativeVoiceSettings(container);
     // The native ring service can surface the ringing screen on its own: while
     // the device is unlocked Android suppresses the full-screen intent, so this
@@ -156,6 +159,31 @@ NativeVoiceSettings _nativeVoiceSettings(ProviderContainer container) {
   } catch (_) {
     return const NativeVoiceSettings();
   }
+}
+
+Future<void> _resyncReminderPayload(
+  ProviderContainer container,
+  String payload,
+) async {
+  try {
+    final eventId = ReminderPayload.parseEventId(payload);
+    if (eventId != null) {
+      final event = await container
+          .read(eventRepositoryProvider)
+          .getById(eventId);
+      if (event != null) {
+        await container.read(reminderSchedulerProvider).syncEvent(event);
+      }
+      return;
+    }
+    final taskId = ReminderPayload.parseTaskId(payload);
+    if (taskId != null) {
+      final task = await container.read(taskRepositoryProvider).getById(taskId);
+      if (task != null) {
+        await container.read(reminderSchedulerProvider).syncTask(task);
+      }
+    }
+  } catch (_) {}
 }
 
 /// Serialises ringing screens so a full-screen intent plus a notification tap

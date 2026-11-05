@@ -298,10 +298,11 @@ class HabitsScreen extends ConsumerWidget {
     Habit habit,
   ) async {
     final l10n = context.l10n;
+    final host = context;
     await showModalBottomSheet<void>(
       context: context,
       builder:
-          (context) => SafeArea(
+          (sheetContext) => SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -309,8 +310,8 @@ class HabitsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.edit_outlined),
                   title: Text(l10n.edit),
                   onTap: () {
-                    Navigator.pop(context);
-                    showHabitEditor(context, habit: habit);
+                    Navigator.pop(sheetContext);
+                    if (host.mounted) showHabitEditor(host, habit: habit);
                   },
                 ),
                 ListTile(
@@ -320,16 +321,17 @@ class HabitsScreen extends ConsumerWidget {
                     ref
                         .read(habitRepositoryProvider)
                         .setArchived(habit.id, !habit.isArchived);
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete_outline),
                   title: Text(l10n.delete),
                   onTap: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
+                    if (!host.mounted) return;
                     final ok = await confirmDialog(
-                      context,
+                      host,
                       title: l10n.deleteConfirmTitle,
                       body: l10n.deleteConfirmBody,
                       confirmLabel: l10n.delete,

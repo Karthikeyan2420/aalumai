@@ -1,5 +1,4 @@
 {
-  "@@locale": "kn",
   "songs": "ಹಾಡುಗಳು",
   "folders": "ಫೋಲ್ಡರ್ಗಳು",
   "play": "ಪ್ಲೇ",
@@ -133,7 +132,7 @@
   "debtTheyOwe": "ನನ್ನಿಗೆ ಕಡೆ",
   "discardChanges": "ಬದಲಾವಣೆಗಳನ್ನು ತ್ಯಜಿಸುವುದೇ?",
   "keepEditing": "ಸಂಪಾದನೆ ಮುಂದುವರಿಸಿ",
-  "sleepTimer": "ನಿದ್ರೆ ಟೈಮರ್",
+  "sleepTimer": "ನಿದ್ರಾ ಟೈಮರ್",
   "selectTracks": "ಆಯ್ಕೆಮಾಡಿ",
   "weeklySummary": "ಈ ವಾರ",
   "searchEvents": "ಈವೆಂಟ್‌ಗಳನ್ನು ಹುಡುಕಿ",
@@ -302,7 +301,6 @@
   "tracks": "ಟ್ರ್ಯಾಕ್‌ಗಳು",
   "shuffle": "ಷಫಲ್",
   "queue": "ಸರತಿ",
-  "sleepTimer": "ನಿದ್ರಾ ಟೈಮರ್",
   "recentlyPlayed": "ಇತ್ತೀಚೆಗೆ ಪ್ಲೇ ಮಾಡಿದವು",
   "nowPlaying": "ಈಗ ಪ್ಲೇ ಆಗುತ್ತಿದೆ",
   "addMusicFolder": "ಸಂಗೀತ ಫೋಲ್ಡರ್ ಸೇರಿಸು",
@@ -322,16 +320,6 @@
   "goalDistanceWeekly": "ಈ ವಾರದ ದೂರ (ಮೀ)",
   "addExercise": "ವ್ಯಾಯಾಮ ಸೇರಿಸಿ",
   "setProgress": "ಸೆಟ್ {index} / {total}",
-  "@setProgress": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "workoutComplete": "ವ್ಯಾಯಾಮ ಪೂರ್ಣಗೊಂಡಿದೆ",
   "startWorkout": "ವ್ಯಾಯಾಮ ಪ್ರಾರಂಭಿಸು",
   "finishWorkout": "ವ್ಯಾಯಾಮ ಮುಗಿಸು",
@@ -413,13 +401,6 @@
   "generateList": "ಊಟದ ಯೋಜನೆಯಿಂದ ರಚಿಸು",
   "atStart": "ಪ್ರಾರಂಭ ಸಮಯದಲ್ಲಿ",
   "minutesBefore": "{count} ನಿಮಿಷಗಳ ಮೊದಲು",
-  "@minutesBefore": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "reminderSet": "ಜ್ಞಾಪನೆ ಹೊಂದಿಸಲಾಗಿದೆ",
   "scheduledFor": "{time} ಕ್ಕೆ ನಿಗದಿಯಾಗಿದೆ",
   "itemsCount": "{count, plural, =0{ಐಟಂಗಳಿಲ್ಲ} other{{count} ಐಟಂಗಳು}}",
@@ -547,13 +528,6 @@
   "previous": "ಹಿಂದಿನದು",
   "restore": "ಮರುಸ್ಥಾಪಿಸಿ",
   "weekGenerated": "{count, plural, =0{ಯಾವುದೇ ಸೆಷನ್ ರಚಿಸಲಿಲ್ಲ} =1{1 ಸೆಷನ್ ರಚಿಸಲಾಗಿದೆ} other{{count} ಸೆಷನ್‌ಗಳು ರಚಿಸಲಾಗಿವೆ}}",
-  "@weekGenerated": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "weekCleared": "ಪ್ರಾರಂಭವಾಗದ ದಿನಗಳನ್ನು ಅಳಿಸಲಾಗಿದೆ",
   "noPlansYet": "ಮೊದಲು ವರ್ಕೌಟ್ ಯೋಜನೆ ರಚಿಸಿ",
   "selectPlan": "ಒಂದು ಯೋಜನೆ ಆಯ್ಕೆಮಾಡಿ",
@@ -622,21 +596,7 @@
   "whoAerobicLabel": "ಏರೋಬಿಕ್ ಚಟುವಟಿಕೆ",
   "whoStrengthLabel": "ಸ್ನಾಯು ಬಲ",
   "whoAerobicValue": "{minutes} / 150 ನಿಮಿ",
-  "@whoAerobicValue": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "whoStrengthValue": "{days} / 2 ದಿನಗಳು",
-  "@whoStrengthValue": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "whoAerobicGoal": "ವಾರಕ್ಕೆ 150-300 ನಿಮಿಷ ಗುರಿಯಿಡಿ",
   "whoStrengthGoal": "ವಾರಕ್ಕೆ ಕನಿಷ್ಠ 2 ದಿನ ಗುರಿಯಿಡಿ",
   "whoDisclaimer": "ಇದು ಸಾಮಾನ್ಯ ಮಾಹಿತಿ, ವೈದ್ಯಕೀಯ ಸಲಹೆ ಅಲ್ಲ. ಆರೋಗ್ಯ ಸಮಸ್ಯೆ ಇದ್ದರೆ ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ತಜ್ಞರ ಸಲಹೆ ಪಡೆಯಿರಿ.",
@@ -706,47 +666,209 @@
   "unfinishedPlan": "ಈ ಯೋಜನೆಯಲ್ಲಿ ಅಪೂರ್ಣ ವ್ಯಾಯಾಮವಿದೆ.",
   "startFresh": "ಹೊಸದಾಗಿ ಪ್ರಾರಂಭಿಸಿ",
   "route": "ಮಾರ್ಗ",
-  "jarvisTitle": "Jarvis",
-  "jarvisSubtitle": "On-device AI assistant",
-  "jarvisChat": "Chat",
-  "jarvisModel": "Model",
-  "jarvisMemories": "Memories",
-  "jarvisChatEmpty": "Ask anything — Jarvis runs entirely on this device.",
-  "jarvisInputHint": "Message Jarvis…",
-  "jarvisSend": "Send",
-  "jarvisStop": "Stop",
-  "jarvisClearChat": "Clear chat",
-  "jarvisThinking": "Thinking…",
-  "jarvisAllowAction": "Allow this action?",
-  "jarvisAllow": "Allow",
-  "jarvisDecline": "Decline",
-  "jarvisNoModel": "No model installed yet.",
-  "jarvisModelInstalled": "Model installed",
-  "jarvisModelLoaded": "Model loaded — ready for chat",
-  "jarvisModelNotLoaded": "Model not loaded",
-  "jarvisDownloadModel": "Download model (~1.3 GB)",
-  "jarvisImportModel": "Import a GGUF file",
-  "jarvisDeleteModel": "Delete model",
-  "jarvisLoadModel": "Load model",
-  "jarvisUnloadModel": "Unload model",
-  "jarvisDownloading": "Downloading…",
-  "jarvisVerifying": "Verifying…",
-  "jarvisCpuThreads": "CPU threads",
-  "jarvisContextSize": "Context size",
-  "jarvisNoMemories": "No memories saved yet.",
-  "jarvisConfirmMemory": "Confirm",
-  "jarvisPendingMemory": "Pending confirmation",
-  "jarvisForgetMemory": "Forget",
-  "jarvisAddMemory": "Save a memory",
-  "jarvisMemoryHint": "A fact or preference Jarvis should remember",
-  "jarvisDeleteModelWarning": "Delete the installed model? You can download or import it again later.",
-  "jarvisMicHold": "Hold to speak",
-  "jarvisSpeakReplies": "Speak replies",
-  "jarvisBriefingTitle": "Morning briefing",
-  "jarvisBriefingTasks": "{count} tasks due",
-  "jarvisBriefingEvents": "{count} events today",
-  "jarvisBriefingAlarm": "Next alarm {time}",
-  "jarvisBriefingQuiet": "Nothing due today — a clear morning.",
-  "jarvisBriefingToggle": "Daily briefing",
-  "jarvisBriefingToggleHint": "A summary notification at 08:00 each morning."
+  "finalMotivationalMessage": "Final motivation",
+  "finalMotivationalMessageHint": "Spoken once after every challenge — tap Done to close",
+  "yoga": "Yoga",
+  "yogaToday": "Today's yoga",
+  "yogaRecommendedForYou": "Recommended for you",
+  "yogaRoutines": "Routines",
+  "yogaPoses": "Poses",
+  "yogaStartRoutine": "Start routine",
+  "yogaSync": "Update poses",
+  "yogaSynced": "Updated {count} poses",
+  "yogaSyncFailed": "Couldn't reach the yoga service. Showing offline poses.",
+  "yogaOfflineNote": "Poses are stored on your device and work offline.",
+  "yogaLevel": "Level",
+  "yogaLevelBeginner": "Beginner",
+  "yogaLevelIntermediate": "Intermediate",
+  "yogaLevelAdvanced": "Advanced",
+  "yogaPoseCount": "{count} poses",
+  "yogaMinutes": "{count} min",
+  "yogaInstructions": "How to practise",
+  "yogaBenefits": "Benefits",
+  "yogaBreathing": "Breathing",
+  "yogaTakeCare": "Take care",
+  "yogaNoImage": "No verified image is available for this pose.",
+  "yogaAddFavorite": "Add to favourites",
+  "yogaRemoveFavorite": "Remove from favourites",
+  "yogaFavorites": "Favourites",
+  "yogaNoFavorites": "No favourite poses yet.",
+  "yogaHistory": "Yoga history",
+  "yogaNoHistory": "No yoga sessions yet.",
+  "yogaSkip": "Skip",
+  "yogaNext": "Next",
+  "yogaPrevious": "Back",
+  "yogaPause": "Pause",
+  "yogaResume": "Resume",
+  "yogaFinish": "Finish",
+  "yogaFinishPrompt": "Finish the session?",
+  "yogaSessionComplete": "Yoga session complete",
+  "yogaPoseOf": "Pose {current} of {total}",
+  "yogaSearchPoses": "Search poses",
+  "yogaAllCategories": "All",
+  "yogaCategoryOther": "Other",
+  "yogaGetReady": "Get ready",
+  "yogaDone": "Done",
+  "yogaAttribution": "Pose data from the yoga-api open dataset. General information only — not medical advice.",
+  "yogaSafetyNote": "Move within a comfortable range. Stop if you feel pain, and see a health professional if you have a medical condition.",
+  "yogaPickLevel": "Choose a level",
+  "yogaLastSynced": "Last updated {when}",
+  "yogaNeverSynced": "Not yet updated from the service",
+  "yogaStart": "Start",
+  "yogaOverview": "Overview",
+  "yogaNoResults": "No yoga poses match your search.",
+  "workouts": "Workouts",
+  "customizeWorkout": "Customize workout",
+  "dumbbellWeightHint": "Dumbbell and barbell exercises use your own weights. Log the weight you lift during each set.",
+  "restDay": "Rest day",
+  "workoutSettings": "Workout",
+  "workoutSettingsDesc": "Choose the equipment and muscle groups for your daily workout",
+  "workoutCategoriesHint": "Tick the equipment and muscle groups you want in your daily workout. Only the ticked options are used to build each day.",
+  "equipmentBodyweight": "No equipment (bodyweight)",
+  "@challengeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@codeLengthValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setProgress": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@minutesBefore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scheduledFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@weekGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@getStarted": {
+    "description": "Primary call-to-action button on the landing screen."
+  },
+  "@landingBrandLatin": {
+    "description": "Romanised AALUMAI brand name shown on the landing screen."
+  },
+  "@landingBrandNative": {
+    "description": "Tamil-script AALUMAI brand name shown on the landing screen."
+  },
+  "@landingTaglineEnglish": {
+    "description": "English tagline shown on the landing screen."
+  },
+  "@landingTaglineNative": {
+    "description": "Tamil tagline shown on the landing screen."
+  },
+  "@whoAerobicValue": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@whoStrengthValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@alarmVoiceLabel": {
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "@customIntervalValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@voiceUnavailableForLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "@yogaSynced": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@yogaPoseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@yogaMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@yogaPoseOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@yogaLastSynced": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -13,7 +13,7 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/backup_service.dart';
-import '../../core/services/notification_service.dart';
+import '../../core/services/notification_policy.dart';
 import '../../core/services/restore_reconciler.dart';
 import '../../core/widgets/common.dart';
 import 'alarm_voice_settings_screen.dart';
@@ -151,14 +151,7 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(l10n.reminder),
                     value: prefs.notificationsEnabled,
                     onChanged: (v) async {
-                      await ref
-                          .read(appPreferencesProvider)
-                          .setNotificationsEnabled(v);
-                      if (v) {
-                        await ref
-                            .read(notificationServiceProvider)
-                            .requestPermissions();
-                      }
+                      await applyNotificationsEnabled(ref, v);
                     },
                   );
                 },
@@ -424,6 +417,13 @@ class SettingsScreen extends ConsumerWidget {
 
     try {
       await ref.read(backupServiceProvider).restore(File(path));
+    } on BackupException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.restoreFailed}: ${e.message}')),
+        );
+      }
+      return;
     } catch (_) {
       // The database file itself could not be replaced: report failure and do
       // not touch the existing schedules.

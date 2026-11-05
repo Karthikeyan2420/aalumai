@@ -245,6 +245,23 @@ class FinanceRepository {
             ]))
           .watch();
 
+  /// Expense rows in [from, to] for aggregates (no row cap).
+  Stream<List<Transaction>> watchExpensesBetween(DateTime from, DateTime to) =>
+      (_db.select(_db.transactions)
+            ..where(
+              (t) =>
+                  t.type.equals(TransactionType.expense.index) &
+                  t.date.isBetweenValues(from, to),
+            ))
+          .watch();
+
+  /// Sum of expense amounts in paise for [from, to].
+  Stream<int> watchExpenseTotalBetween(DateTime from, DateTime to) {
+    return watchExpensesBetween(from, to).map((rows) {
+      return rows.fold<int>(0, (sum, t) => sum + t.amountPaise);
+    });
+  }
+
   Future<int> addTransaction({
     required int accountId,
     required TransactionType type,
@@ -633,25 +650,38 @@ List<CategorySpend> aggregateSpending({
   return list;
 }
 
-/// Expenses in the current calendar month grouped by category, largest first.
-final todayExpenseProvider = Provider<int>((ref) {
-  final txns = ref.watch(transactionsProvider).valueOrNull ?? const [];
+final _todayExpenseRangeProvider = Provider<(DateTime, DateTime)>((ref) {
   final now = DateTime.now();
-  final start = DateTime(now.year, now.month, now.day);
-  final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
-  var sum = 0;
-  for (final t in txns) {
-    if (t.type != TransactionType.expense.index) continue;
-    if (t.date.isBefore(start) || t.date.isAfter(end)) continue;
-    sum += t.amountPaise;
-  }
-  return sum;
+  return (
+    DateTime(now.year, now.month, now.day),
+    DateTime(now.year, now.month, now.day, 23, 59, 59),
+  );
+});
+
+final todayExpenseTotalStreamProvider = StreamProvider<int>((ref) {
+  final (start, end) = ref.watch(_todayExpenseRangeProvider);
+  return ref
+      .watch(financeRepositoryProvider)
+      .watchExpenseTotalBetween(start, end);
+});
+
+/// Today's expense total (all rows, not limited to the transaction list cap).
+final todayExpenseProvider = Provider<int>((ref) {
+  return ref.watch(todayExpenseTotalStreamProvider).valueOrNull ?? 0;
+});
+
+/// Current calendar month expenses for category breakdown (bounded query).
+final monthExpensesStreamProvider = StreamProvider<List<Transaction>>((ref) {
+  final now = DateTime.now();
+  final from = DateTime(now.year, now.month, 1);
+  final to = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+  return ref.watch(financeRepositoryProvider).watchExpensesBetween(from, to);
 });
 
 /// Expenses in the current calendar month grouped by category, largest first.
 /// Reacts to new transactions and category changes.
 final spendingByCategoryProvider = Provider<List<CategorySpend>>((ref) {
-  final txns = ref.watch(transactionsProvider).valueOrNull ?? const [];
+  final txns = ref.watch(monthExpensesStreamProvider).valueOrNull ?? const [];
   final cats = ref.watch(categoriesProvider).valueOrNull ?? const [];
   return aggregateSpending(
     transactions: txns,
