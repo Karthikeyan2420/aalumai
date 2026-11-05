@@ -66,9 +66,8 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
 
-  # Learning
+  # Spoken alarms
   flutter_tts: ^4.2.0
-  speech_to_text: ^7.0.0
   on_audio_query: ^2.9.0
 
 dev_dependencies:
@@ -86,6 +85,8 @@ flutter:
   assets:
     - assets/data/
     - assets/images/
+    - assets/images/fitness/
+    - assets/gym/
     - assets/audio/
     - assets/images/backgrounds/home/
     - assets/images/backgrounds/alarm/

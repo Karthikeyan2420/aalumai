@@ -36,6 +36,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool _loading = true;
   bool _unlocked = false;
   bool _isJournal = false;
+  bool _dirty = false;
+
+  void _markDirty() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
 
   @override
   void initState() {
@@ -74,7 +79,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _save() async => _persist(popAfter: true);
+
+  Future<void> _persist({required bool popAfter}) async {
     final kind = _isJournal ? NoteKind.journal.index : NoteKind.note.index;
     final title = _title.text.trim();
     final body = _body.text;
@@ -89,7 +96,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       await ref
           .read(noteRepositoryProvider)
           .create(title: title, body: body, kind: NoteKind.fromIndex(kind));
-      if (mounted) Navigator.pop(context);
+      if (mounted && popAfter) Navigator.pop(context);
       return;
     }
 
@@ -103,7 +110,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             updatedAt: DateTime.now(),
           ),
         );
-    if (mounted) Navigator.pop(context);
+    _dirty = false;
+    if (mounted && popAfter) Navigator.pop(context);
   }
 
   Future<void> _unlock() async {
@@ -157,6 +165,58 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return false;
   }
 
+  Future<void> _delete() async {
+    final note = _note;
+    if (note == null) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+    if (note.isLocked && !_unlocked) {
+      await _unlock();
+      if (!mounted || !_unlocked) return;
+    }
+    final l10n = context.l10n;
+    final ok = await confirmDialog(
+      context,
+      title: l10n.deleteConfirmTitle,
+      body: l10n.deleteConfirmBody,
+      confirmLabel: l10n.delete,
+    );
+    if (ok) {
+      await ref.read(noteRepositoryProvider).delete(note.id);
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_dirty) return true;
+    final l10n = context.l10n;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(l10n.discardChanges),
+            content: Text(l10n.deleteConfirmBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.keepEditing),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.yes),
+              ),
+            ],
+          ),
+    );
+    if (discard == true) return true;
+    if (discard == false) {
+      await _persist(popAfter: false);
+      return true;
+    }
+    return false;
+  }
+
   Future<void> _toggleLock() async {
     final note = _note;
     if (note == null) return;
@@ -198,14 +258,38 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (await _onWillPop() && context.mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            if (_note != null)
+              IconButton(
+                tooltip: l10n.delete,
+                icon: const Icon(Icons.delete_outline),
+                onPressed: _delete,
+              ),
           IconButton(
             tooltip: l10n.journalEntry,
             icon: Icon(_isJournal ? Icons.book : Icons.book_outlined),
             onPressed: () => setState(() => _isJournal = !_isJournal),
           ),
+          if (_isJournal)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Center(
+                child: Text(
+                  l10n.journalEntry,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ),
           IconButton(
             tooltip: l10n.noteLock,
             icon: Icon(locked ? Icons.lock : Icons.lock_open),
@@ -230,6 +314,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 border: InputBorder.none,
                 filled: false,
               ),
+              onChanged: (_) => _markDirty(),
             ),
             const Divider(),
             Expanded(
@@ -243,10 +328,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   border: InputBorder.none,
                   filled: false,
                 ),
+                onChanged: (_) => _markDirty(),
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

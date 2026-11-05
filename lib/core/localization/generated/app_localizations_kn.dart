@@ -369,6 +369,60 @@ class AppLocalizationsKn extends AppLocalizations {
   String get emptySavings => 'ಇನ್ನೂ ಉಳಿತಾಯ ಗುರಿಗಳಿಲ್ಲ.';
 
   @override
+  String get newCategory => 'ಹೊಸ ವರ್ಗ';
+
+  @override
+  String get categoryExists => 'ಈ ಹೆಸರಿನ ವರ್ಗ ಈಗಾಗಲೇ ಇದೆ.';
+
+  @override
+  String get sameAccount => 'ವರ್ಗಾವಣೆಗೆ ಎರಡು ಬೇರೆ ಖಾತೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.';
+
+  @override
+  String get accountInUse => 'ಈ ಖಾತೆಯಲ್ಲಿ ವಹಿವಾಟುಗಳಿವೆ; ಅಳಿಸಲಾಗುವುದಿಲ್ಲ.';
+
+  @override
+  String get archivedHabits => 'ಆರ್ಕೈವ್ ಮಾಡಿದ ಅಭ್ಯಾಸಗಳು';
+
+  @override
+  String get moreGroupLife => 'ಜೀವನ';
+
+  @override
+  String get moreGroupWellness => 'ಆರೋಗ್ಯ';
+
+  @override
+  String get moreGroupApp => 'ಅಪ್ಲಿಕೇಶನ್';
+
+  @override
+  String get todaySpend => 'ಇಂದಿನ ಖರ್ಚು';
+
+  @override
+  String get debtIOwe => 'ನಾನು ಕಡೆ';
+
+  @override
+  String get debtTheyOwe => 'ನನ್ನಿಗೆ ಕಡೆ';
+
+  @override
+  String get discardChanges => 'ಬದಲಾವಣೆಗಳನ್ನು ತ್ಯಜಿಸುವುದೇ?';
+
+  @override
+  String get keepEditing => 'ಸಂಪಾದನೆ ಮುಂದುವರಿಸಿ';
+
+  @override
+  String get sleepTimer => 'ನಿದ್ರಾ ಟೈಮರ್';
+
+  @override
+  String get selectTracks => 'ಆಯ್ಕೆಮಾಡಿ';
+
+  @override
+  String get weeklySummary => 'ಈ ವಾರ';
+
+  @override
+  String get searchEvents => 'ಈವೆಂಟ್‌ಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get undoDelete => 'ವಹಿವಾಟು ಅಳಿಸಲಾಗಿದೆ';
+
+  @override
   String get emptyLessons => 'ಯಾವ ಪಾಠಗಳೂ ಲಭ್ಯವಿಲ್ಲ.';
 
   @override
@@ -863,9 +917,6 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get queue => 'ಸರತಿ';
-
-  @override
-  String get sleepTimer => 'ನಿದ್ರಾ ಟೈಮರ್';
 
   @override
   String get recentlyPlayed => 'ಇತ್ತೀಚೆಗೆ ಪ್ಲೇ ಮಾಡಿದವು';

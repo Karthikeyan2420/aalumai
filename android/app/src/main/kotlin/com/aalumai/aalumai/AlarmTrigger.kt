@@ -78,7 +78,7 @@ data class AlarmTriggerPayload(
     val triggerAtMs: Long,
 ) {
     val playsMusic: Boolean
-        get() = !(mode == "voiceOnly" && message.trim().isEmpty())
+        get() = mode != "voiceOnly" || message.trim().isEmpty()
 
     val speaks: Boolean
         get() = mode != "musicOnly" && message.trim().isNotEmpty()

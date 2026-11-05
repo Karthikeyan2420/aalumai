@@ -2,7 +2,9 @@ import 'package:aalumai/core/db/database.dart';
 import 'package:aalumai/core/utils/recurrence.dart';
 import 'package:aalumai/features/expenses/data/finance_repository.dart';
 import 'package:aalumai/features/habits/data/habit_repository.dart';
+import 'package:aalumai/features/savings/data/savings_repository.dart';
 import 'package:aalumai/features/tasks/data/task_repository.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,9 +51,6 @@ void main() {
           'water_logs',
           'music_tracks',
           'alarms',
-          'recipes',
-          'lessons',
-          'learning_progress',
         }),
       );
       // The retired dashboard table must not be present.
@@ -230,6 +229,64 @@ void main() {
         expect(await repo.debtPaidPrincipal(debt), 5000);
       },
     );
+
+    test('updateTransaction can change amount and clear category', () async {
+      await repo.seedDefaultCategories();
+      final account = await repo.createAccount(name: 'Cash');
+      final food = await (db.select(db.categories)
+            ..where((t) => t.name.equals('Food')))
+          .getSingle();
+      final id = await repo.addTransaction(
+        accountId: account,
+        type: TransactionType.expense,
+        amountPaise: 5000,
+        date: DateTime(2026, 4, 1),
+        categoryId: food.id,
+      );
+      final row = await (db.select(db.transactions)
+            ..where((t) => t.id.equals(id)))
+          .getSingle();
+      await repo.updateTransaction(
+        row.copyWith(
+          amountPaise: 7500,
+          categoryId: const Value(null),
+        ),
+      );
+      final updated = await (db.select(db.transactions)
+            ..where((t) => t.id.equals(id)))
+          .getSingle();
+      expect(updated.amountPaise, 7500);
+      expect(updated.categoryId, isNull);
+    });
+
+    test('createCategory rejects duplicate names for the same kind', () async {
+      await repo.seedDefaultCategories();
+      expect(
+        () async => repo.createCategory('Food', CategoryKind.expense),
+        throwsA(isA<StateError>()),
+      );
+    });
+  });
+
+  group('SavingsRepository', () {
+    late SavingsRepository savings;
+
+    setUp(() => savings = SavingsRepository(db));
+
+    test('deleteContribution removes a row', () async {
+      final goalId = await savings.createGoal(
+        name: 'Trip',
+        targetPaise: 100000,
+      );
+      await savings.addContribution(
+        goalId: goalId,
+        amountPaise: 5000,
+        date: DateTime(2026, 1, 1),
+      );
+      final row = await db.select(db.savingsContributions).getSingle();
+      await savings.deleteContribution(row.id);
+      expect(await db.select(db.savingsContributions).get(), isEmpty);
+    });
   });
 
   group('HabitRepository', () {

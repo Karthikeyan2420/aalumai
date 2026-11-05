@@ -52,6 +52,7 @@ WorkoutPlanItem _item({
   int sets = 3,
   int reps = 10,
   int durationSec = 0,
+  int restSec = 60,
 }) => WorkoutPlanItem(
   id: id,
   planId: 1,
@@ -60,6 +61,7 @@ WorkoutPlanItem _item({
   sets: sets,
   reps: reps,
   durationSec: durationSec,
+  restSec: restSec,
 );
 
 void main() {
@@ -103,7 +105,7 @@ void main() {
 
     test('skips rests when the exercise defines none', () {
       final steps = WorkoutQueue.build(
-        items: [_item(sets: 3)],
+        items: [_item(sets: 3, restSec: 0)],
         exercises: [_exercise(restSec: 0)],
       );
       expect(steps, hasLength(3));

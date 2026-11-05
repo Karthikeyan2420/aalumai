@@ -245,6 +245,7 @@ class AlarmAudio {
   bool _ringing = false;
   bool _loopActive = false;
   bool _voiceNative = false;
+  bool _musicNative = false;
   AlarmTone? _tone;
   double _volume = 1;
   AlarmPlaybackConfig? _config;
@@ -293,6 +294,7 @@ class AlarmAudio {
     _volume = (config.volumePercent / 100).clamp(0.0, 1.0).toDouble();
     _ringing = true;
     _voiceNative = voiceAlreadyPlaying;
+    _musicNative = musicAlreadyPlaying;
     _startVibration(config.vibrate && !musicAlreadyPlaying);
     if (config.playsMusic && !musicAlreadyPlaying) await _ensurePlaying();
     _startWatchdog();
@@ -302,7 +304,11 @@ class AlarmAudio {
   Future<void> _ensurePlaying() async {
     final tone = _tone;
     final config = _config;
-    if (!_ringing || tone == null || config == null || !config.playsMusic) {
+    if (!_ringing ||
+        _musicNative ||
+        tone == null ||
+        config == null ||
+        !config.playsMusic) {
       return;
     }
     try {
@@ -328,7 +334,7 @@ class AlarmAudio {
       if (!_ringing) return;
       final config = _config;
       if (config == null) return;
-      if (config.playsMusic && !_player.isPlaying) {
+      if (config.playsMusic && !_musicNative && !_player.isPlaying) {
         _ensurePlaying();
       }
       // If the voice loop ended for any reason while still ringing, restart it
@@ -406,7 +412,7 @@ class AlarmAudio {
     final tone = _tone;
     final text = config.message.trim();
     try {
-      if (config.playsMusic && tone != null) {
+      if (config.playsMusic && tone != null && !_musicNative) {
         final target = duck ? 0.0 : (_volume * _duckFactor).clamp(0.0, 1.0);
         await _player.play(tone, target, loop: true);
       }
@@ -438,7 +444,7 @@ class AlarmAudio {
     if (!_ringing) return;
     final config = _config;
     if (config == null) return;
-    if (config.playsMusic) await _ensurePlaying();
+    if (config.playsMusic && !_musicNative) await _ensurePlaying();
     if (config.speaks && !_voiceNative && !_loopActive && _tts != null) {
       _startVoiceLoop();
     }
@@ -477,6 +483,7 @@ class AlarmAudio {
     _config = null;
     _loopActive = false;
     _voiceNative = false;
+    _musicNative = false;
   }
 
   /// Stops any playback, speech and vibration immediately.

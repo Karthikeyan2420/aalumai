@@ -53,6 +53,7 @@ class _HabitEditorState extends ConsumerState<_HabitEditor> {
   late int _targetPerWeek = widget.habit?.targetPerWeek ?? 7;
   late bool _measurable = widget.habit?.isMeasurable ?? false;
   int _reminderMinute = -1;
+  String? _nameError;
 
   @override
   void initState() {
@@ -70,8 +71,12 @@ class _HabitEditorState extends ConsumerState<_HabitEditor> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final name = _name.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      setState(() => _nameError = l10n.required);
+      return;
+    }
     final repo = ref.read(habitRepositoryProvider);
     final goal = double.tryParse(_goal.text.trim()) ?? 0;
     if (widget.habit == null) {
@@ -131,7 +136,13 @@ class _HabitEditorState extends ConsumerState<_HabitEditor> {
           TextField(
             controller: _name,
             autofocus: true,
-            decoration: InputDecoration(labelText: l10n.name),
+            decoration: InputDecoration(
+              labelText: l10n.name,
+              errorText: _nameError,
+            ),
+            onChanged: (_) {
+              if (_nameError != null) setState(() => _nameError = null);
+            },
           ),
           const SizedBox(height: 12),
           TextField(

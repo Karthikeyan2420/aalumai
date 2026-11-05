@@ -77,6 +77,18 @@ class FinanceRepository {
   Future<void> deleteAccount(int id) =>
       (_db.delete(_db.accounts)..where((t) => t.id.equals(id))).go();
 
+  Future<bool> accountHasTransactions(int accountId) async {
+    final count =
+        await (_db.selectOnly(_db.transactions)
+              ..addColumns([_db.transactions.id.count()])
+              ..where(
+                _db.transactions.accountId.equals(accountId) |
+                    _db.transactions.transferAccountId.equals(accountId),
+              ))
+            .getSingle();
+    return (count.read(_db.transactions.id.count()) ?? 0) > 0;
+  }
+
   /// Computes balances: opening balance + income − expense + transfers in/out.
   /// Transfers are neither income nor expense.
   Future<List<AccountBalance>> balances() async {
@@ -168,21 +180,48 @@ class FinanceRepository {
     }
   }
 
+  Future<bool> categoryNameExists(
+    String name,
+    CategoryKind kind, {
+    int? exceptId,
+  }) async {
+    final normalized = name.trim().toLowerCase();
+    if (normalized.isEmpty) return true;
+    final rows =
+        await (_db.select(_db.categories)
+          ..where((t) => t.isArchived.equals(false))).get();
+    for (final c in rows) {
+      if (exceptId != null && c.id == exceptId) continue;
+      if (c.kind != kind.index) continue;
+      if (c.name.trim().toLowerCase() == normalized) return true;
+    }
+    return false;
+  }
+
   Future<int> createCategory(
     String name,
     CategoryKind kind, {
     String icon = '',
-  }) {
+  }) async {
+    if (await categoryNameExists(name, kind)) {
+      throw StateError('categoryExists');
+    }
     return _db
         .into(_db.categories)
         .insert(
           CategoriesCompanion.insert(
-            name: name,
+            name: name.trim(),
             kind: Value(kind.index),
             icon: Value(icon),
             isCustom: const Value(true),
           ),
         );
+  }
+
+  Future<void> archiveCategory(int id) async {
+    await (_db.update(_db.categories)..where((t) => t.id.equals(id))).write(
+      const CategoriesCompanion(isArchived: Value(true)),
+    );
   }
 
   // ---- Transactions -------------------------------------------------------
@@ -252,6 +291,22 @@ class FinanceRepository {
   Future<void> deleteTransaction(int id) =>
       (_db.delete(_db.transactions)..where((t) => t.id.equals(id))).go();
 
+  Future<void> updateTransaction(Transaction transaction) async {
+    await (_db.update(_db.transactions)..where((t) => t.id.equals(transaction.id)))
+        .write(
+      TransactionsCompanion(
+        accountId: Value(transaction.accountId),
+        categoryId: Value(transaction.categoryId),
+        type: Value(transaction.type),
+        amountPaise: Value(transaction.amountPaise),
+        date: Value(transaction.date),
+        note: Value(transaction.note),
+        transferAccountId: Value(transaction.transferAccountId),
+        paymentMethod: Value(transaction.paymentMethod),
+      ),
+    );
+  }
+
   /// Aggregates income/expense totals for a period, excluding transfers.
   Future<({int income, int expense})> totals(DateTime from, DateTime to) async {
     final txns =
@@ -314,6 +369,9 @@ class FinanceRepository {
 
   Future<void> deleteBudget(int id) =>
       (_db.delete(_db.budgets)..where((t) => t.id.equals(id))).go();
+
+  Future<void> updateBudget(Budget budget) =>
+      _db.update(_db.budgets).replace(budget);
 
   /// Amount spent against a budget for the current month/year.
   Future<int> budgetSpent(Budget budget, DateTime now) async {
@@ -409,6 +467,9 @@ class FinanceRepository {
         (t) => t.id.equals(id),
       )).write(RecurringRulesCompanion(isActive: Value(active)));
 
+  Future<void> updateRecurring(RecurringRule rule) =>
+      _db.update(_db.recurringRules).replace(rule);
+
   // ---- Debts --------------------------------------------------------------
 
   Stream<List<Debt>> watchDebts() =>
@@ -416,6 +477,11 @@ class FinanceRepository {
             ..where((t) => t.isClosed.equals(false))
             ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]))
           .watch();
+
+  Future<void> updateDebt(Debt debt) => _db.update(_db.debts).replace(debt);
+
+  Future<void> deleteDebt(int id) =>
+      (_db.delete(_db.debts)..where((t) => t.id.equals(id))).go();
 
   Future<int> createDebt({
     required String name,
@@ -566,6 +632,21 @@ List<CategorySpend> aggregateSpending({
         ..sort((a, b) => b.amountPaise.compareTo(a.amountPaise));
   return list;
 }
+
+/// Expenses in the current calendar month grouped by category, largest first.
+final todayExpenseProvider = Provider<int>((ref) {
+  final txns = ref.watch(transactionsProvider).valueOrNull ?? const [];
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month, now.day);
+  final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+  var sum = 0;
+  for (final t in txns) {
+    if (t.type != TransactionType.expense.index) continue;
+    if (t.date.isBefore(start) || t.date.isAfter(end)) continue;
+    sum += t.amountPaise;
+  }
+  return sum;
+});
 
 /// Expenses in the current calendar month grouped by category, largest first.
 /// Reacts to new transactions and category changes.

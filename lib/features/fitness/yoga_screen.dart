@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/l10n_extension.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
 import 'data/yoga_repository.dart';
@@ -44,6 +45,7 @@ class _YogaScreenState extends ConsumerState<YogaScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.yoga),
+        backgroundColor: softTint(context, ModuleAccents.fitness, 0.08),
         actions: [
           IconButton(
             tooltip: l10n.yogaHistory,

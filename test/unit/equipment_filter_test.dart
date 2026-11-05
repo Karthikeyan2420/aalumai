@@ -24,11 +24,11 @@ void main() {
       expect(isHomeCompatible('dumbbell', WorkoutMode.dumbbell), isTrue);
     });
 
-    test('barbell and ez-bar are home weights, not gym-only', () {
+    test('barbell and ez-bar are not home equipment', () {
       expect(isHomeCompatible('barbell', WorkoutMode.bodyweight), isFalse);
-      expect(isHomeCompatible('barbell', WorkoutMode.dumbbell), isTrue);
+      expect(isHomeCompatible('barbell', WorkoutMode.dumbbell), isFalse);
       expect(isHomeCompatible('ez-bar', WorkoutMode.bodyweight), isFalse);
-      expect(isHomeCompatible('ez-bar', WorkoutMode.dumbbell), isTrue);
+      expect(isHomeCompatible('ez-bar', WorkoutMode.dumbbell), isFalse);
     });
 
     test('gym equipment is never allowed', () {
@@ -37,9 +37,7 @@ void main() {
         'machine',
         'lever',
         'smith',
-        'kettlebell',
         'sled',
-        'band',
         'other',
       ]) {
         expect(
@@ -53,6 +51,16 @@ void main() {
           reason: '$equipment must be excluded in dumbbell mode',
         );
       }
+    });
+
+    test('band is home gear in both modes', () {
+      expect(isHomeCompatible('band', WorkoutMode.bodyweight), isTrue);
+      expect(isHomeCompatible('band', WorkoutMode.dumbbell), isTrue);
+    });
+
+    test('kettlebell is allowed in dumbbell mode only', () {
+      expect(isHomeCompatible('kettlebell', WorkoutMode.bodyweight), isFalse);
+      expect(isHomeCompatible('kettlebell', WorkoutMode.dumbbell), isTrue);
     });
   });
 
@@ -112,7 +120,7 @@ void main() {
       expect(result.map((e) => e.id), [1, 5]);
     });
 
-    test('dumbbell mode includes bodyweight, dumbbell and barbell exercises', () {
+    test('dumbbell mode includes bodyweight and dumbbell exercises only', () {
       final exercises = <Exercise>[
         testExercise(id: 1, name: 'Push-up', equipment: 'bodyweight'),
         testExercise(id: 2, name: 'Curl', equipment: 'dumbbell'),
@@ -120,7 +128,7 @@ void main() {
         testExercise(id: 4, name: 'Cable Fly', equipment: 'cable'),
       ];
       final result = filterHomeExercises(exercises, WorkoutMode.dumbbell);
-      expect(result.map((e) => e.id), [1, 2, 3]);
+      expect(result.map((e) => e.id), [1, 2]);
     });
   });
 
@@ -143,11 +151,10 @@ void main() {
     test('bodyweight mode uses only bodyweight', () {
       expect(equipmentForMode(WorkoutMode.bodyweight), ['bodyweight']);
     });
-    test('dumbbell mode includes both weights', () {
+    test('dumbbell mode uses bodyweight and dumbbell only', () {
       expect(equipmentForMode(WorkoutMode.dumbbell), [
         'bodyweight',
         'dumbbell',
-        'barbell',
       ]);
     });
   });
@@ -164,7 +171,7 @@ void main() {
   });
 
   group('WeekPlanGenerator equipment filtering', () {
-    test('defaults to home weights and never selects gym machines', () {
+    test('defaults exclude barbell and gym machines', () {
       final exercises = <Exercise>[
         testExercise(id: 1, name: 'Push-up', category: 2),
         testExercise(id: 2, name: 'Floor Press', category: 2, equipment: 'barbell'),
@@ -181,11 +188,11 @@ void main() {
         weekStart: DateTime(2026, 1, 5),
       );
       final usedIds = [for (final d in days) for (final i in d.items) i.exerciseId];
-      expect(usedIds, contains(2), reason: 'barbell is home weights by default');
+      expect(usedIds, isNot(contains(2)), reason: 'barbell is not home equipment');
       expect(usedIds, isNot(contains(3)), reason: 'cable must be excluded');
     });
 
-    test('dumbbell mode includes dumbbell and barbell exercises', () {
+    test('dumbbell mode includes dumbbell exercises only', () {
       final exercises = <Exercise>[
         testExercise(id: 1, name: 'Push-up', category: 2),
         testExercise(id: 4, name: 'Dumbbell Press', category: 2, equipment: 'dumbbell'),
@@ -194,7 +201,7 @@ void main() {
       final prefs = WorkoutPreferences(
         fitnessLevel: FitnessLevel.advanced,
         planStyle: WorkoutPlanStyle.fullBody,
-        equipment: ['bodyweight', 'dumbbell', 'barbell'],
+        equipment: ['bodyweight', 'dumbbell'],
       );
       final days = WeekPlanGenerator.generate(
         preferences: prefs,
@@ -203,29 +210,29 @@ void main() {
       );
       final usedIds = [for (final d in days) for (final i in d.items) i.exerciseId];
       expect(usedIds, contains(4), reason: 'dumbbell must be included');
-      expect(usedIds, contains(5), reason: 'barbell must be included');
+      expect(usedIds, isNot(contains(5)), reason: 'barbell must be excluded');
     });
   });
 
   group('SessionBuilder gym filtering', () {
-    test('warm-ups exclude non-home equipment', () {
+    test('warm-ups exclude gym-only equipment', () {
       final exercises = <Exercise>[
         testExercise(id: 1, name: 'Arm Circles', category: 7),
         testExercise(id: 2, name: 'Band Pull-Apart', category: 7, equipment: 'band'),
         testExercise(id: 3, name: 'Cable Pull', category: 7, equipment: 'cable'),
       ];
       final warmUps = SessionBuilder.selectWarmUps(exercises, count: 3);
-      expect(warmUps.map((e) => e.id), isNot(contains(2)));
+      expect(warmUps.map((e) => e.id), contains(2), reason: 'band is home gear');
       expect(warmUps.map((e) => e.id), isNot(contains(3)));
     });
 
-    test('cool-downs exclude non-home equipment', () {
+    test('cool-downs allow band and bodyweight', () {
       final exercises = <Exercise>[
         testExercise(id: 1, name: 'Chest Stretch', category: 8),
         testExercise(id: 2, name: 'Band Stretch', category: 8, equipment: 'band'),
       ];
       final coolDowns = SessionBuilder.selectCoolDowns(exercises, count: 2);
-      expect(coolDowns.map((e) => e.id), isNot(contains(2)));
+      expect(coolDowns.map((e) => e.id), contains(2));
     });
   });
 
@@ -237,6 +244,7 @@ void main() {
       testExercise(id: 4, name: 'Chest Stretch', category: 8),
       testExercise(id: 5, name: 'Arm Circles', category: 7),
       testExercise(id: 6, name: 'Band Pull-Apart', category: 7, equipment: 'band'),
+      testExercise(id: 7, name: 'Cable Pull', category: 7, equipment: 'cable'),
     ];
 
     test('always opens with a push-up, a plank and stretches', () {
@@ -247,9 +255,9 @@ void main() {
       expect(warmUps.where((e) => e.category == 8).length, greaterThanOrEqualTo(2));
     });
 
-    test('never picks non-home equipment into the warm-up', () {
+    test('never picks gym-only equipment into the warm-up', () {
       final warmUps = SessionBuilder.selectWarmUps(library(), count: 6);
-      expect(warmUps.map((e) => e.id), isNot(contains(6)));
+      expect(warmUps.map((e) => e.id), isNot(contains(7)));
     });
 
     test('respects the requested count', () {
@@ -274,7 +282,7 @@ void main() {
         preferences: const WorkoutPreferences(
           fitnessLevel: FitnessLevel.advanced,
           sessionMinutes: 75,
-          equipment: ['bodyweight', 'dumbbell', 'barbell'],
+          equipment: ['bodyweight', 'dumbbell'],
         ),
         exercises: library(),
       );

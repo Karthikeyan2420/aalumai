@@ -13,15 +13,15 @@ Widget _host(Widget child, {Size size = const Size(360, 640)}) => MaterialApp(
 
 void main() {
   group('ModuleAccents', () {
-    test('every dashboard module has a distinct accent and an icon', () {
-      final accents = <Color>{};
+    test('every dashboard module has a unique icon and a mapped accent', () {
       final icons = <IconData>{};
       for (final module in DashboardModule.values) {
-        accents.add(module.accent);
         icons.add(module.icon);
+        expect(module.accent.a, isNonZero);
       }
-      expect(accents.length, DashboardModule.values.length);
       expect(icons.length, DashboardModule.values.length);
+      expect(DashboardModule.schedule.accent, DashboardModule.tasks.accent);
+      expect(DashboardModule.notes.accent, DashboardModule.fitness.accent);
     });
 
     test('requested brand mapping is honoured', () {

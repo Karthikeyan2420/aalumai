@@ -1,5 +1,11 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/fitness_media_settings.dart';
+import '../data/fitness_offline_storage.dart';
 
 /// Demonstration image for a single yoga pose.
 ///
@@ -7,7 +13,7 @@ import 'package:flutter/material.dart';
 /// used for on-disk caching. When a pose has **no verified image** — which is
 /// the honest state for poses the API does not describe — a labelled
 /// placeholder is shown instead of borrowing a picture of a different pose.
-class YogaPoseImage extends StatelessWidget {
+class YogaPoseImage extends ConsumerWidget {
   const YogaPoseImage({
     super.key,
     required this.imageUrl,
@@ -27,7 +33,7 @@ class YogaPoseImage extends StatelessWidget {
   final String? noImageLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     if (imageUrl.trim().isEmpty) {
       return _Placeholder(
@@ -44,20 +50,45 @@ class YogaPoseImage extends StatelessWidget {
         height: size,
         child: ColoredBox(
           color: scheme.surfaceContainerHighest,
-          child: CachedNetworkImage(
-            imageUrl: imageUrl.trim(),
-            fit: BoxFit.contain,
-            fadeInDuration: const Duration(milliseconds: 150),
-            placeholder:
-                (context, _) =>
-                    _Placeholder(size: size, borderRadius: 0, scheme: scheme),
-            errorWidget:
-                (context, _, __) => _Placeholder(
+          child: FutureBuilder<File?>(
+            future: localOfflineYogaImageFile(imageUrl),
+            builder: (context, snap) {
+              final local = snap.data;
+              if (local != null) {
+                return Image.file(
+                  local,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                );
+              }
+              final online = ref.watch(fitnessMediaOnlineProvider);
+              if (!online) {
+                return _Placeholder(
                   size: size,
                   borderRadius: 0,
                   scheme: scheme,
                   label: noImageLabel,
-                ),
+                );
+              }
+              return CachedNetworkImage(
+                imageUrl: imageUrl.trim(),
+                fit: BoxFit.contain,
+                fadeInDuration: const Duration(milliseconds: 150),
+                placeholder:
+                    (context, _) => _Placeholder(
+                      size: size,
+                      borderRadius: 0,
+                      scheme: scheme,
+                    ),
+                errorWidget:
+                    (context, _, __) => _Placeholder(
+                      size: size,
+                      borderRadius: 0,
+                      scheme: scheme,
+                      label: noImageLabel,
+                    ),
+              );
+            },
           ),
         ),
       ),

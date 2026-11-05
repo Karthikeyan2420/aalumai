@@ -59,7 +59,7 @@ void main() {
             equipment: equipment,
             sourceCategory: 'strength',
           ),
-          WorkoutCollection.dumbbell,
+          WorkoutCollection.gym,
           reason: equipment,
         );
       }

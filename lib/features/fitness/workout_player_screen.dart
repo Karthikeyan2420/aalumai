@@ -10,6 +10,7 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
 import 'data/fitness_repository.dart';
 import 'domain/session_flow.dart';
+import 'domain/workout_preferences.dart';
 import 'domain/workout_queue.dart';
 import 'widgets/exercise_gif.dart';
 
@@ -462,6 +463,17 @@ class _WorkoutPlayerScreenState extends ConsumerState<WorkoutPlayerScreen> {
             durationSec: _stopwatch.elapsed.inSeconds,
             outcome: outcome.index,
           );
+    }
+    final scheduledId = widget.scheduledId;
+    if (scheduledId != null &&
+        _sessionId != null &&
+        (outcome == SessionOutcome.completed ||
+            outcome == SessionOutcome.partial)) {
+      await ref.read(fitnessRepositoryProvider).updateScheduleStatus(
+        scheduledId,
+        ScheduleStatus.completed.index,
+        sessionId: _sessionId,
+      );
     }
     if (mounted) setState(() {});
   }

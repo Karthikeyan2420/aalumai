@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A single record from the bundled exercise dataset (Exercise Gym GIFs DB).
 ///
@@ -113,3 +114,8 @@ class ExerciseCatalog {
     return List.unmodifiable(result);
   }
 }
+
+/// The bundled exercise dataset, loaded once and shared by the whole app.
+final exerciseCatalogProvider = Provider<ExerciseCatalog>(
+  (ref) => ExerciseCatalog(),
+);

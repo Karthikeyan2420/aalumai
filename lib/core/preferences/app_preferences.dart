@@ -27,6 +27,8 @@ class AppPreferences {
   static const _kJarvisBriefingId = 'jarvis_briefing_id';
   static const _kRecentQuickActions = 'recent_quick_actions';
   static const _kDashboardHidden = 'dashboard_hidden';
+  static const _kFitnessMediaOnline = 'fitness_media_online';
+  static const _kFitnessOfflinePackReady = 'fitness_offline_pack_ready';
 
   // Jarvis assistant voice preferences (shared by chat & wake-word flow).
   static const _kAssistantSpeechEnabled = 'assistant_speech_enabled';
@@ -278,4 +280,17 @@ class AppPreferences {
 
   Future<void> setJarvisBriefingId(int value) =>
       _prefs.setInt(_kJarvisBriefingId, value);
+
+  /// When true, workout GIFs and yoga images may load from the network.
+  bool get fitnessMediaOnline => _prefs.getBool(_kFitnessMediaOnline) ?? true;
+
+  Future<void> setFitnessMediaOnline(bool value) =>
+      _prefs.setBool(_kFitnessMediaOnline, value);
+
+  /// Whether the user completed a full offline fitness media download.
+  bool get fitnessOfflinePackReady =>
+      _prefs.getBool(_kFitnessOfflinePackReady) ?? false;
+
+  Future<void> setFitnessOfflinePackReady(bool value) =>
+      _prefs.setBool(_kFitnessOfflinePackReady, value);
 }

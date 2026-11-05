@@ -57,6 +57,7 @@ WorkoutPlanItem testPlanItem({
   int sets = 3,
   int reps = 10,
   int durationSec = 0,
+  int restSec = 60,
 }) => WorkoutPlanItem(
   id: id,
   planId: planId,
@@ -65,6 +66,7 @@ WorkoutPlanItem testPlanItem({
   sets: sets,
   reps: reps,
   durationSec: durationSec,
+  restSec: restSec,
 );
 
 /// Builds a completed [WorkoutSession] for tests.

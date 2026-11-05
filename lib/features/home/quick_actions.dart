@@ -7,16 +7,15 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/preferences/app_preferences.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
-import '../expenses/expenses_screen.dart';
+import '../expenses/transaction_editor.dart';
 import '../fitness/data/fitness_repository.dart';
-import '../fitness/fitness_screen.dart';
 import '../habits/data/habit_repository.dart';
 import '../habits/habit_editor.dart';
 import '../notes/note_editor.dart';
 import '../tasks/task_editor.dart';
 
 /// The set of one-tap actions available from the dashboard.
-enum QuickAction { expense, task, water, note, habit, workout, learn }
+enum QuickAction { expense, task, water, note, habit, workout }
 
 extension QuickActionX on QuickAction {
   IconData get icon => switch (this) {
@@ -26,7 +25,6 @@ extension QuickActionX on QuickAction {
     QuickAction.note => Icons.edit_note,
     QuickAction.habit => Icons.check_circle_outline,
     QuickAction.workout => Icons.fitness_center,
-    QuickAction.learn => Icons.school_outlined,
   };
 }
 
@@ -39,7 +37,6 @@ String quickActionLabel(BuildContext context, QuickAction action) {
     QuickAction.note => l10n.quickNote,
     QuickAction.habit => l10n.habits,
     QuickAction.workout => l10n.startWorkout,
-    QuickAction.learn => l10n.quickLearn,
   };
 }
 
@@ -55,6 +52,23 @@ List<QuickAction> orderedQuickActions(AppPreferences prefs) {
     if (!ordered.contains(action)) ordered.add(action);
   }
   return ordered;
+}
+
+/// Chips on the home dashboard: core modules plus habits, then other actions.
+List<QuickAction> dashboardPrimaryQuickActions(AppPreferences prefs) {
+  const core = [
+    QuickAction.expense,
+    QuickAction.task,
+    QuickAction.habit,
+    QuickAction.workout,
+  ];
+  final ordered = orderedQuickActions(prefs);
+  final out = [...core];
+  for (final action in ordered) {
+    if (out.length >= 5) break;
+    if (!out.contains(action)) out.add(action);
+  }
+  return out;
 }
 
 Future<void> _recordRecent(WidgetRef ref, QuickAction action) async {
@@ -87,8 +101,6 @@ Future<void> runQuickAction(
       await _completeHabit(context, ref);
     case QuickAction.workout:
       await _startWorkout(context, ref);
-    case QuickAction.learn:
-      if (context.mounted) context.push(AppRoutes.learning);
   }
 }
 
@@ -276,8 +288,8 @@ Future<void> _addNote(BuildContext context, WidgetRef ref) async {
   await showNoteEditor(context);
 }
 
-Future<void> _startWorkout(BuildContext context, WidgetRef ref) {
-  return startQuickWorkout(context, ref);
+Future<void> _startWorkout(BuildContext context, WidgetRef ref) async {
+  context.push(AppRoutes.fitness);
 }
 
 Future<void> _completeHabit(BuildContext context, WidgetRef ref) {

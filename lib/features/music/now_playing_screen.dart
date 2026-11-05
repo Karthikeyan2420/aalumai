@@ -58,6 +58,11 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
             onPressed: () => _showQueue(context, ref),
           ),
           IconButton(
+            tooltip: context.l10n.sleepTimer,
+            icon: const Icon(Icons.timer_outlined),
+            onPressed: () => _showSleepTimer(context, ref),
+          ),
+          IconButton(
             tooltip: context.l10n.more,
             icon: const Icon(Icons.more_vert),
             onPressed:

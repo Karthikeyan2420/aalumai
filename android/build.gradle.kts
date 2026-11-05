@@ -43,29 +43,46 @@ subprojects {
             }
         }
 
-        // AGP defaults a library's Java target to 1.8 while the Kotlin plugin
-        // defaults to the running toolchain (17); AGP 8 fails the build on that
-        // mismatch. Align libraries that never configure their own options.
-        val script = listOf(
-            projectDir.resolve("build.gradle"),
-            projectDir.resolve("build.gradle.kts"),
-        ).firstOrNull { it.exists() }?.readText().orEmpty()
-        if (!script.contains("compileOptions") && !script.contains("sourceCompatibility")) {
-            val compileOptions = android.javaClass.methods
-                .firstOrNull { it.name == "getCompileOptions" && it.parameterCount == 0 }
-                ?.invoke(android)
-            if (compileOptions != null) {
-                listOf("setSourceCompatibility", "setTargetCompatibility").forEach { setter ->
-                    compileOptions.javaClass.methods
-                        .firstOrNull {
-                            it.name == setter &&
-                                it.parameterCount == 1 &&
-                                it.parameterTypes[0] == JavaVersion::class.java
-                        }
-                        ?.invoke(compileOptions, JavaVersion.VERSION_17)
-                }
+        // Force Java 17 on every Android library so AGP 8 JVM-target checks
+        // stay aligned with Kotlin when Gradle runs on JDK 22+.
+        val compileOptions = android.javaClass.methods
+            .firstOrNull { it.name == "getCompileOptions" && it.parameterCount == 0 }
+            ?.invoke(android)
+        if (compileOptions != null) {
+            listOf("setSourceCompatibility", "setTargetCompatibility").forEach { setter ->
+                compileOptions.javaClass.methods
+                    .firstOrNull {
+                        it.name == setter &&
+                            it.parameterCount == 1 &&
+                            it.parameterTypes[0] == JavaVersion::class.java
+                    }
+                    ?.invoke(compileOptions, JavaVersion.VERSION_17)
             }
         }
+    }
+
+}
+
+// After every plugin script has configured itself, force JVM 17 on Java and
+// Kotlin compile tasks. Needed when Gradle runs on JDK 22+ and plugins pin
+// different targets (1.8 / 11 / toolchain default).
+fun Project.alignJvm17() {
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions.jvmTarget.set(
+            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17,
+        )
+    }
+}
+
+subprojects {
+    if (state.executed) {
+        alignJvm17()
+    } else {
+        afterEvaluate { alignJvm17() }
     }
 }
 

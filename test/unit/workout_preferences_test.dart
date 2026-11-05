@@ -65,6 +65,10 @@ void main() {
         preferredMinuteOfDay: 420,
         substitutions: '1>2',
         safetyAcknowledged: true,
+        gender: 0,
+        heightCm: 0,
+        onboardingDone: false,
+        focusAreaOrder: '',
         updatedAt: DateTime(2026, 1, 1),
       );
       final prefs = WorkoutPreferences.fromRow(row);

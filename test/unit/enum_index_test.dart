@@ -1,6 +1,5 @@
 import 'package:aalumai/features/alarms/data/alarm_repository.dart';
 import 'package:aalumai/features/expenses/data/finance_repository.dart';
-import 'package:aalumai/features/meals/data/meal_repository.dart';
 import 'package:aalumai/features/notes/data/note_repository.dart';
 import 'package:aalumai/features/tasks/data/task_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,11 +31,6 @@ void main() {
     test('NoteKind', () {
       expect(NoteKind.fromIndex(-5), NoteKind.values.first);
       expect(NoteKind.fromIndex(999), NoteKind.values.last);
-    });
-
-    test('MealType', () {
-      expect(MealType.fromIndex(-5), MealType.values.first);
-      expect(MealType.fromIndex(999), MealType.values.last);
     });
 
     test('AlarmChallenge', () {

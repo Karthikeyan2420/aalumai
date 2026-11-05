@@ -362,6 +362,7 @@ class WorkoutPlanItems extends Table {
   IntColumn get sets => integer().withDefault(const Constant(3))();
   IntColumn get reps => integer().withDefault(const Constant(10))();
   IntColumn get durationSec => integer().withDefault(const Constant(0))();
+  IntColumn get restSec => integer().withDefault(const Constant(60))();
 }
 
 /// User-configurable workout preferences. A single row (id == 1) holds the
@@ -403,6 +404,19 @@ class WorkoutPrefs extends Table {
   /// Whether the user has acknowledged the health/safety guidance.
   BoolColumn get safetyAcknowledged =>
       boolean().withDefault(const Constant(false))();
+
+  /// Onboarding profile: 0 unknown, 1 male, 2 female.
+  IntColumn get gender => integer().withDefault(const Constant(0))();
+
+  /// Height in centimetres (0 = unset).
+  IntColumn get heightCm => integer().withDefault(const Constant(0))();
+
+  /// Whether the gym-style onboarding flow has been completed.
+  BoolColumn get onboardingDone =>
+      boolean().withDefault(const Constant(false))();
+
+  /// Comma-separated workout focus-area keys for grid order (see gym UI).
+  TextColumn get focusAreaOrder => text().withDefault(const Constant(''))();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
@@ -688,154 +702,4 @@ class Alarms extends Table {
   IntColumn get voicePauseSec => integer().withDefault(const Constant(5))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-// ---------------------------------------------------------------------------
-// Meals
-// ---------------------------------------------------------------------------
-
-class Recipes extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text()();
-  IntColumn get servings => integer().withDefault(const Constant(1))();
-  TextColumn get instructions => text().withDefault(const Constant(''))();
-  TextColumn get notes => text().withDefault(const Constant(''))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-class RecipeIngredients extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get recipeId =>
-      integer().references(Recipes, #id, onDelete: KeyAction.cascade)();
-  TextColumn get name => text()();
-  RealColumn get quantity => real().withDefault(const Constant(0))();
-  TextColumn get unit => text().withDefault(const Constant(''))();
-}
-
-class MealPlanEntries extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  DateTimeColumn get day => dateTime()();
-  IntColumn get mealType => integer().withDefault(const Constant(0))();
-  IntColumn get recipeId => integer().nullable().references(Recipes, #id)();
-  TextColumn get customName => text().withDefault(const Constant(''))();
-  TextColumn get note => text().withDefault(const Constant(''))();
-}
-
-class GroceryItems extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text()();
-  RealColumn get quantity => real().withDefault(const Constant(0))();
-  TextColumn get unit => text().withDefault(const Constant(''))();
-  TextColumn get category => text().withDefault(const Constant(''))();
-  BoolColumn get isChecked => boolean().withDefault(const Constant(false))();
-  BoolColumn get isManual => boolean().withDefault(const Constant(true))();
-  IntColumn get sourceMealId => integer().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-// ---------------------------------------------------------------------------
-// English learning
-// ---------------------------------------------------------------------------
-
-class LearningCourses extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get sourceLang => text().withDefault(const Constant('ta'))();
-  TextColumn get targetLang => text().withDefault(const Constant('en'))();
-  TextColumn get title => text()();
-  IntColumn get level => integer().withDefault(const Constant(0))();
-  TextColumn get description => text().withDefault(const Constant(''))();
-  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
-}
-
-class Lessons extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get courseId =>
-      integer().references(LearningCourses, #id, onDelete: KeyAction.cascade)();
-  IntColumn get dayNumber => integer()();
-  TextColumn get title => text()();
-  TextColumn get grammarJson => text().withDefault(const Constant(''))();
-  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
-}
-
-class Vocabulary extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get lessonId => integer().nullable().references(Lessons, #id)();
-  TextColumn get word => text()();
-  TextColumn get meaningTa => text().withDefault(const Constant(''))();
-  TextColumn get meaningEn => text().withDefault(const Constant(''))();
-  TextColumn get pronunciationTa => text().withDefault(const Constant(''))();
-  TextColumn get exampleEn => text().withDefault(const Constant(''))();
-  TextColumn get exampleTa => text().withDefault(const Constant(''))();
-  IntColumn get level => integer().withDefault(const Constant(0))();
-  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
-}
-
-class LearningExercises extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get lessonId => integer().references(Lessons, #id)();
-  IntColumn get type => integer().withDefault(const Constant(0))();
-  TextColumn get question => text()();
-  TextColumn get optionsJson => text().withDefault(const Constant(''))();
-  TextColumn get answer => text()();
-  TextColumn get explanationTa => text().withDefault(const Constant(''))();
-  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
-}
-
-class LearningAttempts extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get exerciseId =>
-      integer().references(
-        LearningExercises,
-        #id,
-        onDelete: KeyAction.cascade,
-      )();
-  BoolColumn get isCorrect => boolean()();
-  TextColumn get userAnswer => text().withDefault(const Constant(''))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-class VocabReviews extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get vocabId => integer().references(Vocabulary, #id)();
-  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
-  IntColumn get intervalDays => integer().withDefault(const Constant(0))();
-  IntColumn get repetitions => integer().withDefault(const Constant(0))();
-  DateTimeColumn get dueDate => dateTime()();
-  DateTimeColumn get lastReviewedAt => dateTime().nullable()();
-}
-
-class PronunciationAttempts extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get vocabId => integer().references(Vocabulary, #id)();
-  TextColumn get recognizedText => text().withDefault(const Constant(''))();
-  IntColumn get score => integer().withDefault(const Constant(0))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-class LearningProgress extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  IntColumn get lessonId =>
-      integer().references(Lessons, #id, onDelete: KeyAction.cascade)();
-  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
-  IntColumn get score => integer().withDefault(const Constant(0))();
-  DateTimeColumn get completedAt => dateTime().nullable()();
-}
-
-// ---------------------------------------------------------------------------
-// Jarvis (local AI assistant)
-// ---------------------------------------------------------------------------
-
-/// Durable facts and preferences the assistant remembers. Rows written by the
-/// model start with `confirmed = false` until the user acknowledges them in
-/// the memory manager.
-class JarvisMemories extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get content => text()();
-
-  /// One of the [MemoryCategory] names: fact, preference, goal, person,
-  /// event, summary. Stored as text so new categories never need migrations.
-  TextColumn get category => text().withDefault(const Constant('fact'))();
-  BoolColumn get confirmed => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

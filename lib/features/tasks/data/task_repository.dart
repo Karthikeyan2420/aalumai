@@ -130,6 +130,13 @@ class TaskRepository {
     await _reminders?.removeTask(id);
   }
 
+  Future<void> reorderTasks(List<int> taskIdsInOrder) async {
+    for (var i = 0; i < taskIdsInOrder.length; i++) {
+      await (_db.update(_db.tasks)..where((t) => t.id.equals(taskIdsInOrder[i])))
+          .write(TasksCompanion(sortOrder: Value(i)));
+    }
+  }
+
   /// Marks a task complete. For recurring tasks a new, future occurrence is
   /// created so occurrences are generated predictably without duplication.
   Future<void> setCompleted(Task task, bool completed) async {

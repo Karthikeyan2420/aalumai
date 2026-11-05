@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/localization/l10n_extension.dart';
 import '../../core/router/app_router.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/module_theme.dart';
+import '../../core/widgets/dashboard_components.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -11,84 +13,118 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final items = <_MoreItem>[
-      _MoreItem(
-        Icons.payments_outlined,
-        l10n.expenses,
-        AppRoutes.expenses,
-        ModuleAccents.expenses,
-      ),
-      _MoreItem(
-        Icons.savings_outlined,
-        l10n.savingsGoals,
-        AppRoutes.savings,
-        ModuleAccents.savings,
-      ),
-      _MoreItem(
-        Icons.restaurant_outlined,
-        l10n.meals,
-        AppRoutes.meals,
-        ModuleAccents.meals,
-      ),
-      _MoreItem(
-        Icons.check_circle_outline,
-        l10n.habits,
-        AppRoutes.habits,
-        ModuleAccents.habits,
-      ),
-      _MoreItem(
-        Icons.menu_book_outlined,
-        l10n.learnEnglish,
-        AppRoutes.learning,
-        ModuleAccents.learning,
-      ),
-      _MoreItem(
-        Icons.alarm,
-        l10n.alarms,
-        AppRoutes.alarms,
-        ModuleAccents.alarm,
-      ),
-      _MoreItem(
-        Icons.library_music_outlined,
-        l10n.music,
-        AppRoutes.music,
-        ModuleAccents.music,
-      ),
-      _MoreItem(
-        Icons.edit_note,
-        l10n.notes,
-        AppRoutes.notes,
-        ModuleAccents.notes,
-      ),
-      _MoreItem(
-        Icons.smart_toy_outlined,
-        l10n.jarvisTitle,
-        AppRoutes.jarvis,
-        ModuleAccents.jarvis,
-      ),
-      _MoreItem(
-        Icons.settings_outlined,
-        l10n.settings,
-        AppRoutes.settings,
-        ModuleAccents.settings,
-      ),
-      _MoreItem(
-        Icons.info_outline,
-        l10n.about,
-        AppRoutes.about,
-        ModuleAccents.blue,
-      ),
-    ];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navMore)),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(12),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.4,
-        children: [for (final item in items) _MoreTile(item: item)],
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          8,
+          AppSpacing.screen,
+          32,
+        ),
+        children: [
+          _MoreGroup(
+            title: l10n.moreGroupLife,
+            items: [
+              _MoreItem(
+                Icons.calendar_month_outlined,
+                l10n.navSchedule,
+                AppRoutes.schedule,
+                ModuleAccents.schedule,
+              ),
+              _MoreItem(
+                Icons.edit_note,
+                l10n.notes,
+                AppRoutes.notes,
+                ModuleAccents.notes,
+              ),
+              _MoreItem(
+                Icons.alarm,
+                l10n.alarms,
+                AppRoutes.alarms,
+                ModuleAccents.alarm,
+              ),
+              _MoreItem(
+                Icons.check_circle_outline,
+                l10n.habits,
+                AppRoutes.habits,
+                ModuleAccents.habits,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.cardGap),
+          _MoreGroup(
+            title: l10n.moreGroupWellness,
+            items: [
+              _MoreItem(
+                Icons.library_music_outlined,
+                l10n.music,
+                AppRoutes.music,
+                ModuleAccents.music,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.cardGap),
+          _MoreGroup(
+            title: l10n.moreGroupApp,
+            items: [
+              _MoreItem(
+                Icons.settings_outlined,
+                l10n.settings,
+                AppRoutes.settings,
+                ModuleAccents.settings,
+              ),
+              _MoreItem(
+                Icons.info_outline,
+                l10n.about,
+                AppRoutes.about,
+                ModuleAccents.blue,
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _MoreGroup extends StatelessWidget {
+  const _MoreGroup({required this.title, required this.items});
+
+  final String title;
+  final List<_MoreItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+          child: Text(
+            title,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final columns = width >= 560 ? 3 : 2;
+            return GridView.count(
+              crossAxisCount: columns,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: AppSpacing.cardGap,
+              mainAxisSpacing: AppSpacing.cardGap,
+              childAspectRatio: 1.35,
+              children: [for (final item in items) _MoreTile(item: item)],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -108,36 +144,42 @@ class _MoreTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => context.push(item.route),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AppCard(
+      onTap: () => context.push(item.route),
+      padding: const EdgeInsets.all(14),
+      semanticLabel: item.label,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: softTint(context, item.accent, 0.16),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(item.icon, size: 21, color: item.accent),
+                child: Icon(item.icon, size: 20, color: item.accent),
               ),
-              Text(
-                item.label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: theme.colorScheme.outline,
               ),
             ],
           ),
-        ),
+          Text(
+            item.label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

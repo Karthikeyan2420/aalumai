@@ -2,10 +2,10 @@ package com.aalumai.aalumai
 
 import android.content.Intent
 import android.util.Log
-import com.ryanheise.audioservice.AudioServiceActivity
+import com.ryanheise.audioservice.AudioServiceFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity : AudioServiceActivity() {
+class MainActivity : AudioServiceFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AlarmTriggerPlugin())

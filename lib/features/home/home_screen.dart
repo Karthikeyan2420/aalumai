@@ -9,6 +9,7 @@ import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/module_theme.dart';
 import '../../core/utils/alarm_time.dart';
 import '../../core/widgets/background_view.dart';
@@ -19,8 +20,6 @@ import '../expenses/data/finance_repository.dart';
 import '../fitness/data/fitness_repository.dart';
 import '../habits/data/habit_repository.dart';
 import '../habits/domain/habit_streak.dart';
-import '../learning/data/learning_repository.dart';
-import '../meals/data/meal_repository.dart';
 import '../music/data/music_providers.dart';
 import '../notes/data/note_repository.dart';
 import '../savings/data/savings_repository.dart';
@@ -69,7 +68,12 @@ class HomeScreen extends ConsumerWidget {
             ref.invalidate(weekHabitCompletionsProvider);
           },
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              12,
+              AppSpacing.screen,
+              28,
+            ),
             children: [
               const _GreetingHeader(),
               const SizedBox(height: 16),
@@ -167,6 +171,7 @@ class _TodaySummary extends ConsumerWidget {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
     final balance = ref.watch(totalBalanceProvider);
+    final todaySpend = ref.watch(todayExpenseProvider);
     final water = ref.watch(waterTodayProvider);
     final alarm = ref.watch(nextAlarmProvider);
 
@@ -193,6 +198,19 @@ class _TodaySummary extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
+            Expanded(
+              child: StatTile(
+                icon: Icons.trending_down,
+                accent: ModuleAccents.expenses,
+                label: l10n.todaySpend,
+                value: formatMoney(todaySpend, locale),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
             Expanded(
               child: StatTile(
                 icon: Icons.water_drop,
@@ -276,8 +294,9 @@ class _QuickActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final ordered = orderedQuickActions(ref.watch(appPreferencesProvider));
-    final primary = ordered.take(4).toList();
+    final primary = dashboardPrimaryQuickActions(
+      ref.watch(appPreferencesProvider),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -443,6 +462,7 @@ class _TodayTasks extends ConsumerWidget {
                               dense: true,
                               value: t.task.isCompleted,
                               title: Text(t.task.title),
+                              subtitle: Text(_taskDueSubtitle(context, t.task)),
                               onChanged:
                                   (v) => ref
                                       .read(taskRepositoryProvider)
@@ -456,6 +476,20 @@ class _TodayTasks extends ConsumerWidget {
       },
     );
   }
+}
+
+String _taskDueSubtitle(BuildContext context, Task task) {
+  final l10n = context.l10n;
+  if (task.dueDate == null) return l10n.none;
+  final date = DateFormat.MMMd().format(task.dueDate!);
+  if (task.dueMinuteOfDay >= 0) {
+    final t = TimeOfDay(
+      hour: task.dueMinuteOfDay ~/ 60,
+      minute: task.dueMinuteOfDay % 60,
+    );
+    return '$date · ${t.format(context)}';
+  }
+  return date;
 }
 
 class _HabitsSummary extends ConsumerWidget {
@@ -536,8 +570,8 @@ class _ModulesGrid extends ConsumerWidget {
               crossAxisCount: columns,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
+              crossAxisSpacing: AppSpacing.cardGap,
+              mainAxisSpacing: AppSpacing.cardGap,
               childAspectRatio: 1.15,
               children: cards,
             );
@@ -560,14 +594,22 @@ List<Widget> _moduleCards(
   final sessions = ref.watch(workoutSessionsProvider).valueOrNull ?? const [];
   final notes = ref.watch(allNotesProvider).valueOrNull ?? const [];
   final goals = ref.watch(savingsGoalsProvider).valueOrNull ?? const [];
-  final recipes = ref.watch(recipesProvider).valueOrNull ?? const [];
   final tracks = ref.watch(musicTracksProvider).valueOrNull ?? const [];
-  final courses = ref.watch(coursesProvider).valueOrNull ?? const [];
   final balance = ref.watch(totalBalanceProvider).valueOrNull;
   final alarm = ref.watch(nextAlarmProvider).valueOrNull;
 
   final now = DateTime.now();
   final todayStart = DateTime(now.year, now.month, now.day);
+  final weekStartDay = todayStart.subtract(Duration(days: now.weekday - 1));
+  final weekEndDay = weekStartDay.add(const Duration(days: 7));
+  final weekMins = sessions
+      .where(
+        (s) =>
+            s.endedAt != null &&
+            !s.startedAt.isBefore(weekStartDay) &&
+            s.startedAt.isBefore(weekEndDay),
+      )
+      .fold<int>(0, (a, s) => a + s.durationSec ~/ 60);
   final todaysEvents = EventRepository.expand(
     events,
     todayStart,
@@ -603,7 +645,7 @@ List<Widget> _moduleCards(
     ModuleCard(
       module: DashboardModule.fitness,
       title: l10n.fitness,
-      value: '${sessions.length}',
+      value: weekMins > 0 ? '$weekMins min' : '—',
       subtitle: l10n.workoutHistory,
       onTap: () => context.push(AppRoutes.fitness),
     ),
@@ -625,22 +667,10 @@ List<Widget> _moduleCards(
       module: DashboardModule.expenses,
       title: l10n.expenses,
       value: balance == null ? '—' : formatMoney(balance, locale),
-      subtitle: l10n.totalBalance,
+      subtitle: goals.isEmpty
+          ? l10n.totalBalance
+          : '${goals.length} · ${l10n.savingsGoals}',
       onTap: () => context.push(AppRoutes.expenses),
-    ),
-    ModuleCard(
-      module: DashboardModule.savings,
-      title: l10n.savingsGoals,
-      value: '${goals.length}',
-      subtitle: l10n.savingsGoals,
-      onTap: () => context.push(AppRoutes.savings),
-    ),
-    ModuleCard(
-      module: DashboardModule.meals,
-      title: l10n.meals,
-      value: '${recipes.length}',
-      subtitle: l10n.recipes,
-      onTap: () => context.push(AppRoutes.meals),
     ),
     ModuleCard(
       module: DashboardModule.music,
@@ -648,20 +678,6 @@ List<Widget> _moduleCards(
       value: '${tracks.length}',
       subtitle: l10n.tracks,
       onTap: () => context.push(AppRoutes.music),
-    ),
-    ModuleCard(
-      module: DashboardModule.learning,
-      title: l10n.learnEnglish,
-      value: '${courses.length}',
-      subtitle: l10n.continueLearning,
-      onTap: () => context.push(AppRoutes.learning),
-    ),
-    ModuleCard(
-      module: DashboardModule.jarvis,
-      title: l10n.jarvisTitle,
-      value: 'AI',
-      subtitle: l10n.jarvisSubtitle,
-      onTap: () => context.push(AppRoutes.jarvis),
     ),
   ];
 }

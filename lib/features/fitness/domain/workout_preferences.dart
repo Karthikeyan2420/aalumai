@@ -16,6 +16,9 @@ enum WorkoutGoal {
 /// Training experience, aligned with exercise difficulty (0..2).
 enum FitnessLevel { beginner, intermediate, advanced }
 
+/// Onboarding gender selection.
+enum GymGender { unknown, male, female }
+
 /// How a generated day turned out, shown in the planner history.
 enum ScheduleStatus { planned, completed, skipped, rest, missed }
 
@@ -36,6 +39,10 @@ class WorkoutPreferences {
     this.preferredMinuteOfDay = -1,
     this.substitutions = const {},
     this.safetyAcknowledged = false,
+    this.gender = GymGender.unknown,
+    this.heightCm = 0,
+    this.onboardingDone = false,
+    this.focusAreaOrder = const [],
   });
 
   final WorkoutPlanStyle planStyle;
@@ -54,6 +61,12 @@ class WorkoutPreferences {
   final Map<int, int> substitutions;
 
   final bool safetyAcknowledged;
+  final GymGender gender;
+  final int heightCm;
+  final bool onboardingDone;
+
+  /// Ordered keys for the Workout tab grid (e.g. arm_shoulder, abs).
+  final List<String> focusAreaOrder;
 
   bool trainsOn(int weekday) => TrainingDays.has(trainingDaysMask, weekday);
 
@@ -71,6 +84,10 @@ class WorkoutPreferences {
     int? preferredMinuteOfDay,
     Map<int, int>? substitutions,
     bool? safetyAcknowledged,
+    GymGender? gender,
+    int? heightCm,
+    bool? onboardingDone,
+    List<String>? focusAreaOrder,
   }) {
     return WorkoutPreferences(
       planStyle: planStyle ?? this.planStyle,
@@ -84,6 +101,10 @@ class WorkoutPreferences {
       preferredMinuteOfDay: preferredMinuteOfDay ?? this.preferredMinuteOfDay,
       substitutions: substitutions ?? this.substitutions,
       safetyAcknowledged: safetyAcknowledged ?? this.safetyAcknowledged,
+      gender: gender ?? this.gender,
+      heightCm: heightCm ?? this.heightCm,
+      onboardingDone: onboardingDone ?? this.onboardingDone,
+      focusAreaOrder: focusAreaOrder ?? this.focusAreaOrder,
     );
   }
 
@@ -147,6 +168,13 @@ class WorkoutPreferences {
       preferredMinuteOfDay: row.preferredMinuteOfDay,
       substitutions: decodeSubstitutions(row.substitutions),
       safetyAcknowledged: row.safetyAcknowledged,
+      gender: GymGender.values[row.gender.clamp(
+        0,
+        GymGender.values.length - 1,
+      )],
+      heightCm: row.heightCm,
+      onboardingDone: row.onboardingDone,
+      focusAreaOrder: decodeStrings(row.focusAreaOrder),
     );
   }
 }

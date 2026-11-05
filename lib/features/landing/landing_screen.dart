@@ -7,6 +7,7 @@ import '../../core/localization/l10n_extension.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/module_theme.dart';
 
 class _LanguageOption {
   const _LanguageOption(this.code, this.nativeName);
@@ -300,37 +301,37 @@ class _FeatureList extends StatelessWidget {
     final items = <_FeatureItem>[
       _FeatureItem(
         icon: Icons.alarm,
-        color: const Color(0xFF7C4DFF),
+        color: ModuleAccents.alarm,
         title: l10n.featureSmartAlarms,
         subtitle: l10n.featureSmartAlarmsDesc,
       ),
       _FeatureItem(
         icon: Icons.fitness_center,
-        color: const Color(0xFF00C853),
+        color: ModuleAccents.fitness,
         title: l10n.featureFitness,
         subtitle: l10n.featureFitnessDesc,
       ),
       _FeatureItem(
         icon: Icons.music_note,
-        color: const Color(0xFFFF4081),
+        color: ModuleAccents.music,
         title: l10n.featureMusic,
         subtitle: l10n.featureMusicDesc,
       ),
       _FeatureItem(
         icon: Icons.check_circle,
-        color: const Color(0xFFFF7043),
+        color: ModuleAccents.habits,
         title: l10n.featureHabits,
         subtitle: l10n.featureHabitsDesc,
       ),
       _FeatureItem(
         icon: Icons.savings,
-        color: const Color(0xFF1E88E5),
+        color: ModuleAccents.savings,
         title: l10n.featureExpenses,
         subtitle: l10n.featureExpensesDesc,
       ),
       _FeatureItem(
         icon: Icons.calendar_month,
-        color: const Color(0xFF00BFA5),
+        color: ModuleAccents.schedule,
         title: l10n.featureCalendar,
         subtitle: l10n.featureCalendarDesc,
       ),
@@ -431,17 +432,16 @@ class _GetStartedButton extends StatelessWidget {
           key: const ValueKey('landing_get_started'),
           onPressed: onPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF1E6FF6),
+            backgroundColor: AppColors.teal,
             foregroundColor: Colors.white,
-            elevation: 4,
-            shadowColor: const Color(0xFF1E6FF6).withValues(alpha: 0.4),
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
           child: Text(
             l10n.getStarted,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import '../domain/exercise_collections.dart';
 import '../domain/exercise_format.dart';
 import '../domain/weekly_planner.dart';
 import '../domain/who_guidance.dart';
+import '../domain/daily_session_builder.dart';
 import '../domain/workout_preferences.dart';
 import 'exercise_catalog.dart';
 
@@ -510,6 +511,7 @@ class FitnessRepository {
     int sets = 3,
     int reps = 10,
     int durationSec = 0,
+    int restSec = 60,
   }) {
     return _db
         .into(_db.workoutPlanItems)
@@ -521,6 +523,7 @@ class FitnessRepository {
             sets: Value(sets),
             reps: Value(reps),
             durationSec: Value(durationSec),
+            restSec: Value(restSec),
           ),
         );
   }
@@ -708,6 +711,12 @@ class FitnessRepository {
               WorkoutPreferences.encodeSubstitutions(prefs.substitutions),
             ),
             safetyAcknowledged: Value(prefs.safetyAcknowledged),
+            gender: Value(prefs.gender.index),
+            heightCm: Value(prefs.heightCm),
+            onboardingDone: Value(prefs.onboardingDone),
+            focusAreaOrder: Value(
+              WorkoutPreferences.encodeStrings(prefs.focusAreaOrder),
+            ),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -893,9 +902,51 @@ class FitnessRepository {
     return created;
   }
 
+  /// Generates planner entries for the next [days] calendar days starting at
+  /// [startDate] (today by default). Uses WHO-informed daily sessions.
+  Future<int> generateThirtyDayPlan({DateTime? startDate, int days = 30}) async {
+    final prefs = WorkoutPreferences.fromRow(await preferencesRow());
+    final exercises = await _db.select(_db.exercises).get();
+    final now = DateTime.now();
+    final start =
+        startDate ??
+        DateTime(now.year, now.month, 1);
+    final dayStart = DateTime(start.year, start.month, start.day);
+    var created = 0;
+    for (var offset = 0; offset < days; offset++) {
+      final date = DateTime(dayStart.year, dayStart.month, dayStart.day + offset);
+      final existing = await watchScheduleForDate(date).first;
+      if (existing.any((e) => e.status == ScheduleStatus.completed.index)) {
+        continue;
+      }
+      for (final e in existing) {
+        if (e.status != ScheduleStatus.completed.index) {
+          await deleteScheduleEntry(e.id);
+        }
+      }
+      final planned = DailySessionBuilder.buildDay(
+        date: date,
+        preferences: prefs,
+        exercises: exercises,
+        substitutions: prefs.substitutions,
+      );
+      if (planned == null || planned.items.isEmpty) continue;
+      final planId = await _persistGeneratedPlan(planned);
+      await addScheduleEntry(
+        date: date,
+        planId: planId,
+        title: planned.title,
+        muscleGroups: planned.muscleGroups,
+        status: ScheduleStatus.planned.index,
+      );
+      created++;
+    }
+    return created;
+  }
+
   Future<int> _persistGeneratedPlan(PlannedDay day) async {
     final planId = await createPlan(
-      'Session ${day.muscleGroups.join('-')}',
+      day.title.isEmpty ? 'Session ${day.muscleGroups.join('-')}' : day.title,
       kind: 1,
       muscleGroups: day.muscleGroups,
     );
@@ -908,6 +959,7 @@ class FitnessRepository {
         sets: item.sets,
         reps: item.reps,
         durationSec: item.durationSec,
+        restSec: item.restSec,
       );
     }
     return planId;
@@ -940,11 +992,6 @@ class FitnessRepository {
   Future<void> deleteGoal(int id) =>
       (_db.delete(_db.fitnessGoals)..where((t) => t.id.equals(id))).go();
 }
-
-/// The bundled exercise dataset, loaded once and shared by the whole app.
-final exerciseCatalogProvider = Provider<ExerciseCatalog>(
-  (ref) => ExerciseCatalog(),
-);
 
 final fitnessRepositoryProvider = Provider<FitnessRepository>(
   (ref) => FitnessRepository(

@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 
-/// Colourful per-module accent palette for the 2026 design system.
-///
-/// Blue and teal are the primary brand accents; each feature module gets a
-/// distinct, friendly hue so cards, icons and progress rings are instantly
-/// recognisable while staying coherent.
+import 'app_theme.dart';
+
+/// Restrained module accent family — recognisable hues in 36px icon wells only.
 class ModuleAccents {
   const ModuleAccents._();
 
-  // Brand primaries.
   static const blue = Color(0xFF3B82F6);
-  static const teal = Color(0xFF14B8A6);
+  static const teal = AppColors.teal;
+  static const emerald = Color(0xFF10B981);
+  static const amber = Color(0xFFEAB308);
+  static const coral = Color(0xFFF87171);
+  static const violet = Color(0xFF8B5CF6);
+  static const slate = Color(0xFF64748B);
 
-  // Module accents.
-  static const alarm = Color(0xFFF87171); // coral / red
-  static const music = Color(0xFF8B5CF6); // purple
-  static const fitness = Color(0xFF22C55E); // green
-  static const habits = Color(0xFF10B981); // emerald
-  static const tasks = Color(0xFF3B82F6); // blue
-  static const schedule = Color(0xFF0EA5E9); // sky
-  static const notes = Color(0xFF14B8A6); // teal
-  static const expenses = Color(0xFFF97316); // orange
-  static const savings = Color(0xFFEAB308); // amber
-  static const meals = Color(0xFFEC4899); // pink
-  static const learning = Color(0xFF06B6D4); // cyan
-  static const jarvis = Color(0xFF6366F1); // indigo
-  static const water = Color(0xFF38BDF8); // light blue
-  static const settings = Color(0xFF64748B); // slate
+  static const alarm = coral;
+  static const music = violet;
+  static const fitness = teal;
+  static const habits = emerald;
+  static const tasks = blue;
+  static const schedule = blue;
+  static const notes = teal;
+  static const expenses = Color(0xFFF97316);
+  static const savings = amber;
+  static const water = Color(0xFF60A5FA);
+  static const settings = slate;
 }
 
 /// A soft, tinted background derived from an accent colour — used behind
@@ -53,10 +51,7 @@ enum DashboardModule {
   schedule,
   notes,
   expenses,
-  savings,
-  meals,
-  learning,
-  jarvis;
+  savings;
 
   Color get accent => switch (this) {
     DashboardModule.alarm => ModuleAccents.alarm,
@@ -68,9 +63,6 @@ enum DashboardModule {
     DashboardModule.notes => ModuleAccents.notes,
     DashboardModule.expenses => ModuleAccents.expenses,
     DashboardModule.savings => ModuleAccents.savings,
-    DashboardModule.meals => ModuleAccents.meals,
-    DashboardModule.learning => ModuleAccents.learning,
-    DashboardModule.jarvis => ModuleAccents.jarvis,
   };
 
   IconData get icon => switch (this) {
@@ -83,8 +75,5 @@ enum DashboardModule {
     DashboardModule.notes => Icons.edit_note,
     DashboardModule.expenses => Icons.account_balance_wallet,
     DashboardModule.savings => Icons.savings,
-    DashboardModule.meals => Icons.restaurant,
-    DashboardModule.learning => Icons.school,
-    DashboardModule.jarvis => Icons.smart_toy_outlined,
   };
 }

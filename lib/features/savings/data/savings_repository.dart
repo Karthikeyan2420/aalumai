@@ -53,6 +53,18 @@ class SavingsRepository {
   Future<void> deleteGoal(int id) =>
       (_db.delete(_db.savingsGoals)..where((t) => t.id.equals(id))).go();
 
+  Future<SavingsGoal?> getGoalById(int id) =>
+      (_db.select(_db.savingsGoals)..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+
+  Future<void> deleteContribution(int id) => (_db.delete(_db.savingsContributions)
+        ..where((t) => t.id.equals(id)))
+      .go();
+
+  Stream<SavingsGoal?> watchGoal(int id) =>
+      (_db.select(_db.savingsGoals)..where((t) => t.id.equals(id)))
+          .watchSingleOrNull();
+
   Stream<List<SavingsContribution>> watchContributions(int goalId) =>
       (_db.select(_db.savingsContributions)
             ..where((t) => t.goalId.equals(goalId))

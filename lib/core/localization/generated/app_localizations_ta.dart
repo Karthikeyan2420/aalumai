@@ -369,6 +369,60 @@ class AppLocalizationsTa extends AppLocalizations {
   String get emptySavings => 'இன்னும் சேமிப்பு இலக்குகள் இல்லை.';
 
   @override
+  String get newCategory => 'புதிய வகை';
+
+  @override
+  String get categoryExists => 'இந்த பெயரில் ஏற்கனவே ஒரு வகை உள்ளது.';
+
+  @override
+  String get sameAccount => 'பரிமாற்றத்திற்கு இரண்டு வேறு கணக்குகளைத் தேர்ந்தெடுக்கவும்.';
+
+  @override
+  String get accountInUse => 'இந்த கணக்கில் பரிவர்த்தனைகள் உள்ளன; நீக்க முடியாது.';
+
+  @override
+  String get archivedHabits => 'காப்பகப்படுத்திய பழக்கங்கள்';
+
+  @override
+  String get moreGroupLife => 'வாழ்க்கை';
+
+  @override
+  String get moreGroupWellness => 'நலம்';
+
+  @override
+  String get moreGroupApp => 'பயன்பாடு';
+
+  @override
+  String get todaySpend => 'இன்றைய செலவு';
+
+  @override
+  String get debtIOwe => 'நான் கடன்பட்டுள்ளேன்';
+
+  @override
+  String get debtTheyOwe => 'எனக்கு கடன்';
+
+  @override
+  String get discardChanges => 'மாற்றங்களை நிராகரிக்கவா?';
+
+  @override
+  String get keepEditing => 'தொடர்ந்து திருத்து';
+
+  @override
+  String get sleepTimer => 'தூக்க டைமர்';
+
+  @override
+  String get selectTracks => 'தேர்ந்தெடு';
+
+  @override
+  String get weeklySummary => 'இந்த வாரம்';
+
+  @override
+  String get searchEvents => 'நிகழ்வுகளைத் தேடு';
+
+  @override
+  String get undoDelete => 'பரிவர்த்தனை நீக்கப்பட்டது';
+
+  @override
   String get emptyLessons => 'பாடங்கள் எதுவும் இல்லை.';
 
   @override
@@ -863,9 +917,6 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get queue => 'வரிசை';
-
-  @override
-  String get sleepTimer => 'தூக்க டைமர்';
 
   @override
   String get recentlyPlayed => 'சமீபத்தில் இயக்கியவை';

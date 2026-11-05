@@ -167,6 +167,7 @@ void main() {
       expect(player.playCount, 0);
       await tester.pump(const Duration(seconds: 3));
       expect(tts.speakCount, 0);
+      expect(player.playCount, 0, reason: 'watchdog must not start Flutter music');
 
       await audio.dispose();
     },

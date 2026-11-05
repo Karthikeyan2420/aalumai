@@ -8,12 +8,14 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/backgrounds/background_presets.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/backup_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/restore_reconciler.dart';
+import '../../core/widgets/common.dart';
 import 'alarm_voice_settings_screen.dart';
 import 'background_settings_screen.dart';
 import 'data/lock_service.dart';
@@ -38,154 +40,179 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settings)),
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        backgroundColor: softTint(context, ModuleAccents.settings, 0.08),
+      ),
       body: ListView(
+        padding: const EdgeInsets.only(bottom: 32),
         children: [
-          _SectionHeader(l10n.settingsGeneral),
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(l10n.language),
-            subtitle: Text(
-              _languages
-                  .firstWhere(
-                    (l) => l.$1 == (locale ?? 'en'),
-                    orElse: () => ('en', 'English'),
-                  )
-                  .$2,
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _pickLanguage(context, ref, locale),
-          ),
-          ListTile(
-            leading: const Icon(Icons.brightness_6_outlined),
-            title: Text(l10n.theme),
-            subtitle: Text(_themeLabel(context, themeMode)),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _pickTheme(context, ref, themeMode),
-          ),
-          ListTile(
-            leading: const Icon(Icons.wallpaper_outlined),
-            title: const Text('Home background'),
-            subtitle: const Text('Relaxing image, colour or gradient'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _openBackground(context, BackgroundSlot.home),
-          ),
-          ListTile(
-            leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Alarm background'),
-            subtitle: const Text('Night-sky image, colour or gradient'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _openBackground(context, BackgroundSlot.alarm),
-          ),
-          ListTile(
-            leading: const Icon(Icons.record_voice_over_outlined),
-            title: Text(l10n.settingsAlarmVoice),
-            subtitle: Text(l10n.settingsAlarmVoiceDesc),
-            trailing: const Icon(Icons.chevron_right),
-            onTap:
-                () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const AlarmVoiceSettingsScreen(),
-                  ),
+          SettingsGroup(
+            title: l10n.settingsGeneral,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(l10n.language),
+                subtitle: Text(
+                  _languages
+                      .firstWhere(
+                        (l) => l.$1 == (locale ?? 'en'),
+                        orElse: () => ('en', 'English'),
+                      )
+                      .$2,
                 ),
-          ),
-          const Divider(),
-          _SectionHeader(l10n.settingsFitness),
-          ListTile(
-            leading: const Icon(Icons.water_drop_outlined),
-            title: Text(l10n.waterIntake),
-            subtitle: Text('${prefs.dailyWaterGoalMl} ml'),
-            onTap:
-                () => _editNumber(
-                  context,
-                  l10n.waterIntake,
-                  prefs.dailyWaterGoalMl,
-                  (v) =>
-                      ref.read(appPreferencesProvider).setDailyWaterGoalMl(v),
-                ),
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.music_note_outlined),
-            title: Text(l10n.settingsAudio),
-            subtitle: const Text('Play music during workouts'),
-            value: prefs.workoutMusicEnabled,
-            onChanged:
-                (v) =>
-                    ref.read(appPreferencesProvider).setWorkoutMusicEnabled(v),
-          ),
-          ListTile(
-            leading: const Icon(Icons.fitness_center),
-            title: Text(l10n.workoutSettings),
-            subtitle: Text(l10n.workoutSettingsDesc),
-            trailing: const Icon(Icons.chevron_right),
-            onTap:
-                () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const WorkoutSettingsScreen(),
-                  ),
-                ),
-          ),
-          const Divider(),
-          _SectionHeader(l10n.settingsNotifications),
-          Consumer(
-            builder: (context, ref, _) {
-              return SwitchListTile(
-                secondary: const Icon(Icons.notifications_outlined),
-                title: Text(l10n.reminder),
-                value: prefs.notificationsEnabled,
-                onChanged: (v) async {
-                  await ref
-                      .read(appPreferencesProvider)
-                      .setNotificationsEnabled(v);
-                  if (v) {
-                    await ref
-                        .read(notificationServiceProvider)
-                        .requestPermissions();
-                  }
-                },
-              );
-            },
-          ),
-          const Divider(),
-          _SectionHeader(l10n.settingsData),
-          ListTile(
-            leading: const Icon(Icons.backup_outlined),
-            title: Text(l10n.backupNow),
-            subtitle:
-                prefs.lastBackupAt == null
-                    ? Text(l10n.backupDescription)
-                    : Text(
-                      DateFormat.yMMMd().add_Hm().format(prefs.lastBackupAt!),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _pickLanguage(context, ref, locale),
+              ),
+              ListTile(
+                leading: const Icon(Icons.brightness_6_outlined),
+                title: Text(l10n.theme),
+                subtitle: Text(_themeLabel(context, themeMode)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _pickTheme(context, ref, themeMode),
+              ),
+              ListTile(
+                leading: const Icon(Icons.wallpaper_outlined),
+                title: const Text('Home background'),
+                subtitle: const Text('Relaxing image, colour or gradient'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _openBackground(context, BackgroundSlot.home),
+              ),
+              ListTile(
+                leading: const Icon(Icons.dark_mode_outlined),
+                title: const Text('Alarm background'),
+                subtitle: const Text('Night-sky image, colour or gradient'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _openBackground(context, BackgroundSlot.alarm),
+              ),
+              ListTile(
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: Text(l10n.settingsAlarmVoice),
+                subtitle: Text(l10n.settingsAlarmVoiceDesc),
+                trailing: const Icon(Icons.chevron_right),
+                onTap:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AlarmVoiceSettingsScreen(),
+                      ),
                     ),
-            onTap: () => _backup(context, ref),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.upload_file_outlined),
-            title: Text(l10n.exportCsv),
-            subtitle: Text(l10n.exportCsvDescription),
-            onTap: () => _exportCsv(context, ref),
+          SettingsGroup(
+            title: l10n.settingsFitness,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.water_drop_outlined),
+                title: Text(l10n.waterIntake),
+                subtitle: Text('${prefs.dailyWaterGoalMl} ml'),
+                onTap:
+                    () => _editNumber(
+                      context,
+                      l10n.waterIntake,
+                      prefs.dailyWaterGoalMl,
+                      (v) =>
+                          ref
+                              .read(appPreferencesProvider)
+                              .setDailyWaterGoalMl(v),
+                    ),
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.music_note_outlined),
+                title: Text(l10n.settingsAudio),
+                subtitle: const Text('Play music during workouts'),
+                value: prefs.workoutMusicEnabled,
+                onChanged:
+                    (v) => ref
+                        .read(appPreferencesProvider)
+                        .setWorkoutMusicEnabled(v),
+              ),
+              ListTile(
+                leading: const Icon(Icons.fitness_center),
+                title: Text(l10n.workoutSettings),
+                subtitle: Text(l10n.workoutSettingsDesc),
+                trailing: const Icon(Icons.chevron_right),
+                onTap:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const WorkoutSettingsScreen(),
+                      ),
+                    ),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.restore_outlined),
-            title: Text(l10n.restoreBackup),
-            onTap: () => _restore(context, ref),
+          SettingsGroup(
+            title: l10n.settingsNotifications,
+            children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  return SwitchListTile(
+                    secondary: const Icon(Icons.notifications_outlined),
+                    title: Text(l10n.reminder),
+                    value: prefs.notificationsEnabled,
+                    onChanged: (v) async {
+                      await ref
+                          .read(appPreferencesProvider)
+                          .setNotificationsEnabled(v);
+                      if (v) {
+                        await ref
+                            .read(notificationServiceProvider)
+                            .requestPermissions();
+                      }
+                    },
+                  );
+                },
+              ),
+            ],
           ),
-          const Divider(),
-          _SectionHeader(l10n.settingsPrivacy),
-          ListTile(
-            leading: const Icon(Icons.lock_outline),
-            title: Text(l10n.noteLock),
-            onTap: () => _managePin(context, ref),
+          SettingsGroup(
+            title: l10n.settingsData,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.backup_outlined),
+                title: Text(l10n.backupNow),
+                subtitle:
+                    prefs.lastBackupAt == null
+                        ? Text(l10n.backupDescription)
+                        : Text(
+                          DateFormat.yMMMd().add_Hm().format(
+                            prefs.lastBackupAt!,
+                          ),
+                        ),
+                onTap: () => _backup(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.upload_file_outlined),
+                title: Text(l10n.exportCsv),
+                subtitle: Text(l10n.exportCsvDescription),
+                onTap: () => _exportCsv(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.restore_outlined),
+                title: Text(l10n.restoreBackup),
+                onTap: () => _restore(context, ref),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.policy_outlined),
-            title: Text(l10n.aboutPrivacy),
-            onTap: () => context.push(AppRoutes.about),
-          ),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: Text(l10n.about),
-            onTap: () => context.push(AppRoutes.about),
+          SettingsGroup(
+            title: l10n.settingsPrivacy,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: Text(l10n.noteLock),
+                onTap: () => _managePin(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.policy_outlined),
+                title: Text(l10n.aboutPrivacy),
+                onTap: () => context.push(AppRoutes.about),
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.about),
+                onTap: () => context.push(AppRoutes.about),
+              ),
+            ],
           ),
         ],
       ),
@@ -482,24 +509,5 @@ class SettingsScreen extends ConsumerWidget {
     if (ok == true && ctrl.text.trim().length >= 4) {
       await lock.setPin(ctrl.text.trim());
     }
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.secondary,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
   }
 }

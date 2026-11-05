@@ -5,8 +5,6 @@ import 'package:aalumai/features/expenses/data/finance_repository.dart';
 import 'package:aalumai/features/fitness/data/fitness_repository.dart';
 import 'package:aalumai/features/habits/data/habit_repository.dart';
 import 'package:aalumai/features/home/home_screen.dart';
-import 'package:aalumai/features/learning/data/learning_repository.dart';
-import 'package:aalumai/features/meals/data/meal_repository.dart';
 import 'package:aalumai/features/music/data/music_providers.dart';
 import 'package:aalumai/features/notes/data/note_repository.dart';
 import 'package:aalumai/features/savings/data/savings_repository.dart';
@@ -32,9 +30,7 @@ List<Override> _emptyOverrides(SharedPreferences prefs) => [
   workoutSessionsProvider.overrideWith((ref) => Stream.value(const [])),
   allNotesProvider.overrideWith((ref) => Stream.value(const [])),
   savingsGoalsProvider.overrideWith((ref) => Stream.value(const [])),
-  recipesProvider.overrideWith((ref) => Stream.value(const [])),
   musicTracksProvider.overrideWith((ref) => Stream.value(const [])),
-  coursesProvider.overrideWith((ref) => Stream.value(const [])),
 ];
 
 Widget _host(ProviderContainer container, {GoRouter? router}) {
@@ -102,8 +98,7 @@ void main() {
     expect(find.text('Alarms'), findsOneWidget);
     expect(find.text('Fitness'), findsOneWidget);
     expect(find.text('Music'), findsOneWidget);
-    expect(find.text('Learn English'), findsOneWidget);
-    expect(find.text('Recipes'), findsOneWidget);
+    expect(find.text('Expenses'), findsOneWidget);
   });
 
   testWidgets('lays out without overflow on a small phone', (tester) async {

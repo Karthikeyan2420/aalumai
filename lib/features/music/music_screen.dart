@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/db/database.dart';
 import '../../core/localization/l10n_extension.dart';
+import '../../core/theme/module_theme.dart';
 import 'add_to_collection.dart';
 import 'data/music_providers.dart';
 import 'data/music_repository.dart';
@@ -67,7 +68,10 @@ class _MusicScreenState extends ConsumerState<MusicScreen>
     if (scanPhase == ScanPhase.permissionDenied ||
         scanPhase == ScanPhase.permissionPermanentlyDenied) {
       return Scaffold(
-        appBar: AppBar(title: Text(context.l10n.music)),
+        appBar: AppBar(
+          title: Text(context.l10n.music),
+          backgroundColor: softTint(context, DashboardModule.music.accent, 0.08),
+        ),
         body: MusicPermissionView(
           permanentlyDenied: scanPhase == ScanPhase.permissionPermanentlyDenied,
           onGrant: _scan,
@@ -122,14 +126,25 @@ class _MusicScreenState extends ConsumerState<MusicScreen>
   }
 
   PreferredSizeWidget _normalAppBar(LibraryQuery query) {
+    final tracks = ref.watch(musicTracksProvider).valueOrNull ?? const [];
     return AppBar(
       title: Text(context.l10n.music),
+      backgroundColor: softTint(context, DashboardModule.music.accent, 0.08),
       bottom: _tabBar(),
       actions: [
         IconButton(
           tooltip: context.l10n.search,
           icon: const Icon(Icons.search),
           onPressed: () => setState(() => _searching = true),
+        ),
+        IconButton(
+          tooltip: context.l10n.selectTracks,
+          icon: const Icon(Icons.checklist),
+          onPressed: () {
+            if (tracks.isNotEmpty) {
+              setState(() => _selected.add(tracks.first.id));
+            }
+          },
         ),
         IconButton(
           tooltip: context.l10n.sortBy,

@@ -369,6 +369,60 @@ class AppLocalizationsMl extends AppLocalizations {
   String get emptySavings => 'ഇതുവരെ സമ്പാദ്യ ലക്ഷ്യങ്ങളില്ല.';
 
   @override
+  String get newCategory => 'പുതിയ വിഭാഗം';
+
+  @override
+  String get categoryExists => 'ഈ പേരിൽ ഒരു വിഭാഗം നിലവിലുണ്ട്.';
+
+  @override
+  String get sameAccount => 'കൈമാറ്റത്തിന് രണ്ട് വ്യത്യസ്ത അക്കൗണ്ടുകൾ തിരഞ്ഞെടുക്കുക.';
+
+  @override
+  String get accountInUse => 'ഈ അക്കൗണ്ടിൽ ഇടപാടുകളുണ്ട്; ഇല്ലാതാക്കാൻ കഴിയില്ല.';
+
+  @override
+  String get archivedHabits => 'ആർക്കൈവ് ചെയ്ത ശീലങ്ങൾ';
+
+  @override
+  String get moreGroupLife => 'ജീവിതം';
+
+  @override
+  String get moreGroupWellness => 'ആരോഗ്യം';
+
+  @override
+  String get moreGroupApp => 'ആപ്പ്';
+
+  @override
+  String get todaySpend => 'ഇന്നത്തെ ചെലവ്';
+
+  @override
+  String get debtIOwe => 'ഞാൻ കടപ്പെട്ടിരിക്കുന്നു';
+
+  @override
+  String get debtTheyOwe => 'എനിക്ക് കടം';
+
+  @override
+  String get discardChanges => 'മാറ്റങ്ങൾ ഉപേക്ഷിക്കണോ?';
+
+  @override
+  String get keepEditing => 'തിരുത്തൽ തുടരുക';
+
+  @override
+  String get sleepTimer => 'സ്ലീപ്പ് ടൈമർ';
+
+  @override
+  String get selectTracks => 'തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get weeklySummary => 'ഈ ആഴ്ച';
+
+  @override
+  String get searchEvents => 'ഇവന്റുകൾ തിരയുക';
+
+  @override
+  String get undoDelete => 'ഇടപാട് ഇല്ലാതാക്കി';
+
+  @override
   String get emptyLessons => 'പാഠങ്ങൾ ഒന്നും ലഭ്യമല്ല.';
 
   @override
@@ -863,9 +917,6 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get queue => 'ക്യൂ';
-
-  @override
-  String get sleepTimer => 'സ്ലീപ്പ് ടൈമർ';
 
   @override
   String get recentlyPlayed => 'അടുത്തിടെ പ്ലേ ചെയ്തവ';

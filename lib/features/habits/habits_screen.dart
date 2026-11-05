@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/module_scaffold.dart';
 import 'data/habit_repository.dart';
 import 'domain/habit_streak.dart';
 import 'habit_editor.dart';
+import '../expenses/item_actions.dart';
 
 class HabitsScreen extends ConsumerWidget {
   const HabitsScreen({super.key});
@@ -20,7 +24,17 @@ class HabitsScreen extends ConsumerWidget {
     final today = HabitStreak.normalize(DateTime.now());
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.habitChecklist)),
+      appBar: AppBar(
+        title: Text(l10n.habitChecklist),
+        backgroundColor: softTint(context, DashboardModule.habits.accent, 0.08),
+        actions: [
+          IconButton(
+            tooltip: l10n.archivedHabits,
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: () => _showArchived(context, ref),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'habitsAdd',
         onPressed: () => showHabitEditor(context),
@@ -35,6 +49,7 @@ class HabitsScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.check_circle_outline,
               message: l10n.emptyHabits,
+              accent: DashboardModule.habits.accent,
               actionLabel: l10n.add,
               onAction: () => showHabitEditor(context),
             );
@@ -46,46 +61,168 @@ class HabitsScreen extends ConsumerWidget {
                 .putIfAbsent(c.habitId, () => <DateTime>{})
                 .add(HabitStreak.normalize(c.day));
           }
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
-            itemCount: habits.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final habit = habits[index];
-              final days = byHabit[habit.id] ?? const <DateTime>{};
-              final done = days.contains(today);
-              final schedule = HabitSchedule.fromIndex(habit.scheduleType);
-              final eligible = HabitStreak.isEligibleDay(
-                schedule: schedule,
-                weekdaysMask: habit.weekdaysMask,
-                date: today,
-              );
-              final streak = HabitStreak.currentStreak(
-                schedule: schedule,
-                weekdaysMask: habit.weekdaysMask,
-                targetPerWeek: habit.targetPerWeek,
-                completedDays: days,
-                today: today,
-              );
-              return _HabitTile(
-                habit: habit,
-                completedToday: done,
-                eligibleToday: eligible,
-                streak: streak,
-                weekly: schedule == HabitSchedule.weeklyTarget,
-                weekDays: _weekDays(habit, days, today),
-                onToggle:
-                    () => ref
-                        .read(habitRepositoryProvider)
-                        .setCompleted(habit.id, today, completed: !done),
-                onLongPress: () => _showActions(context, ref, habit),
-                onTap: () => _showHeatmap(context, ref, habit),
-              );
+          return ReorderableListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              12,
+              AppSpacing.screen,
+              96,
+            ),
+            onReorder: (oldIndex, newIndex) async {
+              if (newIndex > oldIndex) newIndex--;
+              final ids = habits.map((h) => h.id).toList();
+              final moved = ids.removeAt(oldIndex);
+              ids.insert(newIndex, moved);
+              await ref.read(habitRepositoryProvider).reorderActive(ids);
             },
+            buildDefaultDragHandles: false,
+            children: [
+              for (var index = 0; index < habits.length; index++)
+                _habitListTile(
+                  context,
+                  ref,
+                  listIndex: index,
+                  key: ValueKey(habits[index].id),
+                  habit: habits[index],
+                  byHabit: byHabit,
+                  today: today,
+                ),
+            ],
           );
         },
       ),
     );
+  }
+
+  Widget _habitListTile(
+    BuildContext context,
+    WidgetRef ref, {
+    required Key key,
+    required int listIndex,
+    required Habit habit,
+    required Map<int, Set<DateTime>> byHabit,
+    required DateTime today,
+  }) {
+    final days = byHabit[habit.id] ?? const <DateTime>{};
+    final done = days.contains(today);
+    final schedule = HabitSchedule.fromIndex(habit.scheduleType);
+    final eligible = HabitStreak.isEligibleDay(
+      schedule: schedule,
+      weekdaysMask: habit.weekdaysMask,
+      date: today,
+    );
+    final streak = HabitStreak.currentStreak(
+      schedule: schedule,
+      weekdaysMask: habit.weekdaysMask,
+      targetPerWeek: habit.targetPerWeek,
+      completedDays: days,
+      today: today,
+    );
+    return KeyedSubtree(
+      key: key,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.cardGap),
+        child: _HabitTile(
+          listIndex: listIndex,
+          habit: habit,
+          completedToday: done,
+          eligibleToday: eligible,
+          streak: streak,
+          weekly: schedule == HabitSchedule.weeklyTarget,
+          weekDays: _weekDays(habit, days, today),
+          onToggle:
+              () => _toggleHabit(context, ref, habit, today, done, days),
+          onDayTap:
+              (day) => _toggleDay(context, ref, habit, day, days),
+          onMore: () => _showActions(context, ref, habit),
+          onTap: () => _showHeatmap(context, ref, habit),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleHabit(
+    BuildContext context,
+    WidgetRef ref,
+    Habit habit,
+    DateTime today,
+    bool done,
+    Set<DateTime> days,
+  ) async {
+    final repo = ref.read(habitRepositoryProvider);
+    if (done) {
+      await repo.setCompleted(habit.id, today, completed: false);
+      return;
+    }
+    if (habit.isMeasurable) {
+      final value = await _promptMeasure(context, habit);
+      if (value == null) return;
+      await repo.setCompleted(
+        habit.id,
+        today,
+        completed: true,
+        value: value,
+      );
+      return;
+    }
+    await repo.setCompleted(habit.id, today, completed: true);
+  }
+
+  Future<void> _toggleDay(
+    BuildContext context,
+    WidgetRef ref,
+    Habit habit,
+    DateTime day,
+    Set<DateTime> days,
+  ) async {
+    final normalized = HabitStreak.normalize(day);
+    final schedule = HabitSchedule.fromIndex(habit.scheduleType);
+    if (!HabitStreak.isEligibleDay(
+      schedule: schedule,
+      weekdaysMask: habit.weekdaysMask,
+      date: normalized,
+    )) {
+      return;
+    }
+    final done = days.contains(normalized);
+    await _toggleHabit(context, ref, habit, normalized, done, days);
+  }
+
+  Future<double?> _promptMeasure(BuildContext context, Habit habit) async {
+    final l10n = context.l10n;
+    final ctrl = TextEditingController(
+      text: habit.goalValue > 0 ? habit.goalValue.toString() : '',
+    );
+    final result = await showDialog<double>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(habit.name),
+            content: TextField(
+              controller: ctrl,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: l10n.amount,
+                suffixText: habit.unit.isEmpty ? null : habit.unit,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final v = double.tryParse(ctrl.text.trim());
+                  if (v != null && v > 0) Navigator.pop(ctx, v);
+                },
+                child: Text(l10n.save),
+              ),
+            ],
+          ),
+    );
+    return result;
   }
 
   List<_DayDot> _weekDays(Habit habit, Set<DateTime> days, DateTime today) {
@@ -105,6 +242,54 @@ class HabitsScreen extends ConsumerWidget {
         isToday: HabitStreak.normalize(day) == today,
       );
     });
+  }
+
+  Future<void> _showArchived(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder:
+          (ctx) => DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.5,
+            builder:
+                (context, controller) => ref.watch(archivedHabitsProvider).when(
+                  loading: () => const LoadingState(),
+                  error: (e, _) => ErrorState(message: e.toString()),
+                  data:
+                      (habits) => ListView(
+                        controller: controller,
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Text(
+                            l10n.archivedHabits,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          if (habits.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(l10n.emptyHabits),
+                            ),
+                          for (final h in habits)
+                            ListTile(
+                              title: Text(h.name),
+                              trailing: TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(habitRepositoryProvider)
+                                      .setArchived(h.id, false);
+                                },
+                                child: Text(l10n.restore),
+                              ),
+                            ),
+                        ],
+                      ),
+                ),
+          ),
+    );
   }
 
   Future<void> _showActions(
@@ -237,6 +422,42 @@ class HabitsScreen extends ConsumerWidget {
                       ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          showHabitEditor(context, habit: habit);
+                        },
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(l10n.edit),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          final ok = await confirmDialog(
+                            context,
+                            title: l10n.deleteConfirmTitle,
+                            body: l10n.deleteConfirmBody,
+                            confirmLabel: l10n.delete,
+                          );
+                          if (ok) {
+                            await ref
+                                .read(habitRepositoryProvider)
+                                .deleteHabit(habit.id);
+                          }
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text(l10n.delete),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -283,17 +504,20 @@ class _DayDot {
 
 class _HabitTile extends StatelessWidget {
   const _HabitTile({
+    required this.listIndex,
     required this.habit,
     required this.completedToday,
     required this.eligibleToday,
     required this.streak,
     required this.weekDays,
     required this.onToggle,
-    required this.onLongPress,
     required this.onTap,
+    required this.onMore,
+    required this.onDayTap,
     this.weekly = false,
   });
 
+  final int listIndex;
   final Habit habit;
   final bool completedToday;
   final bool eligibleToday;
@@ -301,97 +525,111 @@ class _HabitTile extends StatelessWidget {
   final bool weekly;
   final List<_DayDot> weekDays;
   final VoidCallback onToggle;
-  final VoidCallback onLongPress;
   final VoidCallback onTap;
+  final VoidCallback onMore;
+  final void Function(DateTime day) onDayTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: eligibleToday ? onToggle : null,
-                tooltip: context.l10n.habitComplete,
-                icon: Icon(
-                  completedToday
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
-                  color:
-                      completedToday
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.outline,
-                  size: 30,
+    final l10n = context.l10n;
+    final accent = DashboardModule.habits.accent;
+    return ModuleListTile(
+      onTap: onTap,
+      trailing: itemMoreButton(onPressed: onMore),
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ReorderableDragStartListener(
+            index: listIndex,
+            child: Tooltip(
+              message: l10n.reorder,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.drag_handle,
+                  color: theme.colorScheme.outline,
                 ),
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      habit.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: IconButton(
+              onPressed: eligibleToday ? onToggle : null,
+              tooltip: l10n.habitComplete,
+              icon: Icon(
+                completedToday
+                    ? Icons.check_circle
+                    : Icons.radio_button_unchecked,
+                color:
+                    completedToday
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline,
+                size: 28,
+              ),
+            ),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            habit.name,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (final d in weekDays)
+                Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: GestureDetector(
+                    onTap: d.eligible ? () => onDayTap(d.date) : null,
+                    child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          d.completed
+                              ? accent
+                              : d.eligible
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : Colors.transparent,
+                      border: Border.all(
+                        color:
+                            d.isToday
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outlineVariant,
+                        width: d.isToday ? 2.5 : 1,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        for (final d in weekDays)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 5),
-                            child: Container(
-                              width: 16,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    d.completed
-                                        ? theme.colorScheme.secondary
-                                        : d.eligible
-                                        ? theme
-                                            .colorScheme
-                                            .surfaceContainerHighest
-                                        : Colors.transparent,
-                                border: Border.all(
-                                  color:
-                                      d.isToday
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.outlineVariant,
-                                  width: d.isToday ? 2 : 1,
-                                ),
-                              ),
-                            ),
-                          ),
-                        const Spacer(),
-                        if (streak > 0)
-                          Row(
-                            children: [
-                              Icon(
-                                weekly
-                                    ? Icons.calendar_view_week
-                                    : Icons.local_fire_department,
-                                size: 16,
-                                color: theme.colorScheme.tertiary,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(weekly ? '${streak}w' : '$streak'),
-                            ],
-                          ),
-                      ],
+                  ),
+                ),
+                ),
+              const Spacer(),
+              if (streak > 0)
+                Row(
+                  children: [
+                    Icon(
+                      weekly
+                          ? Icons.calendar_view_week
+                          : Icons.local_fire_department,
+                      size: 16,
+                      color: theme.colorScheme.tertiary,
                     ),
+                    const SizedBox(width: 2),
+                    Text(weekly ? '${streak}w' : '$streak'),
                   ],
                 ),
-              ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

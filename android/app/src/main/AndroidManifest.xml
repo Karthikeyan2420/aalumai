@@ -20,9 +20,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
-    <!-- Pronunciation practice (speech_to_text) -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-
     <!-- Location tagging on notes (geolocator) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -33,7 +30,8 @@
     <application
         android:label="AALUMAI"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:hasFragileUserData="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -136,10 +134,6 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
-        </intent>
-        <!-- speech_to_text: discover on-device recognition services. -->
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>

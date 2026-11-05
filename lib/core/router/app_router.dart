@@ -9,13 +9,9 @@ import '../../features/habits/habits_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/dashboard_config_screen.dart';
 import '../../features/landing/landing_screen.dart';
-import '../../features/learning/learning_screen.dart';
-import '../../features/jarvis/jarvis_screen.dart';
-import '../../features/meals/meals_screen.dart';
 import '../../features/more/more_screen.dart';
 import '../../features/music/music_screen.dart';
 import '../../features/notes/notes_screen.dart';
-import '../../features/savings/savings_screen.dart';
 import '../../features/schedule/schedule_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
@@ -36,10 +32,6 @@ class AppRoutes {
   static const alarms = '/alarms';
   static const habits = '/habits';
   static const notes = '/notes';
-  static const savings = '/savings';
-  static const meals = '/meals';
-  static const learning = '/learning';
-  static const jarvis = '/jarvis';
   static const settings = '/settings';
   static const about = '/about';
   static const dashboardConfig = '/dashboard-config';
@@ -73,14 +65,6 @@ GoRouter createRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.schedule,
-                builder: (context, state) => const ScheduleScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: AppRoutes.tasks,
                 builder: (context, state) => const TasksScreen(),
               ),
@@ -97,6 +81,14 @@ GoRouter createRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: AppRoutes.expenses,
+                builder: (context, state) => const ExpensesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: AppRoutes.more,
                 builder: (context, state) => const MoreScreen(),
               ),
@@ -105,12 +97,12 @@ GoRouter createRouter() {
         ],
       ),
       GoRoute(
-        path: AppRoutes.yoga,
-        builder: (context, state) => const YogaScreen(),
+        path: AppRoutes.schedule,
+        builder: (context, state) => const ScheduleScreen(),
       ),
       GoRoute(
-        path: AppRoutes.expenses,
-        builder: (context, state) => const ExpensesScreen(),
+        path: AppRoutes.yoga,
+        builder: (context, state) => const YogaScreen(),
       ),
       GoRoute(
         path: AppRoutes.music,
@@ -127,22 +119,6 @@ GoRouter createRouter() {
       GoRoute(
         path: AppRoutes.notes,
         builder: (context, state) => const NotesScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.savings,
-        builder: (context, state) => const SavingsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.meals,
-        builder: (context, state) => const MealsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.learning,
-        builder: (context, state) => const LearningScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.jarvis,
-        builder: (context, state) => const JarvisScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

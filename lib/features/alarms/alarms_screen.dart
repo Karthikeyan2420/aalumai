@@ -5,6 +5,7 @@ import '../../core/db/database.dart';
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/services/alarm_scheduler.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/utils/alarm_time.dart';
 import '../../core/widgets/common.dart';
 import 'alarm_editor_screen.dart';
@@ -19,7 +20,10 @@ class AlarmsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final alarms = ref.watch(alarmsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.alarms)),
+      appBar: AppBar(
+        title: Text(l10n.alarms),
+        backgroundColor: softTint(context, ModuleAccents.alarm, 0.08),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'alarmsAdd',
         onPressed: () => showAlarmEditor(context, ref),
@@ -34,6 +38,7 @@ class AlarmsScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.alarm,
               message: l10n.emptyAlarms,
+              accent: ModuleAccents.alarm,
               actionLabel: l10n.newAlarm,
               onAction: () => showAlarmEditor(context, ref),
             );

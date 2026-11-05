@@ -37,8 +37,8 @@ WorkoutCollection? workoutCollectionFor({
     return WorkoutCollection.stretching;
   }
   return switch (equipment.trim().toLowerCase()) {
-    'dumbbell' || 'barbell' || 'ez-bar' || 'kettlebell' =>
-      WorkoutCollection.dumbbell,
+    'dumbbell' || 'kettlebell' => WorkoutCollection.dumbbell,
+    'barbell' || 'ez-bar' => WorkoutCollection.gym,
     'band' => WorkoutCollection.band,
     'bodyweight' => WorkoutCollection.bodyweight,
     'cable' || 'machine' || 'lever' || 'smith' || 'sled' || 'other' =>

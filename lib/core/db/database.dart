@@ -49,19 +49,6 @@ part 'database.g.dart';
     MusicState,
     MusicHistory,
     Alarms,
-    Recipes,
-    RecipeIngredients,
-    MealPlanEntries,
-    GroceryItems,
-    LearningCourses,
-    Lessons,
-    Vocabulary,
-    LearningExercises,
-    LearningAttempts,
-    VocabReviews,
-    PronunciationAttempts,
-    LearningProgress,
-    JarvisMemories,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -70,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -176,9 +163,65 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(alarms, alarms.finalMessage);
       }
       if (from < 10) {
-        // Additive only: new table for the Jarvis assistant's memories.
-        // Existing rows are untouched; the table starts empty.
-        await m.createTable(jarvisMemories);
+        await customStatement('''
+CREATE TABLE IF NOT EXISTS jarvis_memories (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  content TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'fact',
+  confirmed INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+''');
+      }
+      if (from < 11) {
+        await m.addColumn(workoutPrefs, workoutPrefs.gender);
+        await m.addColumn(workoutPrefs, workoutPrefs.heightCm);
+        await m.addColumn(workoutPrefs, workoutPrefs.onboardingDone);
+        await m.addColumn(workoutPrefs, workoutPrefs.focusAreaOrder);
+        await customStatement('''
+CREATE TABLE IF NOT EXISTS watch_devices (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL DEFAULT '',
+  address TEXT NOT NULL,
+  last_seen INTEGER NOT NULL,
+  service_uuids TEXT NOT NULL DEFAULT '',
+  UNIQUE(address)
+);
+''');
+        await customStatement('''
+CREATE TABLE IF NOT EXISTS health_samples (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  metric TEXT NOT NULL,
+  value REAL NOT NULL,
+  start_at INTEGER NOT NULL,
+  end_at INTEGER,
+  source TEXT NOT NULL,
+  external_id TEXT NOT NULL,
+  recorded_at INTEGER NOT NULL,
+  UNIQUE(source, external_id)
+);
+''');
+      }
+      if (from < 12) {
+        await m.addColumn(workoutPlanItems, workoutPlanItems.restSec);
+      }
+      if (from < 13) {
+        await customStatement('DROP TABLE IF EXISTS learning_attempts');
+        await customStatement('DROP TABLE IF EXISTS pronunciation_attempts');
+        await customStatement('DROP TABLE IF EXISTS vocab_reviews');
+        await customStatement('DROP TABLE IF EXISTS learning_progress');
+        await customStatement('DROP TABLE IF EXISTS learning_exercises');
+        await customStatement('DROP TABLE IF EXISTS vocabulary');
+        await customStatement('DROP TABLE IF EXISTS lessons');
+        await customStatement('DROP TABLE IF EXISTS learning_courses');
+        await customStatement('DROP TABLE IF EXISTS jarvis_memories');
+        await customStatement('DROP TABLE IF EXISTS grocery_items');
+        await customStatement('DROP TABLE IF EXISTS meal_plan_entries');
+        await customStatement('DROP TABLE IF EXISTS recipe_ingredients');
+        await customStatement('DROP TABLE IF EXISTS recipes');
+        await customStatement('DROP TABLE IF EXISTS health_samples');
+        await customStatement('DROP TABLE IF EXISTS watch_devices');
       }
     },
     beforeOpen: (details) async {

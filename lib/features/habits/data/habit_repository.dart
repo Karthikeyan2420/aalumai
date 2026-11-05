@@ -26,6 +26,15 @@ class HabitRepository {
       (_db.select(_db.habits)
         ..orderBy([(t) => OrderingTerm(expression: t.createdAt)])).watch();
 
+  Stream<List<Habit>> watchArchived() {
+    return (_db.select(_db.habits)
+          ..where((t) => t.isArchived.equals(true))
+          ..orderBy([
+            (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc),
+          ]))
+        .watch();
+  }
+
   Future<int> create({
     required String name,
     String note = '',
@@ -37,6 +46,12 @@ class HabitRepository {
     String unit = '',
     int reminderMinuteOfDay = -1,
   }) async {
+    final existing = await (_db.select(_db.habits)
+          ..where((t) => t.isArchived.equals(false)))
+        .get();
+    final nextOrder = existing.isEmpty
+        ? 0
+        : existing.map((h) => h.sortOrder).reduce((a, b) => a > b ? a : b) + 1;
     final id = await _db
         .into(_db.habits)
         .insert(
@@ -50,6 +65,7 @@ class HabitRepository {
             goalValue: Value(goalValue),
             unit: Value(unit),
             reminderMinuteOfDay: Value(reminderMinuteOfDay),
+            sortOrder: Value(nextOrder),
           ),
         );
     final habit = await getById(id);
@@ -141,6 +157,13 @@ class HabitRepository {
     final rows = await completionsForHabit(habitId);
     return rows.map((r) => HabitStreak.normalize(r.day)).toSet();
   }
+
+  Future<void> reorderActive(List<int> habitIdsInOrder) async {
+    for (var i = 0; i < habitIdsInOrder.length; i++) {
+      await (_db.update(_db.habits)..where((t) => t.id.equals(habitIdsInOrder[i])))
+          .write(HabitsCompanion(sortOrder: Value(i)));
+    }
+  }
 }
 
 final habitRepositoryProvider = Provider<HabitRepository>(
@@ -152,6 +175,10 @@ final habitRepositoryProvider = Provider<HabitRepository>(
 
 final activeHabitsProvider = StreamProvider<List<Habit>>(
   (ref) => ref.watch(habitRepositoryProvider).watchActive(),
+);
+
+final archivedHabitsProvider = StreamProvider<List<Habit>>(
+  (ref) => ref.watch(habitRepositoryProvider).watchArchived(),
 );
 
 /// Completions for the current week (Monday..Sunday).

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/module_theme.dart';
 
 /// A rounded surface used by every dashboard card, so radius, border and
@@ -26,7 +27,7 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
       side: BorderSide(
         color:
             borderColor ??
@@ -35,7 +36,7 @@ class AppCard extends StatelessWidget {
     );
     final content = Padding(padding: padding, child: child);
     return Material(
-      color: color ?? theme.colorScheme.surface,
+      color: color ?? theme.cardTheme.color ?? theme.colorScheme.surface,
       shape: shape,
       clipBehavior: Clip.antiAlias,
       child:
@@ -114,8 +115,8 @@ class ModuleCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: softTint(context, accent, 0.16),
                   borderRadius: BorderRadius.circular(12),

@@ -369,6 +369,60 @@ class AppLocalizationsTe extends AppLocalizations {
   String get emptySavings => 'ఇంకా పొదుపు లక్ష్యాలు లేవు.';
 
   @override
+  String get newCategory => 'కొత్త వర్గం';
+
+  @override
+  String get categoryExists => 'ఈ పేరుతో వర్గం ఇప్పటికే ఉంది.';
+
+  @override
+  String get sameAccount => 'బదిలీకి రెండు వేర్వేరు ఖాతాలు ఎంచుకోండి.';
+
+  @override
+  String get accountInUse => 'ఈ ఖాతాలో లావాదేవీలు ఉన్నాయి; తొలగించలేము.';
+
+  @override
+  String get archivedHabits => 'ఆర్కైవ్ చేసిన అలవాట్లు';
+
+  @override
+  String get moreGroupLife => 'జీవితం';
+
+  @override
+  String get moreGroupWellness => 'ఆరోగ్యం';
+
+  @override
+  String get moreGroupApp => 'యాప్';
+
+  @override
+  String get todaySpend => 'ఈరోజు ఖర్చు';
+
+  @override
+  String get debtIOwe => 'నేను బాకీ';
+
+  @override
+  String get debtTheyOwe => 'నాకు బాకీ';
+
+  @override
+  String get discardChanges => 'మార్పులను వద్దా?';
+
+  @override
+  String get keepEditing => 'సవరణ కొనసాగించు';
+
+  @override
+  String get sleepTimer => 'నిద్ర టైమర్';
+
+  @override
+  String get selectTracks => 'ఎంచుకోండి';
+
+  @override
+  String get weeklySummary => 'ఈ వారం';
+
+  @override
+  String get searchEvents => 'ఈవెంట్‌లు వెతకండి';
+
+  @override
+  String get undoDelete => 'లావాదేవీ తొలగించబడింది';
+
+  @override
   String get emptyLessons => 'ఏ పాఠాలు అందుబాటులో లేవు.';
 
   @override
@@ -863,9 +917,6 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get queue => 'క్యూ';
-
-  @override
-  String get sleepTimer => 'నిద్ర టైమర్';
 
   @override
   String get recentlyPlayed => 'ఇటీవల ప్లే చేసినవి';

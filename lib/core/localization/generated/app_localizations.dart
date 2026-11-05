@@ -821,6 +821,114 @@ abstract class AppLocalizations {
   /// **'No savings goals yet.'**
   String get emptySavings;
 
+  /// No description provided for @newCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get newCategory;
+
+  /// No description provided for @categoryExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A category with this name already exists.'**
+  String get categoryExists;
+
+  /// No description provided for @sameAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose two different accounts for a transfer.'**
+  String get sameAccount;
+
+  /// No description provided for @accountInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has transactions and cannot be deleted.'**
+  String get accountInUse;
+
+  /// No description provided for @archivedHabits.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived habits'**
+  String get archivedHabits;
+
+  /// No description provided for @moreGroupLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Life'**
+  String get moreGroupLife;
+
+  /// No description provided for @moreGroupWellness.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness'**
+  String get moreGroupWellness;
+
+  /// No description provided for @moreGroupApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get moreGroupApp;
+
+  /// No description provided for @todaySpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s spend'**
+  String get todaySpend;
+
+  /// No description provided for @debtIOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'I owe'**
+  String get debtIOwe;
+
+  /// No description provided for @debtTheyOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'They owe me'**
+  String get debtTheyOwe;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChanges;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get sleepTimer;
+
+  /// No description provided for @selectTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectTracks;
+
+  /// No description provided for @weeklySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get weeklySummary;
+
+  /// No description provided for @searchEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Search events'**
+  String get searchEvents;
+
+  /// No description provided for @undoDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted'**
+  String get undoDelete;
+
   /// No description provided for @emptyLessons.
   ///
   /// In en, this message translates to:
@@ -1804,12 +1912,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Queue'**
   String get queue;
-
-  /// No description provided for @sleepTimer.
-  ///
-  /// In en, this message translates to:
-  /// **'Sleep timer'**
-  String get sleepTimer;
 
   /// No description provided for @recentlyPlayed.
   ///

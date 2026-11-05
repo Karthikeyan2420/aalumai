@@ -1,12 +1,12 @@
 import 'package:aalumai/core/db/database.dart';
 import 'package:aalumai/core/localization/generated/app_localizations.dart';
 import 'package:aalumai/core/providers/providers.dart';
-import 'package:aalumai/core/widgets/common.dart';
 import 'package:aalumai/features/fitness/data/fitness_repository.dart';
-import 'package:aalumai/features/fitness/domain/exercise_collections.dart';
+import 'package:aalumai/features/fitness/domain/equipment_filter.dart';
+import 'package:aalumai/features/fitness/domain/gym_focus.dart';
+import 'package:aalumai/features/fitness/domain/workout_preferences.dart';
 import 'package:aalumai/features/fitness/fitness_screen.dart';
-import 'package:aalumai/features/fitness/workout_plan_screen.dart';
-import 'package:aalumai/features/fitness/workout_player_screen.dart';
+import 'package:aalumai/features/fitness/gym/day_workout_screen.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,11 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/gif_test_helper.dart';
 
-/// End-to-end coverage for picking one of the three seeded starter plans and
-/// actually getting into the guided workout.
-///
-/// Regression guard: selecting a plan could leave the UI on a spinner forever
-/// instead of opening the player.
 void main() {
   setupGifTestEnvironment();
 
@@ -27,17 +22,14 @@ void main() {
   late FitnessRepository repo;
   late SharedPreferences prefs;
 
-  const planNames = [
-    'Beginner full body',
-    'Dumbbell strength',
-    'Bodyweight HIIT',
-  ];
-
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     db = AppDatabase.forTesting(NativeDatabase.memory());
     repo = FitnessRepository(db);
+    await repo.savePreferences(
+      const WorkoutPreferences(onboardingDone: true, safetyAcknowledged: true),
+    );
   });
 
   tearDown(() => db.close());
@@ -45,6 +37,7 @@ void main() {
   Widget host() => ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
+      appDatabaseProvider.overrideWithValue(db),
       fitnessRepositoryProvider.overrideWithValue(repo),
     ],
     child: MaterialApp(
@@ -55,15 +48,11 @@ void main() {
     ),
   );
 
-  /// Seeds the starter data on the real event loop, where drift's executor
-  /// actually runs, then returns the seeded plan names.
   Future<void> seed(WidgetTester tester) => tester.runAsync(() async {
     await repo.seedExercises();
     await repo.seedStarterPlans();
   });
 
-  /// Drift's executor completes on the real event loop, so flush it between
-  /// frames (mirrors workout_player_test._settle).
   Future<void> settle(WidgetTester tester, {int rounds = 8}) async {
     for (var i = 0; i < rounds; i++) {
       await tester.pump(const Duration(milliseconds: 50));
@@ -74,7 +63,6 @@ void main() {
     await tester.pump();
   }
 
-  /// Re-frames until [probe] holds, giving drift real-async windows to finish.
   Future<bool> waitFor(
     WidgetTester tester,
     bool Function() probe, {
@@ -91,151 +79,68 @@ void main() {
     return probe();
   }
 
-  bool loading() => find.byType(LoadingState).evaluate().isNotEmpty;
-
-  /// Unmounts the tree so drift's stream providers close, then flushes the
-  /// zero-duration cleanup timers they schedule (mirrors workout_player_test).
-  /// The 11s pump also fires flutter_cache_manager's cache-cleanup timer,
-  /// otherwise it outlives the test and trips the pending-timer invariant.
-  Future<void> unmount(WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump(const Duration(milliseconds: 20));
-    await tester.pump(const Duration(seconds: 11));
-  }
-
-  /// Loads each starter plan's exercises straight from the database.
-  Future<Map<String, List<Exercise>>> planExercises(WidgetTester tester) async {
-    final result = await tester.runAsync(() async {
-      final exercises = await repo.watchExercises().first;
-      final byId = {for (final e in exercises) e.id: e};
-      final plans = await repo.watchPlans().first;
-      return {
-        for (final p in plans)
-          p.name: [
-            for (final item in await repo.watchPlanItems(p.id).first)
-              byId[item.exerciseId]!,
-          ],
-      };
-    });
-    return result!;
-  }
-
-  testWidgets('the seeded starter plans are all present', (tester) async {
-    await seed(tester);
-    final names = await tester.runAsync(
-      () async => (await repo.watchPlans().first).map((p) => p.name).toList(),
-    );
-    expect(names, planNames);
-
-    final items = await planExercises(tester);
-    for (final name in planNames) {
-      expect(items[name], isNotEmpty, reason: '$name must have exercises');
-    }
-    // The dumbbell plan holds dumbbell work only — never a generic mix.
-    expect(
-      items['Dumbbell strength']!.every(
-        (e) => exerciseCollection(e) == WorkoutCollection.dumbbell,
-      ),
-      isTrue,
-    );
-    expect(
-      items['Bodyweight HIIT']!.every(
-        (e) =>
-            exerciseCollection(e) == WorkoutCollection.bodyweight ||
-            exerciseCollection(e) == WorkoutCollection.stretching,
-      ),
-      isTrue,
-    );
-  });
-
-  testWidgets('tapping a plan opens its detail screen, not a spinner', (
+  testWidgets('Workout tab opens category grid after onboarding', (
     tester,
   ) async {
-    // The plans sit at the bottom of a long ListView; a tall window keeps them
-    // on-screen so the tap is not obscured.
-    tester.view.physicalSize = const Size(1000, 3000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
     await seed(tester);
     await tester.pumpWidget(host());
-    await settle(tester);
+    await settle(tester, rounds: 12);
 
     await tester.tap(
-      find.descendant(of: find.byType(TabBar), matching: find.text('Workout')),
+      find.descendant(
+        of: find.byType(SegmentedButton<int>),
+        matching: find.text('Workout'),
+      ),
     );
     await settle(tester);
 
-    expect(find.text('Beginner full body'), findsOneWidget);
-
-    await tester.tap(find.text('Beginner full body'));
-    final opened = await waitFor(
-      tester,
-      () => find.byType(WorkoutPlanScreen).evaluate().isNotEmpty,
-    );
-    expect(opened, isTrue, reason: 'selecting a plan must push its detail');
-
-    final loaded = await waitFor(tester, () => !loading());
-    expect(loaded, isTrue, reason: 'plan exercises must finish loading');
-    final firstExercise =
-        (await planExercises(tester))['Beginner full body']!.first.name;
-    expect(find.text(firstExercise), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    await unmount(tester);
+    expect(find.text('ARM & SHOULDER'), findsOneWidget);
+    expect(find.text('Dumbbell'), findsWidgets);
+    expect(find.text('Bodyweight'), findsOneWidget);
+    expect(find.text('Adjust the order'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 50));
   });
 
-  testWidgets('the play button reaches the guided player for all plans', (
+  testWidgets('DayWorkoutScreen shows Start for picked exercises', (
     tester,
   ) async {
-    // The plans sit at the bottom of a long ListView; a tall window keeps all
-    // three built so the lazy viewport never has to be scrolled.
-    tester.view.physicalSize = const Size(1000, 3000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
     await seed(tester);
-
-    for (final planName in planNames) {
-      await tester.pumpWidget(host());
-      await settle(tester);
-      await tester.tap(
-        find.descendant(of: find.byType(TabBar), matching: find.text('Workout')),
-      );
-      await settle(tester);
-
-      final planTile = find.ancestor(
-        of: find.text(planName),
-        matching: find.byType(ListTile),
-      );
-      await tester.ensureVisible(planTile);
-      await settle(tester);
-      await tester.tap(
-        find.descendant(of: planTile, matching: find.byIcon(Icons.play_arrow)),
-      );
-
-      final pushed = await waitFor(
-        tester,
-        () => find.byType(WorkoutPlayerScreen).evaluate().isNotEmpty,
-      );
-      expect(pushed, isTrue, reason: '$planName must open the player');
-
-      // The guided flow prompts for a readiness check before creating a session.
-      final prompted = await waitFor(
-        tester,
-        () => find.text("I'm ready").evaluate().isNotEmpty,
-      );
-      expect(prompted, isTrue, reason: '$planName should prompt readiness');
-      await tester.tap(find.text("I'm ready"));
-
-      final ready = await waitFor(tester, () => !loading());
-      expect(ready, isTrue, reason: '$planName player must leave loading');
-      expect(find.byType(WorkoutPlayerScreen), findsOneWidget);
-      expect(find.text("I'm ready"), findsNothing);
-      expect(tester.takeException(), isNull);
-
-      await unmount(tester);
-    }
+    late List<Exercise> all;
+    await tester.runAsync(() async {
+      all = await repo.watchExercises().first;
+    });
+    final picked = pickFocusExercises(
+      all: all,
+      focus: GymFocusKey.armShoulder,
+      mode: WorkoutMode.dumbbell,
+      levelIndex: 0,
+      count: 8,
+    );
+    expect(picked, isNotEmpty);
+    final rows = [
+      for (final e in picked)
+        (
+          exercise: e,
+          sets: 3,
+          reps: e.defaultReps,
+          durationSec: e.isTimed ? e.defaultDurationSec : 0,
+          restSec: 60,
+        ),
+    ];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          fitnessRepositoryProvider.overrideWithValue(repo),
+          appDatabaseProvider.overrideWithValue(db),
+        ],
+        child: MaterialApp(
+          home: DayWorkoutScreen(title: 'DAY 1', exercises: rows),
+        ),
+      ),
+    );
+    expect(find.text('Start'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 50));
   });
 }

@@ -369,6 +369,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptySavings => 'No savings goals yet.';
 
   @override
+  String get newCategory => 'New category';
+
+  @override
+  String get categoryExists => 'A category with this name already exists.';
+
+  @override
+  String get sameAccount => 'Choose two different accounts for a transfer.';
+
+  @override
+  String get accountInUse => 'This account has transactions and cannot be deleted.';
+
+  @override
+  String get archivedHabits => 'Archived habits';
+
+  @override
+  String get moreGroupLife => 'Life';
+
+  @override
+  String get moreGroupWellness => 'Wellness';
+
+  @override
+  String get moreGroupApp => 'App';
+
+  @override
+  String get todaySpend => 'Today\'s spend';
+
+  @override
+  String get debtIOwe => 'I owe';
+
+  @override
+  String get debtTheyOwe => 'They owe me';
+
+  @override
+  String get discardChanges => 'Discard changes?';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get sleepTimer => 'Sleep timer';
+
+  @override
+  String get selectTracks => 'Select';
+
+  @override
+  String get weeklySummary => 'This week';
+
+  @override
+  String get searchEvents => 'Search events';
+
+  @override
+  String get undoDelete => 'Transaction deleted';
+
+  @override
   String get emptyLessons => 'No lessons available.';
 
   @override
@@ -863,9 +917,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get queue => 'Queue';
-
-  @override
-  String get sleepTimer => 'Sleep timer';
 
   @override
   String get recentlyPlayed => 'Recently played';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/l10n_extension.dart';
+import '../../core/theme/app_theme.dart';
 import 'dashboard_sections.dart';
 
 String _sectionLabel(BuildContext context, DashboardSection section) {
@@ -21,6 +22,7 @@ class DashboardConfigScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final config = ref.watch(dashboardConfigProvider);
     final controller = ref.read(dashboardConfigProvider.notifier);
     final order = config.order;
@@ -28,7 +30,12 @@ class DashboardConfigScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.customizeDashboard)),
       body: ReorderableListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          8,
+          AppSpacing.screen,
+          32,
+        ),
         onReorder: (oldIndex, newIndex) {
           final next = [...order];
           if (newIndex > oldIndex) newIndex -= 1;
@@ -37,13 +44,26 @@ class DashboardConfigScreen extends ConsumerWidget {
           controller.setOrder(next);
         },
         children: [
+          Padding(
+            key: const ValueKey('dashboard_config_hint'),
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+            child: Text(
+              'Drag to reorder · toggle to show or hide',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
           for (final section in order)
-            SwitchListTile(
+            Card(
               key: ValueKey(section.name),
-              value: !config.hidden.contains(section),
-              title: Text(_sectionLabel(context, section)),
-              secondary: const Icon(Icons.drag_handle),
-              onChanged: (visible) => controller.setVisible(section, visible),
+              margin: const EdgeInsets.only(bottom: AppSpacing.cardGap),
+              child: SwitchListTile(
+                value: !config.hidden.contains(section),
+                title: Text(_sectionLabel(context, section)),
+                secondary: const Icon(Icons.drag_handle),
+                onChanged: (visible) => controller.setVisible(section, visible),
+              ),
             ),
         ],
       ),

@@ -87,6 +87,7 @@ class WorkoutQueue {
             sets: item.sets,
             reps: item.reps,
             durationSec: item.durationSec,
+            restSec: item.restSec > 0 ? item.restSec : exercise.restSec,
           ),
     ];
     return _assemble(specs, phase);
@@ -106,6 +107,7 @@ class WorkoutQueue {
           sets: e.defaultSets,
           reps: e.defaultReps,
           durationSec: e.defaultDurationSec,
+          restSec: e.restSec,
         ),
     ], phase);
   }
@@ -134,7 +136,7 @@ class WorkoutQueue {
             phase: phase,
           ),
         );
-        rests.add(spec.exercise.restSec);
+        rests.add(spec.restSec);
       }
     }
 
@@ -222,10 +224,12 @@ class _WorkoutSpec {
     required this.sets,
     required this.reps,
     required this.durationSec,
+    required this.restSec,
   });
 
   final Exercise exercise;
   final int sets;
   final int reps;
   final int durationSec;
+  final int restSec;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/app_info.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/localization/l10n_extension.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -14,7 +15,7 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.about)),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.screen),
         children: [
           Center(
             child: ClipRRect(
@@ -93,7 +94,7 @@ class AboutScreen extends StatelessWidget {
                       Icon(
                         Icons.lock_outline,
                         size: 20,
-                        color: theme.colorScheme.secondary,
+                        color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(

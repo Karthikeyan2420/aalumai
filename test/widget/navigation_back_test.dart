@@ -7,8 +7,6 @@ import 'package:aalumai/features/expenses/data/finance_repository.dart';
 import 'package:aalumai/features/fitness/data/fitness_repository.dart';
 import 'package:aalumai/features/habits/data/habit_repository.dart';
 import 'package:aalumai/features/home/home_screen.dart';
-import 'package:aalumai/features/learning/data/learning_repository.dart';
-import 'package:aalumai/features/meals/data/meal_repository.dart';
 import 'package:aalumai/features/more/more_screen.dart';
 import 'package:aalumai/features/music/data/music_providers.dart';
 import 'package:aalumai/features/notes/data/note_repository.dart';
@@ -35,9 +33,7 @@ List<Override> _overrides(SharedPreferences prefs) => [
   workoutSessionsProvider.overrideWith((ref) => Stream.value(const [])),
   allNotesProvider.overrideWith((ref) => Stream.value(const [])),
   savingsGoalsProvider.overrideWith((ref) => Stream.value(const [])),
-  recipesProvider.overrideWith((ref) => Stream.value(const [])),
   musicTracksProvider.overrideWith((ref) => Stream.value(const [])),
-  coursesProvider.overrideWith((ref) => Stream.value(const [])),
 ];
 
 void main() {

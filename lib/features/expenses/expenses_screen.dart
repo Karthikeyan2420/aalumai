@@ -1,84 +1,210 @@
+import 'package:collection/collection.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
-import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/utils/money.dart';
 import '../../core/utils/recurrence.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/widgets/charts.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/dashboard_components.dart';
+import '../../core/widgets/module_scaffold.dart';
 import 'data/finance_repository.dart';
+import 'category_picker.dart';
+import 'item_actions.dart';
+import 'savings_goals_ui.dart';
+import 'transaction_list_helpers.dart';
+import 'transaction_editor.dart';
 
-class ExpensesScreen extends ConsumerWidget {
+class ExpensesScreen extends ConsumerStatefulWidget {
   const ExpensesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExpensesScreen> createState() => _ExpensesScreenState();
+}
+
+class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = TabController(length: 4, vsync: this);
+    _tabs.addListener(() {
+      if (!_tabs.indexIsChanging) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final balance = ref.watch(totalBalanceProvider);
     final locale = Localizations.localeOf(context).toString();
+    final onGoalsTab = _tabs.index == 3;
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.expenses),
-          actions: [
-            IconButton(
-              tooltip: l10n.recurring,
-              icon: const Icon(Icons.event_repeat),
-              onPressed: () => showRecurringManager(context, ref),
-            ),
-          ],
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l10n.expense),
-              Tab(text: l10n.budgets),
-              Tab(text: l10n.debts),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.expenses),
+        backgroundColor: softTint(context, ModuleAccents.expenses, 0.08),
+        actions: [
+          IconButton(
+            tooltip: l10n.recurring,
+            icon: const Icon(Icons.event_repeat),
+            onPressed: () => showRecurringManager(context, ref),
           ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          heroTag: 'expensesAdd',
-          onPressed: () => showTransactionEditor(context, ref),
-          icon: const Icon(Icons.add),
-          label: Text(l10n.addTransaction),
-        ),
-        body: Column(
-          children: [
-            Card(
-              margin: const EdgeInsets.all(12),
-              child: ListTile(
-                leading: const Icon(Icons.account_balance_wallet),
-                title: Text(l10n.totalBalance),
-                trailing: Text(
-                  balance.valueOrNull == null
-                      ? '—'
-                      : formatMoney(balance.valueOrNull!, locale),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                onTap: () => showAccountsManager(context, ref),
-              ),
-            ),
-            const Expanded(
-              child: TabBarView(
-                children: [_TransactionsTab(), _BudgetsTab(), _DebtsTab()],
-              ),
-            ),
+        ],
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: [
+            Tab(text: l10n.expense),
+            Tab(text: l10n.budgets),
+            Tab(text: l10n.debts),
+            Tab(text: l10n.savingsGoals),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: onGoalsTab ? 'expensesGoalsAdd' : 'expensesAdd',
+        onPressed: () => onGoalsTab
+            ? showSavingsGoalEditor(context, ref)
+            : showTransactionEditor(context, ref),
+        icon: const Icon(Icons.add),
+        label: Text(onGoalsTab ? l10n.newGoal : l10n.addTransaction),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              12,
+              AppSpacing.screen,
+              4,
+            ),
+            child: AppCard(
+              onTap: () => showAccountsManager(context, ref),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  moduleIconWell(
+                    context,
+                    icon: Icons.account_balance_wallet,
+                    accent: ModuleAccents.expenses,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      l10n.totalBalance,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    balance.valueOrNull == null
+                        ? '—'
+                        : formatMoney(balance.valueOrNull!, locale),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              children: const [
+                _TransactionsTab(),
+                _BudgetsTab(),
+                _DebtsTab(),
+                SavingsGoalsTab(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TransactionsTab extends ConsumerWidget {
+class _TransactionsTab extends ConsumerStatefulWidget {
   const _TransactionsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_TransactionsTab> createState() => _TransactionsTabState();
+}
+
+class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
+  DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickMonth() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _month,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() => _month = DateTime(picked.year, picked.month));
+    }
+  }
+
+  Future<void> _deleteWithUndo(Transaction t) async {
+    final l10n = context.l10n;
+    final ok = await confirmDialog(
+      context,
+      title: l10n.deleteConfirmTitle,
+      body: l10n.deleteConfirmBody,
+      confirmLabel: l10n.delete,
+    );
+    if (!ok || !mounted) return;
+    final repo = ref.read(financeRepositoryProvider);
+    await repo.deleteTransaction(t.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.undoDelete),
+        action: SnackBarAction(
+          label: l10n.undo,
+          onPressed: () async {
+            await repo.addTransaction(
+              accountId: t.accountId,
+              type: TransactionType.fromIndex(t.type),
+              amountPaise: t.amountPaise,
+              date: t.date,
+              categoryId: t.categoryId,
+              note: t.note,
+              transferAccountId: t.transferAccountId,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
     final txns = ref.watch(transactionsProvider);
@@ -103,6 +229,11 @@ class _TransactionsTab extends ConsumerWidget {
             (ref.watch(recurringRulesProvider).valueOrNull ?? const [])
                 .where((r) => r.isActive && !r.nextDate.isAfter(now))
                 .toList();
+        var monthList = filterTransactionsForMonth(list, _month);
+        monthList = searchTransactions(monthList, _query);
+        final grouped = groupTransactionsByDay(monthList);
+        final dayKeys = grouped.keys.toList();
+
         if (list.isEmpty && due.isEmpty) {
           return EmptyState(
             icon: Icons.receipt_long_outlined,
@@ -111,70 +242,135 @@ class _TransactionsTab extends ConsumerWidget {
             onAction: () => showTransactionEditor(context, ref),
           );
         }
-        final headerCount = (due.isNotEmpty ? 1 : 0) + (showChart ? 1 : 0);
-        return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 96),
-          itemCount: list.length + headerCount,
-          itemBuilder: (context, i) {
-            if (due.isNotEmpty && i == 0) {
-              return _DueRecurringCard(rules: due);
-            }
-            final chartIndex = due.isNotEmpty ? 1 : 0;
-            if (showChart && i == chartIndex) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                child: SectionCard(
-                  title: l10n.spendingByCategory,
-                  icon: Icons.pie_chart_outline,
-                  child: SimpleBarChart(slices: slices),
-                ),
-              );
-            }
-            final t = list[i - headerCount];
-            final type = TransactionType.fromIndex(t.type);
-            final sign = switch (type) {
-              TransactionType.income => '+',
-              TransactionType.expense => '−',
-              TransactionType.transfer => '↔',
-            };
-            final color = switch (type) {
-              TransactionType.income => Colors.green,
-              TransactionType.expense => Theme.of(context).colorScheme.error,
-              TransactionType.transfer => Theme.of(context).colorScheme.primary,
-            };
-            final subtitle = [
-              accountNames[t.accountId] ?? '',
-              if (t.categoryId != null) categoryNames[t.categoryId] ?? '',
-              DateFormat.yMMMd(locale).format(t.date),
-            ].where((s) => s.isNotEmpty).join(' · ');
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: color.withValues(alpha: 0.15),
-                child: Text(sign, style: TextStyle(color: color)),
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchCtrl,
+                      decoration: InputDecoration(
+                        hintText: l10n.search,
+                        prefixIcon: const Icon(Icons.search),
+                        isDense: true,
+                      ),
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: _pickMonth,
+                    icon: const Icon(Icons.calendar_month),
+                    label: Text(DateFormat.yMMM(locale).format(_month)),
+                  ),
+                ],
               ),
-              title: Text(t.note.isEmpty ? type.name : t.note),
-              subtitle: Text(subtitle),
-              trailing: Text(
-                formatMoney(t.amountPaise, locale),
-                style: TextStyle(color: color, fontWeight: FontWeight.w600),
-              ),
-              onLongPress: () async {
-                final ok = await confirmDialog(
-                  context,
-                  title: l10n.deleteConfirmTitle,
-                  body: l10n.deleteConfirmBody,
-                  confirmLabel: l10n.delete,
-                );
-                if (ok) {
-                  await ref
-                      .read(financeRepositoryProvider)
-                      .deleteTransaction(t.id);
-                }
-              },
-            );
-          },
+            ),
+            Expanded(
+              child: monthList.isEmpty && due.isEmpty
+                  ? EmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      message: l10n.emptyExpenses,
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.only(bottom: 96),
+                      children: [
+                        if (due.isNotEmpty) _DueRecurringCard(rules: due),
+                        if (showChart)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                            child: SectionCard(
+                              title: l10n.spendingByCategory,
+                              icon: Icons.pie_chart_outline,
+                              child: SimpleBarChart(slices: slices),
+                            ),
+                          ),
+                        for (final day in dayKeys) ...[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                            child: Text(
+                              daySectionLabel(context, day),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          for (final t in grouped[day]!)
+                            _transactionTile(
+                              context,
+                              ref,
+                              t,
+                              locale,
+                              categoryNames,
+                              accountNames,
+                            ),
+                        ],
+                      ],
+                    ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _transactionTile(
+    BuildContext context,
+    WidgetRef ref,
+    Transaction t,
+    String locale,
+    Map<int, String> categoryNames,
+    Map<int, String> accountNames,
+  ) {
+    final type = TransactionType.fromIndex(t.type);
+    final sign = switch (type) {
+      TransactionType.income => '+',
+      TransactionType.expense => '−',
+      TransactionType.transfer => '↔',
+    };
+    final color = switch (type) {
+      TransactionType.income => Colors.green,
+      TransactionType.expense => Theme.of(context).colorScheme.error,
+      TransactionType.transfer => Theme.of(context).colorScheme.primary,
+    };
+    final subtitle = [
+      accountNames[t.accountId] ?? '',
+      if (t.categoryId != null) categoryNames[t.categoryId] ?? '',
+      DateFormat.jm(locale).format(t.date),
+    ].where((s) => s.isNotEmpty).join(' · ');
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: color.withValues(alpha: 0.15),
+        child: Text(sign, style: TextStyle(color: color)),
+      ),
+      title: Text(t.note.isEmpty ? type.name : t.note),
+      subtitle: Text(subtitle),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            formatMoney(t.amountPaise, locale),
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          ),
+          itemMoreButton(
+            onPressed:
+                () => showEditDeleteMenu(
+                  context,
+                  onEdit:
+                      () => showTransactionEditor(
+                        context,
+                        ref,
+                        transaction: t,
+                      ),
+                  onDelete: () => _deleteWithUndo(t),
+                ),
+          ),
+        ],
+      ),
+      onTap: () => showTransactionEditor(context, ref, transaction: t),
+      onLongPress: () => _deleteWithUndo(t),
     );
   }
 }
@@ -217,7 +413,25 @@ class _BudgetsTab extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         children: [
                           for (final b in list)
-                            _BudgetTile(budget: b, locale: locale),
+                            _BudgetTile(
+                              budget: b,
+                              locale: locale,
+                              onEdit:
+                                  () => showBudgetEditor(context, ref, budget: b),
+                              onDelete: () async {
+                                final ok = await confirmDialog(
+                                  context,
+                                  title: l10n.deleteConfirmTitle,
+                                  body: l10n.deleteConfirmBody,
+                                  confirmLabel: l10n.delete,
+                                );
+                                if (ok) {
+                                  await ref
+                                      .read(financeRepositoryProvider)
+                                      .deleteBudget(b.id);
+                                }
+                              },
+                            ),
                         ],
                       ),
             ),
@@ -229,12 +443,29 @@ class _BudgetsTab extends ConsumerWidget {
 }
 
 class _BudgetTile extends ConsumerWidget {
-  const _BudgetTile({required this.budget, required this.locale});
+  const _BudgetTile({
+    required this.budget,
+    required this.locale,
+    required this.onEdit,
+    required this.onDelete,
+  });
   final Budget budget;
   final String locale;
+  final VoidCallback onEdit;
+  final Future<void> Function() onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final categories = ref.watch(categoriesProvider).valueOrNull ?? const [];
+    final categoryLabel =
+        budget.categoryId == null
+            ? l10n.all
+            : (categories
+                    .where((c) => c.id == budget.categoryId)
+                    .firstOrNull
+                    ?.name ??
+                l10n.category);
     return FutureBuilder<int>(
       future: ref
           .read(financeRepositoryProvider)
@@ -253,10 +484,25 @@ class _BudgetTile extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(context.l10n.budget)),
+                    Expanded(
+                      child: Text(
+                        categoryLabel,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                     Text(
                       '${formatMoney(spent, locale)} / '
                       '${formatMoney(budget.amountPaise, locale)}',
+                    ),
+                    itemMoreButton(
+                      onPressed:
+                          () => showEditDeleteMenu(
+                            context,
+                            onEdit: onEdit,
+                            onDelete: onDelete,
+                          ),
                     ),
                   ],
                 ),
@@ -309,7 +555,25 @@ class _DebtsTab extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           children: [
                             for (final d in list)
-                              _DebtTile(debt: d, locale: locale),
+                              _DebtTile(
+                                debt: d,
+                                locale: locale,
+                                onEdit:
+                                    () => showDebtEditor(context, ref, debt: d),
+                                onDelete: () async {
+                                  final ok = await confirmDialog(
+                                    context,
+                                    title: l10n.deleteConfirmTitle,
+                                    body: l10n.deleteConfirmBody,
+                                    confirmLabel: l10n.delete,
+                                  );
+                                  if (ok) {
+                                    await ref
+                                        .read(financeRepositoryProvider)
+                                        .deleteDebt(d.id);
+                                  }
+                                },
+                              ),
                           ],
                         ),
               ),
@@ -320,9 +584,16 @@ class _DebtsTab extends ConsumerWidget {
 }
 
 class _DebtTile extends ConsumerWidget {
-  const _DebtTile({required this.debt, required this.locale});
+  const _DebtTile({
+    required this.debt,
+    required this.locale,
+    required this.onEdit,
+    required this.onDelete,
+  });
   final Debt debt;
   final String locale;
+  final VoidCallback onEdit;
+  final Future<void> Function() onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -342,10 +613,23 @@ class _DebtTile extends ConsumerWidget {
               '${l10n.outstanding}: '
               '${formatMoney(outstanding, locale)}',
             ),
-            trailing: IconButton(
-              icon: const Icon(Icons.payments_outlined),
-              tooltip: l10n.payment,
-              onPressed: () => showPaymentEditor(context, ref, debt),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.payments_outlined),
+                  tooltip: l10n.payment,
+                  onPressed: () => showPaymentEditor(context, ref, debt),
+                ),
+                itemMoreButton(
+                  onPressed:
+                      () => showEditDeleteMenu(
+                        context,
+                        onEdit: onEdit,
+                        onDelete: onDelete,
+                      ),
+                ),
+              ],
             ),
           ),
         );
@@ -392,8 +676,55 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
                                 subtitle: Text(
                                   AccountType.fromIndex(a.type).name,
                                 ),
-                                trailing: Text(
-                                  formatMoney(a.openingBalancePaise, locale),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      formatMoney(a.openingBalancePaise, locale),
+                                    ),
+                                    itemMoreButton(
+                                      onPressed:
+                                          () => showEditDeleteMenu(
+                                            context,
+                                            onEdit:
+                                                () => showAccountEditor(
+                                                  context,
+                                                  ref,
+                                                  account: a,
+                                                ),
+                                            onDelete: () async {
+                                              final repo = ref.read(
+                                                financeRepositoryProvider,
+                                              );
+                                              if (await repo.accountHasTransactions(
+                                                a.id,
+                                              )) {
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        l10n.accountInUse,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                                return;
+                                              }
+                                              if (!context.mounted) return;
+                                              final ok = await confirmDialog(
+                                                context,
+                                                title: l10n.deleteConfirmTitle,
+                                                body: l10n.deleteConfirmBody,
+                                                confirmLabel: l10n.delete,
+                                              );
+                                              if (!context.mounted) return;
+                                              if (ok) await repo.deleteAccount(a.id);
+                                            },
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             const SizedBox(height: 8),
@@ -412,287 +743,124 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
   );
 }
 
-Future<void> showAccountEditor(BuildContext context, WidgetRef ref) async {
+Future<void> showBudgetEditor(
+  BuildContext context,
+  WidgetRef ref, {
+  Budget? budget,
+}) async {
   final l10n = context.l10n;
-  final controller = TextEditingController();
-  var type = AccountType.cash;
+  final amountCtrl = TextEditingController(
+    text:
+        budget == null
+            ? ''
+            : Money.paiseToRupees(budget.amountPaise).toString(),
+  );
+  int? categoryId = budget?.categoryId;
   final saved = await showDialog<bool>(
     context: context,
     builder:
-        (context) => StatefulBuilder(
+        (dialogContext) => Consumer(
           builder:
-              (context, setState) => AlertDialog(
-                title: Text(l10n.account),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: controller,
-                      autofocus: true,
-                      decoration: InputDecoration(labelText: l10n.accountName),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<AccountType>(
-                      value: type,
-                      decoration: InputDecoration(labelText: l10n.account),
-                      items: [
-                        for (final t in AccountType.values)
-                          DropdownMenuItem(value: t, child: Text(t.name)),
-                      ],
-                      onChanged: (v) => setState(() => type = v ?? type),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.save),
-                  ),
-                ],
-              ),
-        ),
-  );
-  if (saved == true && controller.text.trim().isNotEmpty) {
-    await ref
-        .read(financeRepositoryProvider)
-        .createAccount(name: controller.text.trim(), type: type);
-  }
-}
-
-Future<void> showTransactionEditor(BuildContext context, WidgetRef ref) async {
-  final l10n = context.l10n;
-  final accounts = ref.read(accountsProvider).valueOrNull ?? const <Account>[];
-  if (accounts.isEmpty) {
-    await showAccountEditor(context, ref);
-    return;
-  }
-  final categories =
-      ref.read(categoriesProvider).valueOrNull ?? const <Category>[];
-  final amountCtrl = TextEditingController();
-  final noteCtrl = TextEditingController();
-  var type = TransactionType.expense;
-  var accountId = accounts.first.id;
-  var transferId = accounts.length > 1 ? accounts[1].id : accounts.first.id;
-  var categoryId = -1;
-
-  final saved = await showDialog<bool>(
-    context: context,
-    builder:
-        (context) => StatefulBuilder(
-          builder: (context, setState) {
-            final filtered =
-                categories
-                    .where(
-                      (c) =>
-                          (type == TransactionType.income && c.kind == 0) ||
-                          (type == TransactionType.expense && c.kind == 1),
-                    )
-                    .toList();
-            return AlertDialog(
-              title: Text(l10n.addTransaction),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SegmentedButton<TransactionType>(
-                      segments: [
-                        ButtonSegment(
-                          value: TransactionType.expense,
-                          label: Text(l10n.expense),
-                        ),
-                        ButtonSegment(
-                          value: TransactionType.income,
-                          label: Text(l10n.income),
-                        ),
-                        if (accounts.length > 1)
-                          ButtonSegment(
-                            value: TransactionType.transfer,
-                            label: Text(l10n.transfer),
+              (context, ref, _) => StatefulBuilder(
+                builder:
+                    (context, setState) {
+                      final categories =
+                          ref.watch(categoriesProvider).valueOrNull ??
+                          const <Category>[];
+                      final expense =
+                          categories.where((c) => c.kind == 1).toList();
+                      return AlertDialog(
+                        title: Text(budget == null ? l10n.budgets : l10n.edit),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextField(
+                                controller: amountCtrl,
+                                autofocus: true,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: InputDecoration(
+                                  labelText: l10n.amount,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.category,
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              CategoryChipPicker(
+                                categories: expense,
+                                selectedId: categoryId,
+                                kind: CategoryKind.expense,
+                                noneLabel: l10n.all,
+                                onSelected:
+                                    (id) => setState(() => categoryId = id),
+                              ),
+                            ],
                           ),
-                      ],
-                      selected: {type},
-                      onSelectionChanged:
-                          (s) => setState(() {
-                            type = s.first;
-                            categoryId = -1;
-                          }),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: amountCtrl,
-                      autofocus: true,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(labelText: l10n.amount),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<int>(
-                      value: accountId,
-                      decoration: InputDecoration(
-                        labelText:
-                            type == TransactionType.transfer
-                                ? l10n.fromAccount
-                                : l10n.account,
-                      ),
-                      items: [
-                        for (final a in accounts)
-                          DropdownMenuItem(value: a.id, child: Text(a.name)),
-                      ],
-                      onChanged:
-                          (v) => setState(() => accountId = v ?? accountId),
-                    ),
-                    if (type == TransactionType.transfer) ...[
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        value: transferId,
-                        decoration: InputDecoration(labelText: l10n.toAccount),
-                        items: [
-                          for (final a in accounts)
-                            DropdownMenuItem(value: a.id, child: Text(a.name)),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(l10n.save),
+                          ),
                         ],
-                        onChanged:
-                            (v) => setState(() => transferId = v ?? transferId),
-                      ),
-                    ] else ...[
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        value: categoryId,
-                        decoration: InputDecoration(labelText: l10n.category),
-                        items: [
-                          DropdownMenuItem(value: -1, child: Text(l10n.none)),
-                          for (final c in filtered)
-                            DropdownMenuItem(value: c.id, child: Text(c.name)),
-                        ],
-                        onChanged: (v) => setState(() => categoryId = v ?? -1),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: noteCtrl,
-                      decoration: InputDecoration(labelText: l10n.description),
-                    ),
-                  ],
-                ),
+                      );
+                    },
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(l10n.cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(l10n.save),
-                ),
-              ],
-            );
-          },
         ),
   );
-
   final rupees = double.tryParse(amountCtrl.text.trim());
   if (saved == true && rupees != null && rupees > 0) {
     final repo = ref.read(financeRepositoryProvider);
     final paise = Money.rupeesToPaise(rupees);
-    if (type == TransactionType.transfer) {
-      await repo.addTransfer(
-        fromAccountId: accountId,
-        toAccountId: transferId,
+    if (budget == null) {
+      await repo.createBudget(
+        categoryId: categoryId,
         amountPaise: paise,
-        date: DateTime.now(),
-        note: noteCtrl.text.trim(),
+        startDate: DateTime.now(),
       );
     } else {
-      await repo.addTransaction(
-        accountId: accountId,
-        type: type,
-        amountPaise: paise,
-        date: DateTime.now(),
-        categoryId: categoryId == -1 ? null : categoryId,
-        note: noteCtrl.text.trim(),
+      await repo.updateBudget(
+        budget.copyWith(
+          categoryId: Value(categoryId),
+          amountPaise: paise,
+        ),
       );
     }
   }
 }
 
-Future<void> showBudgetEditor(BuildContext context, WidgetRef ref) async {
+Future<void> showDebtEditor(
+  BuildContext context,
+  WidgetRef ref, {
+  Debt? debt,
+}) async {
   final l10n = context.l10n;
-  final categories =
-      ref.read(categoriesProvider).valueOrNull ?? const <Category>[];
-  final amountCtrl = TextEditingController();
-  var categoryId = -1;
-  final saved = await showDialog<bool>(
-    context: context,
-    builder:
-        (context) => StatefulBuilder(
-          builder:
-              (context, setState) => AlertDialog(
-                title: Text(l10n.budgets),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: amountCtrl,
-                      autofocus: true,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(labelText: l10n.amount),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<int>(
-                      value: categoryId,
-                      decoration: InputDecoration(labelText: l10n.category),
-                      items: [
-                        DropdownMenuItem(value: -1, child: Text(l10n.all)),
-                        for (final c in categories.where((c) => c.kind == 1))
-                          DropdownMenuItem(value: c.id, child: Text(c.name)),
-                      ],
-                      onChanged: (v) => setState(() => categoryId = v ?? -1),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.save),
-                  ),
-                ],
-              ),
-        ),
+  final nameCtrl = TextEditingController(text: debt?.name ?? '');
+  final amountCtrl = TextEditingController(
+    text:
+        debt == null
+            ? ''
+            : Money.paiseToRupees(debt.principalPaise).toString(),
   );
-  final rupees = double.tryParse(amountCtrl.text.trim());
-  if (saved == true && rupees != null && rupees > 0) {
-    await ref
-        .read(financeRepositoryProvider)
-        .createBudget(
-          categoryId: categoryId == -1 ? null : categoryId,
-          amountPaise: Money.rupeesToPaise(rupees),
-          startDate: DateTime.now(),
-        );
-  }
-}
-
-Future<void> showDebtEditor(BuildContext context, WidgetRef ref) async {
-  final l10n = context.l10n;
-  final nameCtrl = TextEditingController();
-  final amountCtrl = TextEditingController();
-  var type = 0;
+  var type = debt?.type ?? 0;
   final saved = await showDialog<bool>(
     context: context,
     builder:
         (context) => StatefulBuilder(
           builder:
               (context, setState) => AlertDialog(
-                title: Text(l10n.debts),
+                title: Text(debt == null ? l10n.debts : l10n.edit),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -712,8 +880,8 @@ Future<void> showDebtEditor(BuildContext context, WidgetRef ref) async {
                     const SizedBox(height: 12),
                     SegmentedButton<int>(
                       segments: [
-                        ButtonSegment(value: 0, label: Text(l10n.debt)),
-                        ButtonSegment(value: 1, label: Text(l10n.payment)),
+                        ButtonSegment(value: 0, label: Text(l10n.debtIOwe)),
+                        ButtonSegment(value: 1, label: Text(l10n.debtTheyOwe)),
                       ],
                       selected: {type},
                       onSelectionChanged: (s) => setState(() => type = s.first),
@@ -738,14 +906,24 @@ Future<void> showDebtEditor(BuildContext context, WidgetRef ref) async {
       rupees != null &&
       rupees > 0 &&
       nameCtrl.text.trim().isNotEmpty) {
-    await ref
-        .read(financeRepositoryProvider)
-        .createDebt(
+    final repo = ref.read(financeRepositoryProvider);
+    final paise = Money.rupeesToPaise(rupees);
+    if (debt == null) {
+      await repo.createDebt(
+        name: nameCtrl.text.trim(),
+        type: type,
+        principalPaise: paise,
+        startDate: DateTime.now(),
+      );
+    } else {
+      await repo.updateDebt(
+        debt.copyWith(
           name: nameCtrl.text.trim(),
           type: type,
-          principalPaise: Money.rupeesToPaise(rupees),
-          startDate: DateTime.now(),
-        );
+          principalPaise: paise,
+        ),
+      );
+    }
   }
 }
 
@@ -827,18 +1005,6 @@ Future<void> showPaymentEditor(
   }
 }
 
-/// The human label for a recurring rule's frequency index.
-String _frequencyLabel(AppLocalizations l10n, int frequency) {
-  final freq = RecurrenceFrequency.values[frequency.clamp(0, 4)];
-  return switch (freq) {
-    RecurrenceFrequency.none => l10n.none,
-    RecurrenceFrequency.daily => l10n.everyDay,
-    RecurrenceFrequency.weekly => l10n.everyWeek,
-    RecurrenceFrequency.monthly => l10n.everyMonth,
-    RecurrenceFrequency.yearly => l10n.everyYear,
-  };
-}
-
 /// Banner shown at the top of the transactions list when recurring rules are
 /// due. Each row can be confirmed (recorded as a transaction and advanced).
 class _DueRecurringCard extends ConsumerWidget {
@@ -863,7 +1029,7 @@ class _DueRecurringCard extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   rule.note.isEmpty
-                      ? _frequencyLabel(l10n, rule.frequency)
+                      ? frequencyLabel(l10n, rule.frequency)
                       : rule.note,
                 ),
                 subtitle: Text(
@@ -941,7 +1107,7 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
                                   rule.note.isEmpty
-                                      ? _frequencyLabel(l10n, rule.frequency)
+                                      ? frequencyLabel(l10n, rule.frequency)
                                       : rule.note,
                                 ),
                                 subtitle: Text(
@@ -951,6 +1117,18 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    IconButton(
+                                      tooltip: l10n.edit,
+                                      icon: const Icon(Icons.edit_outlined),
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        await showRecurringEditor(
+                                          context,
+                                          ref,
+                                          rule: rule,
+                                        );
+                                      },
+                                    ),
                                     IconButton(
                                       tooltip: l10n.confirm,
                                       icon: const Icon(Icons.check_circle),
@@ -987,167 +1165,211 @@ Future<void> showRecurringManager(BuildContext context, WidgetRef ref) async {
   );
 }
 
-/// Editor for a new recurring rule (expense or income).
-Future<void> showRecurringEditor(BuildContext context, WidgetRef ref) async {
+/// Editor for a new or existing recurring rule (expense or income).
+Future<void> showRecurringEditor(
+  BuildContext context,
+  WidgetRef ref, {
+  RecurringRule? rule,
+}) async {
   final l10n = context.l10n;
   final accounts = ref.read(accountsProvider).valueOrNull ?? const <Account>[];
   if (accounts.isEmpty) {
     await showAccountEditor(context, ref);
     return;
   }
-  final categories =
-      ref.read(categoriesProvider).valueOrNull ?? const <Category>[];
-  final amountCtrl = TextEditingController();
-  final noteCtrl = TextEditingController();
-  var type = TransactionType.expense;
-  var accountId = accounts.first.id;
-  var categoryId = -1;
-  var frequency = RecurrenceFrequency.monthly;
-  var nextDate = DateTime.now();
+  final amountCtrl = TextEditingController(
+    text:
+        rule == null ? '' : Money.paiseToRupees(rule.amountPaise).toString(),
+  );
+  final noteCtrl = TextEditingController(text: rule?.note ?? '');
+  var type =
+      rule == null
+          ? TransactionType.expense
+          : TransactionType.fromIndex(rule.type);
+  var accountId = rule?.accountId ?? accounts.first.id;
+  int? categoryId = rule?.categoryId;
+  var frequency =
+      rule == null
+          ? RecurrenceFrequency.monthly
+          : RecurrenceFrequency.values[rule.frequency.clamp(0, 4)];
+  var nextDate = rule?.nextDate ?? DateTime.now();
 
   final saved = await showDialog<bool>(
     context: context,
     builder:
-        (context) => StatefulBuilder(
-          builder: (context, setState) {
-            final filtered =
-                categories
-                    .where(
-                      (c) =>
-                          (type == TransactionType.income && c.kind == 0) ||
-                          (type == TransactionType.expense && c.kind == 1),
-                    )
-                    .toList();
-            return AlertDialog(
-              title: Text(l10n.recurring),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SegmentedButton<TransactionType>(
-                      segments: [
-                        ButtonSegment(
-                          value: TransactionType.expense,
-                          label: Text(l10n.expense),
-                        ),
-                        ButtonSegment(
-                          value: TransactionType.income,
-                          label: Text(l10n.income),
-                        ),
-                      ],
-                      selected: {type},
-                      onSelectionChanged:
-                          (s) => setState(() {
-                            type = s.first;
-                            categoryId = -1;
-                          }),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: amountCtrl,
-                      autofocus: true,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(labelText: l10n.amount),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<int>(
-                      value: accountId,
-                      decoration: InputDecoration(labelText: l10n.account),
-                      items: [
-                        for (final a in accounts)
-                          DropdownMenuItem(value: a.id, child: Text(a.name)),
-                      ],
-                      onChanged:
-                          (v) => setState(() => accountId = v ?? accountId),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<int>(
-                      value: categoryId,
-                      decoration: InputDecoration(labelText: l10n.category),
-                      items: [
-                        DropdownMenuItem(value: -1, child: Text(l10n.none)),
-                        for (final c in filtered)
-                          DropdownMenuItem(value: c.id, child: Text(c.name)),
-                      ],
-                      onChanged: (v) => setState(() => categoryId = v ?? -1),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<RecurrenceFrequency>(
-                      value: frequency,
-                      decoration: InputDecoration(labelText: l10n.frequency),
-                      items: [
-                        for (final f in const [
-                          RecurrenceFrequency.daily,
-                          RecurrenceFrequency.weekly,
-                          RecurrenceFrequency.monthly,
-                          RecurrenceFrequency.yearly,
-                        ])
-                          DropdownMenuItem(
-                            value: f,
-                            child: Text(_frequencyLabel(l10n, f.index)),
+        (dialogContext) => Consumer(
+          builder:
+              (context, ref, _) => StatefulBuilder(
+                builder: (context, setState) {
+                  final categories =
+                      ref.watch(categoriesProvider).valueOrNull ??
+                      const <Category>[];
+                  final filtered =
+                      categories
+                          .where(
+                            (c) =>
+                                (type == TransactionType.income && c.kind == 0) ||
+                                (type == TransactionType.expense && c.kind == 1),
+                          )
+                          .toList();
+                  return AlertDialog(
+                    title: Text(rule == null ? l10n.recurring : l10n.edit),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SegmentedButton<TransactionType>(
+                            segments: [
+                              ButtonSegment(
+                                value: TransactionType.expense,
+                                label: Text(l10n.expense),
+                              ),
+                              ButtonSegment(
+                                value: TransactionType.income,
+                                label: Text(l10n.income),
+                              ),
+                            ],
+                            selected: {type},
+                            onSelectionChanged:
+                                (s) => setState(() {
+                                  type = s.first;
+                                  categoryId = null;
+                                }),
                           ),
-                      ],
-                      onChanged:
-                          (v) => setState(() => frequency = v ?? frequency),
-                    ),
-                    const SizedBox(height: 12),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.event),
-                      title: Text(l10n.taskDue),
-                      subtitle: Text(
-                        MaterialLocalizations.of(
-                          context,
-                        ).formatMediumDate(nextDate),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: amountCtrl,
+                            autofocus: true,
+                            keyboardType:
+                                const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                            decoration: InputDecoration(labelText: l10n.amount),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<int>(
+                            value: accountId,
+                            decoration: InputDecoration(labelText: l10n.account),
+                            items: [
+                              for (final a in accounts)
+                                DropdownMenuItem(
+                                  value: a.id,
+                                  child: Text(a.name),
+                                ),
+                            ],
+                            onChanged:
+                                (v) => setState(() => accountId = v ?? accountId),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.category,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          CategoryChipPicker(
+                            categories: filtered,
+                            selectedId: categoryId,
+                            kind:
+                                type == TransactionType.income
+                                    ? CategoryKind.income
+                                    : CategoryKind.expense,
+                            onSelected: (id) => setState(() => categoryId = id),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<RecurrenceFrequency>(
+                            value: frequency,
+                            decoration: InputDecoration(
+                              labelText: l10n.frequency,
+                            ),
+                            items: [
+                              for (final f in const [
+                                RecurrenceFrequency.daily,
+                                RecurrenceFrequency.weekly,
+                                RecurrenceFrequency.monthly,
+                                RecurrenceFrequency.yearly,
+                              ])
+                                DropdownMenuItem(
+                                  value: f,
+                                  child: Text(frequencyLabel(l10n, f.index)),
+                                ),
+                            ],
+                            onChanged:
+                                (v) => setState(() => frequency = v ?? frequency),
+                          ),
+                          const SizedBox(height: 12),
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.event),
+                            title: Text(l10n.taskDue),
+                            subtitle: Text(
+                              MaterialLocalizations.of(
+                                context,
+                              ).formatMediumDate(nextDate),
+                            ),
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: nextDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                setState(() => nextDate = picked);
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: noteCtrl,
+                            decoration: InputDecoration(
+                              labelText: l10n.description,
+                            ),
+                          ),
+                        ],
                       ),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: nextDate,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) {
-                          setState(() => nextDate = picked);
-                        }
-                      },
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: noteCtrl,
-                      decoration: InputDecoration(labelText: l10n.description),
-                    ),
-                  ],
-                ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(l10n.save),
+                      ),
+                    ],
+                  );
+                },
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(l10n.cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(l10n.save),
-                ),
-              ],
-            );
-          },
         ),
   );
   final amount = double.tryParse(amountCtrl.text.trim()) ?? 0;
   if (saved == true && amount > 0) {
-    await ref
-        .read(financeRepositoryProvider)
-        .createRecurring(
+    final repo = ref.read(financeRepositoryProvider);
+    final paise = Money.rupeesToPaise(amount);
+    if (rule == null) {
+      await repo.createRecurring(
+        type: type.index,
+        accountId: accountId,
+        amountPaise: paise,
+        nextDate: nextDate,
+        categoryId: categoryId,
+        note: noteCtrl.text.trim(),
+        frequency: frequency.index,
+      );
+    } else {
+      await repo.updateRecurring(
+        rule.copyWith(
           type: type.index,
           accountId: accountId,
-          amountPaise: Money.rupeesToPaise(amount),
+          amountPaise: paise,
           nextDate: nextDate,
-          categoryId: categoryId == -1 ? null : categoryId,
+          categoryId: Value(categoryId),
           note: noteCtrl.text.trim(),
           frequency: frequency.index,
-        );
+        ),
+      );
+    }
   }
 }

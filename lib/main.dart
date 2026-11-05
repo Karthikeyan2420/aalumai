@@ -17,8 +17,6 @@ import 'features/alarms/ringing_coordinator.dart';
 import 'features/expenses/data/finance_repository.dart';
 import 'features/fitness/data/fitness_repository.dart';
 import 'features/habits/data/habit_repository.dart';
-import 'features/jarvis/data/briefing_scheduler.dart';
-import 'features/learning/data/learning_repository.dart';
 import 'features/music/data/player_service.dart';
 import 'features/schedule/data/event_repository.dart';
 import 'features/tasks/data/task_repository.dart';
@@ -93,9 +91,6 @@ Future<void> _bootstrap(ProviderContainer container) async {
     await container.read(fitnessRepositoryProvider).seedStarterPlans();
   } catch (_) {}
   try {
-    await container.read(learningRepositoryProvider).seedCourse();
-  } catch (_) {}
-  try {
     final notifications = container.read(notificationServiceProvider);
     notifications.onAlarmNotificationTap =
         (alarmId) => _openAlarm(container, alarmId);
@@ -127,15 +122,6 @@ Future<void> _bootstrap(ProviderContainer container) async {
   } catch (_) {}
   try {
     await container.read(eventRepositoryProvider).reconcileReminders();
-  } catch (_) {}
-  try {
-    await reconcileDailyBriefing(
-      reminders: container.read(notificationServiceProvider),
-      prefs: container.read(appPreferencesProvider),
-      tasks: container.read(taskRepositoryProvider),
-      events: container.read(eventRepositoryProvider),
-      alarms: container.read(alarmRepositoryProvider),
-    );
   } catch (_) {}
 }
 

@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/module_theme.dart';
 import '../../core/localization/l10n_extension.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/module_scaffold.dart';
 import 'data/task_repository.dart';
 import 'task_editor.dart';
+import '../expenses/item_actions.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -17,6 +21,14 @@ class TasksScreen extends ConsumerStatefulWidget {
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   int _filter = 0; // 0 today, 1 upcoming, 2 overdue, 3 completed, 4 all
+  String _query = '';
+  final _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +37,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final tasksAsync = ref.watch(allTasksProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.navTasks)),
+      appBar: AppBar(
+        title: Text(l10n.navTasks),
+        backgroundColor: softTint(context, DashboardModule.tasks.accent, 0.08),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'tasksAddTask',
         onPressed: () => showTaskEditor(context),
@@ -34,20 +49,35 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 52,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                _chip(l10n.taskDue, 0),
-                _chip(l10n.taskUpcoming, 1),
-                _chip(l10n.taskOverdue, 2),
-                _chip(l10n.taskCompleted, 3),
-                _chip(l10n.all, 4),
-              ],
+          ModuleFilterBar(
+            labels: [
+              l10n.taskDue,
+              l10n.taskUpcoming,
+              l10n.taskOverdue,
+              l10n.taskCompleted,
+              l10n.all,
+            ],
+            selectedIndex: _filter,
+            onSelected: (i) => setState(() => _filter = i),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screen,
+              8,
+              AppSpacing.screen,
+              0,
+            ),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: l10n.search,
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+              ),
+              onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
             ),
           ),
+          const SizedBox(height: 4),
           Expanded(
             child: tasksAsync.when(
               loading: () => const LoadingState(),
@@ -84,45 +114,55 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         default:
                           return true;
                       }
+                    }).where((e) {
+                      if (_query.isEmpty) return true;
+                      return e.task.title.toLowerCase().contains(_query);
                     }).toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
                     icon: Icons.checklist_rtl,
                     message: all.isEmpty ? l10n.emptyTasks : l10n.emptyTitle,
+                    accent: DashboardModule.tasks.accent,
                     actionLabel: l10n.add,
                     onAction: () => showTaskEditor(context),
                   );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final entry = filtered[index];
-                    return _TaskTile(
-                      entry: entry,
-                      onToggle: () => _toggle(repo, entry.task),
-                      onTap: () => showTaskEditor(context, task: entry.task),
-                      onLongPress: () => _menu(context, repo, entry.task),
-                    );
+                return ReorderableListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    8,
+                    AppSpacing.screen,
+                    96,
+                  ),
+                  onReorder: (oldIndex, newIndex) async {
+                    if (newIndex > oldIndex) newIndex--;
+                    final ids = filtered.map((e) => e.task.id).toList();
+                    final id = ids.removeAt(oldIndex);
+                    ids.insert(newIndex, id);
+                    await repo.reorderTasks(ids);
                   },
+                  children: [
+                    for (final entry in filtered)
+                      KeyedSubtree(
+                        key: ValueKey(entry.task.id),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.cardGap),
+                          child: _TaskTile(
+                            entry: entry,
+                            onToggle: () => _toggle(repo, entry.task),
+                            onTap: () => showTaskEditor(context, task: entry.task),
+                            onLongPress: () => _menu(context, repo, entry.task),
+                            onMore: () => _menu(context, repo, entry.task),
+                          ),
+                        ),
+                      ),
+                  ],
                 );
               },
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, int value) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: _filter == value,
-        onSelected: (_) => setState(() => _filter = value),
       ),
     );
   }
@@ -205,12 +245,14 @@ class _TaskTile extends StatelessWidget {
     required this.onToggle,
     required this.onTap,
     required this.onLongPress,
+    required this.onMore,
   });
 
   final TaskWithSubtasks entry;
   final VoidCallback onToggle;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -222,81 +264,76 @@ class _TaskTile extends StatelessWidget {
       TaskPriority.medium => theme.colorScheme.tertiary,
       TaskPriority.low => theme.colorScheme.outline,
     };
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: onToggle,
-                icon: Icon(
-                  task.isCompleted
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
-                  color:
-                      task.isCompleted
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.outline,
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        decoration:
-                            task.isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: priorityColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _subtitle(context, task),
-                          style: theme.textTheme.bodySmall,
-                        ),
-                        if (entry.subtasks.isNotEmpty) ...[
-                          const SizedBox(width: 10),
-                          Icon(
-                            Icons.account_tree_outlined,
-                            size: 14,
-                            color: theme.colorScheme.outline,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${entry.completedSubtasks}/${entry.subtasks.length}',
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ],
-                        if (task.recurrenceRule.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          const Icon(Icons.repeat, size: 14),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return ModuleListTile(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      trailing: itemMoreButton(onPressed: onMore),
+      leading: SizedBox(
+        width: 44,
+        height: 44,
+        child: IconButton(
+          onPressed: onToggle,
+          icon: Icon(
+            task.isCompleted
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color:
+                task.isCompleted
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outline,
           ),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            task.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              decoration:
+                  task.isCompleted ? TextDecoration.lineThrough : null,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: priorityColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  _subtitle(context, task),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              if (entry.subtasks.isNotEmpty) ...[
+                Icon(
+                  Icons.account_tree_outlined,
+                  size: 14,
+                  color: theme.colorScheme.outline,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '${entry.completedSubtasks}/${entry.subtasks.length}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+              if (task.recurrenceRule.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.repeat, size: 14),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
