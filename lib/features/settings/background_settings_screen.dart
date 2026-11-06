@@ -283,7 +283,7 @@ class _CustomImageTileState extends ConsumerState<_CustomImageTile> {
   Future<void> _pick() async {
     setState(() => _busy = true);
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.image,
         withData: false,
       );

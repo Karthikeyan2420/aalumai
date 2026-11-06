@@ -50,6 +50,9 @@ class _FakeTts implements AlarmTts {
   Future<List<TtsVoice>> voices() async => const [];
 
   @override
+  void clearVoiceCache() {}
+
+  @override
   Future<void> configure(AlarmVoiceSettings settings, String languageCode) async {}
 
   @override

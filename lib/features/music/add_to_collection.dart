@@ -257,7 +257,7 @@ Future<void> showAddToCollectionSheet(
 
 Future<String?> _pickCover() async {
   try {
-    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    final result = await FilePicker.pickFiles(type: FileType.image);
     final source = result?.files.single.path;
     if (source == null) return null;
     final dir = await getApplicationDocumentsDirectory();

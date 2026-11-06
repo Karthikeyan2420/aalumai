@@ -16,7 +16,7 @@ dependencies:
 
   # State management & navigation
   flutter_riverpod: ^2.6.1
-  go_router: ^14.6.2
+  go_router: ^17.0.0
 
   # Persistence
   drift: ^2.23.1
@@ -24,37 +24,37 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.0
   shared_preferences: ^2.3.3
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.3.4
 
   # Utilities
   collection: ^1.19.0
   uuid: ^4.5.1
   crypto: ^3.0.6
-  package_info_plus: ^8.1.2
+  package_info_plus: ^9.0.1
   url_launcher: ^6.3.1
   csv: ^6.0.0
-  archive: ^3.6.1
+  archive: ^4.6.0
 
   # Notifications & alarms
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^19.5.0
   timezone: ^0.10.0
-  flutter_timezone: ^3.0.1
-  permission_handler: ^11.3.1
+  flutter_timezone: ^5.1.1
+  permission_handler: ^11.4.0
 
   # Media & audio
-  just_audio: ^0.9.42
+  just_audio: ^0.10.6
   audio_service: ^0.18.15
-  audio_session: ^0.1.21
-  file_picker: ^8.1.6
+  audio_session: ^0.2.4
+  file_picker: ^11.0.3
 
   # Keep the screen awake during an active workout
   wakelock_plus: ^1.2.8
 
   # Location & fitness
-  geolocator: ^13.0.2
+  geolocator: ^14.0.2
 
   # Charts
-  fl_chart: ^0.70.0
+  fl_chart: ^0.70.2
 
   # Remote exercise demonstration GIFs (disk + memory cached)
   cached_network_image: ^3.4.1
@@ -63,8 +63,8 @@ dependencies:
   http: ^1.2.0
 
   # Real map tiles for the Run/Walk module (OpenStreetMap, no API key)
-  flutter_map: ^7.0.2
-  latlong2: ^0.9.1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
 
   # Spoken alarms
   flutter_tts: ^4.2.0

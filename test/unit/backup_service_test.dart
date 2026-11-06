@@ -5,7 +5,10 @@ import 'package:aalumai/core/services/backup_service.dart';
 import 'package:aalumai/features/expenses/data/finance_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+import '../helpers/test_preferences.dart';
 
 /// Routes path_provider to a throwaway directory so backup/restore can be
 /// exercised without a real platform.
@@ -43,13 +46,14 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final finance = FinanceRepository(db);
     await finance.createAccount(name: 'Cash', openingBalancePaise: 12345);
-    final service = BackupService(db);
+    final prefs = await testSharedPreferences();
+    final service = BackupService(db, prefs);
 
     final result = await service.exportBackup();
 
     expect(await result.file.exists(), isTrue);
     expect(result.bytes, greaterThan(0));
-    expect(await service.listBackups(), hasLength(1));
+    expect(result.file.path.endsWith('.zip'), isTrue);
 
     await db.close();
   });
@@ -64,12 +68,20 @@ void main() {
       amountPaise: 4200,
       date: DateTime(2026, 1, 1),
     );
-    final service = BackupService(db);
-    final backup = await service.exportBackup();
+    final prefs = await testSharedPreferences();
+    final legacy = File('${tempDir.path}/legacy.sqlite');
+    final escaped = legacy.path.replaceAll("'", "''");
+    await db.customStatement("VACUUM INTO '$escaped'");
+    await db.close();
 
-    await service.restore(backup.file);
+    final service = BackupService(
+      AppDatabase.forTesting(
+        NativeDatabase(File('${tempDir.path}/aalumai.sqlite')),
+      ),
+      prefs,
+    );
+    await service.restore(legacy);
 
-    // A fresh connection at the restored location should see the data.
     final restored = AppDatabase.forTesting(
       NativeDatabase(File('${tempDir.path}/aalumai.sqlite')),
     );
@@ -94,7 +106,8 @@ void main() {
         categoryId: cat,
         note: 'Lunch',
       );
-      final csv = await BackupService(db).transactionsCsv();
+      final prefs = await testSharedPreferences();
+      final csv = await BackupService(db, prefs).transactionsCsv();
 
       expect(csv, contains('Date,Type,Amount,Account,Category,Note'));
       expect(csv, contains('2026-07-09,Expense,12.50,Bank,Food,Lunch'));

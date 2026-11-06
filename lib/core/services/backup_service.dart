@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:crypto/crypto.dart';
 import 'package:csv/csv.dart';
@@ -198,7 +199,13 @@ class BackupService {
 
       final schemaVersion = await _readSchemaVersion(dbOut);
 
-      final info = await PackageInfo.fromPlatform();
+      var appVersion = '0.0.0';
+      var buildNumber = '0';
+      try {
+        final info = await PackageInfo.fromPlatform();
+        appVersion = info.version;
+        buildNumber = info.buildNumber;
+      } catch (_) {}
       final manifestFiles = <Map<String, String>>[
         {'path': 'database.sqlite', 'sha256': await _fileSha256(dbOut)},
       ];
@@ -240,8 +247,8 @@ class BackupService {
 
       final manifest = {
         'formatVersion': bundleFormatVersion,
-        'appVersion': info.version,
-        'buildNumber': info.buildNumber,
+        'appVersion': appVersion,
+        'buildNumber': buildNumber,
         'schemaVersion': schemaVersion,
         'createdAt': DateTime.now().toIso8601String(),
         'files': manifestFiles,
@@ -310,7 +317,15 @@ class BackupService {
 
     Directory? safety;
     try {
-      extractFileToDisk(zipFile.path, temp.path);
+      final bytes = await zipFile.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+      for (final entry in archive) {
+        if (!entry.isFile || entry.name.isEmpty) continue;
+        final name = entry.name.replaceAll('\\', '/');
+        final out = File(p.join(temp.path, name));
+        await out.parent.create(recursive: true);
+        await out.writeAsBytes(entry.content as List<int>);
+      }
 
       final manifestFile = File(p.join(temp.path, 'manifest.json'));
       final dbFile = File(p.join(temp.path, 'database.sqlite'));

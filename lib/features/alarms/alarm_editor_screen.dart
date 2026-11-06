@@ -829,7 +829,7 @@ class _AlarmEditorScreenState extends ConsumerState<AlarmEditorScreen> {
   /// app-managed storage and selects it for this alarm. Nothing is uploaded.
   Future<void> _pickCustomSound() async {
     try {
-      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      final result = await FilePicker.pickFiles(type: FileType.audio);
       final path = result?.files.single.path;
       if (path == null) return;
       final uri = await ref.read(alarmSoundStoreProvider).import(path);

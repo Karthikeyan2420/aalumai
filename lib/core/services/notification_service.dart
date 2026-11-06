@@ -82,7 +82,7 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
     try {
       tzdata.initializeTimeZones();
       final zone = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(zone));
+      tz.setLocalLocation(tz.getLocation(zone.identifier));
     } catch (_) {
       // Fall back to UTC if the platform timezone cannot be read.
       tzdata.initializeTimeZones();
@@ -259,8 +259,6 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
       when,
       details,
       androidScheduleMode: mode,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: matchDateTimeComponents,
       payload: payload,
     );
@@ -437,8 +435,6 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload,
       );
     } catch (e) {
@@ -494,8 +490,6 @@ class NotificationService implements AlarmScheduler, ReminderNotifier {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents:
             weekday == null
                 ? DateTimeComponents.time

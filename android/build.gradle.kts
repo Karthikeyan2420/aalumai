@@ -12,9 +12,6 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
-subprojects {
-    project.evaluationDependsOn(":app")
-}
 
 // Some older Flutter plugins (e.g. on_audio_query_android 1.1.0) predate AGP 7's
 // `namespace` requirement and only declare a package in their AndroidManifest.

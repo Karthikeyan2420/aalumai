@@ -2,11 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../backgrounds/background_presets.dart';
-import '../backgrounds/background_store.dart';
-
 /// Keys persisted in backup bundles (app settings + backgrounds).
-const backupPreferenceKeys = <String>{
+final backupPreferenceKeys = <String>{
   'locale_code',
   'theme_mode',
   'first_run_complete',
@@ -30,8 +27,8 @@ const backupPreferenceKeys = <String>{
   'alarm_voice_rate',
   'alarm_voice_pitch',
   'alarm_voice_volume',
-  BackgroundStore.keyFor(BackgroundSlot.home),
-  BackgroundStore.keyFor(BackgroundSlot.alarm),
+  'background_home',
+  'background_alarm',
 };
 
 Map<String, Object?> exportPreferences(SharedPreferences prefs) {

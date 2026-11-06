@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../db/database.dart';
-import '../preferences/app_preferences.dart';
 import '../providers/providers.dart';
 import '../../features/habits/data/habit_repository.dart';
 import '../../features/schedule/data/event_repository.dart';
