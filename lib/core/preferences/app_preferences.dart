@@ -27,6 +27,7 @@ class AppPreferences {
   static const _kJarvisBriefingId = 'jarvis_briefing_id';
   static const _kRecentQuickActions = 'recent_quick_actions';
   static const _kDashboardHidden = 'dashboard_hidden';
+  static const _kHiddenFeatures = 'hidden_features';
   static const _kFitnessMediaOnline = 'fitness_media_online';
   static const _kFitnessOfflinePackReady = 'fitness_offline_pack_ready';
 
@@ -147,6 +148,16 @@ class AppPreferences {
   Future<void> setDashboardHidden(List<String> keys) =>
       _prefs.setString(_kDashboardHidden, jsonEncode(keys));
 
+  /// Menu/tab keys hidden from the Permissions settings page.
+  List<String> get hiddenFeatures {
+    final raw = _prefs.getString(_kHiddenFeatures);
+    if (raw == null || raw.isEmpty) return const [];
+    return (jsonDecode(raw) as List).cast<String>();
+  }
+
+  Future<void> setHiddenFeatures(List<String> keys) =>
+      _prefs.setString(_kHiddenFeatures, jsonEncode(keys));
+
   /// Preferred TTS language for alarms. Empty means "follow the app language".
   String get alarmVoiceLanguage => _prefs.getString(_kVoiceLanguage) ?? '';
 
@@ -246,8 +257,7 @@ class AppPreferences {
       _prefs.setDouble(_kAssistantSpeechVolume, value);
 
   /// Installed TTS voice name to use, or empty for the device default.
-  String get assistantVoiceName =>
-      _prefs.getString(_kAssistantVoiceName) ?? '';
+  String get assistantVoiceName => _prefs.getString(_kAssistantVoiceName) ?? '';
 
   Future<void> setAssistantVoiceName(String value) =>
       _prefs.setString(_kAssistantVoiceName, value);
@@ -261,8 +271,7 @@ class AppPreferences {
 
   /// The user's preferred name, used to answer "who am I?"; empty when the
   /// user has not configured one.
-  String get assistantUserName =>
-      _prefs.getString(_kAssistantUserName) ?? '';
+  String get assistantUserName => _prefs.getString(_kAssistantUserName) ?? '';
 
   Future<void> setAssistantUserName(String value) =>
       _prefs.setString(_kAssistantUserName, value);

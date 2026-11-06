@@ -97,6 +97,13 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
               ),
+              ListTile(
+                leading: const Icon(Icons.rule_folder_outlined),
+                title: const Text('Permissions'),
+                subtitle: const Text('Choose which menus and tabs are shown'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.permissions),
+              ),
             ],
           ),
           SettingsGroup(
@@ -111,10 +118,9 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       l10n.waterIntake,
                       prefs.dailyWaterGoalMl,
-                      (v) =>
-                          ref
-                              .read(appPreferencesProvider)
-                              .setDailyWaterGoalMl(v),
+                      (v) => ref
+                          .read(appPreferencesProvider)
+                          .setDailyWaterGoalMl(v),
                     ),
               ),
               SwitchListTile(

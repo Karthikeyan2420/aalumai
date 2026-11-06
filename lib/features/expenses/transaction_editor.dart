@@ -73,7 +73,7 @@ Future<void> showAccountEditor(
                       decoration: InputDecoration(labelText: l10n.account),
                       items: [
                         for (final t in AccountType.values)
-                          DropdownMenuItem(value: t, child: Text(t.name)),
+                          DropdownMenuItem(value: t, child: Text(t.label)),
                       ],
                       onChanged: (v) => setState(() => type = v ?? type),
                     ),
@@ -110,7 +110,8 @@ Future<void> showAccountEditor(
     await repo.createAccount(name: nameCtrl.text.trim(), type: type);
   } else {
     final opening =
-        double.tryParse(balanceCtrl.text.trim()) ?? account.openingBalancePaise / 100;
+        double.tryParse(balanceCtrl.text.trim()) ??
+        account.openingBalancePaise / 100;
     await repo.updateAccount(
       account.copyWith(
         name: nameCtrl.text.trim(),
@@ -151,14 +152,11 @@ class _TransactionEditorSheetState
     super.initState();
     final t = widget.transaction;
     _amountCtrl = TextEditingController(
-      text:
-          t == null ? '' : Money.paiseToRupees(t.amountPaise).toString(),
+      text: t == null ? '' : Money.paiseToRupees(t.amountPaise).toString(),
     );
     _noteCtrl = TextEditingController(text: t?.note ?? '');
     _type =
-        t == null
-            ? TransactionType.expense
-            : TransactionType.fromIndex(t.type);
+        t == null ? TransactionType.expense : TransactionType.fromIndex(t.type);
     _accountId = t?.accountId ?? widget.accounts.first.id;
     _transferId =
         t?.transferAccountId ??
@@ -296,12 +294,12 @@ class _TransactionEditorSheetState
                 if (_type == TransactionType.transfer) {
                   _categoryId = null;
                 } else if (_categoryId != null) {
-                  final cat = categories
-                      .where((c) => c.id == _categoryId)
-                      .firstOrNull;
+                  final cat =
+                      categories.where((c) => c.id == _categoryId).firstOrNull;
                   if (cat != null &&
                       ((_type == TransactionType.income && cat.kind != 0) ||
-                          (_type == TransactionType.expense && cat.kind != 1))) {
+                          (_type == TransactionType.expense &&
+                              cat.kind != 1))) {
                     _categoryId = null;
                   }
                 }
@@ -361,7 +359,10 @@ class _TransactionEditorSheetState
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(l10n.category, style: Theme.of(context).textTheme.labelLarge),
+              child: Text(
+                l10n.category,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
             const SizedBox(height: 8),
             CategoryChipPicker(
@@ -390,10 +391,7 @@ class _TransactionEditorSheetState
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: FilledButton(
-                  onPressed: _save,
-                  child: Text(l10n.save),
-                ),
+                child: FilledButton(onPressed: _save, child: Text(l10n.save)),
               ),
             ],
           ),

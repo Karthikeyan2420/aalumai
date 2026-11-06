@@ -13,6 +13,7 @@ import '../../features/more/more_screen.dart';
 import '../../features/music/music_screen.dart';
 import '../../features/notes/notes_screen.dart';
 import '../../features/schedule/schedule_screen.dart';
+import '../../features/settings/permission_settings_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
 import '../shell/app_shell.dart';
@@ -33,6 +34,7 @@ class AppRoutes {
   static const habits = '/habits';
   static const notes = '/notes';
   static const settings = '/settings';
+  static const permissions = '/permissions';
   static const about = '/about';
   static const dashboardConfig = '/dashboard-config';
 }
@@ -123,6 +125,10 @@ GoRouter createRouter() {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.permissions,
+        builder: (context, state) => const PermissionSettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.about,

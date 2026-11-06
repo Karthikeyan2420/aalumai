@@ -1,18 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/l10n_extension.dart';
+import '../../core/permissions/app_permissions.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/module_theme.dart';
 import '../../core/widgets/dashboard_components.dart';
 
-class MoreScreen extends StatelessWidget {
+class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final permissions = ref.watch(featurePermissionsProvider);
+
+    List<_MoreItem> visible(List<_MoreItem> items) =>
+        items
+            .where(
+              (item) =>
+                  item.feature == null || permissions.isVisible(item.feature!),
+            )
+            .toList();
+
+    final life = visible([
+      _MoreItem(
+        AppFeature.lifeSchedule,
+        Icons.calendar_month_outlined,
+        l10n.navSchedule,
+        AppRoutes.schedule,
+        ModuleAccents.schedule,
+      ),
+      _MoreItem(
+        AppFeature.lifeNotes,
+        Icons.edit_note,
+        l10n.notes,
+        AppRoutes.notes,
+        ModuleAccents.notes,
+      ),
+      _MoreItem(
+        AppFeature.lifeAlarms,
+        Icons.alarm,
+        l10n.alarms,
+        AppRoutes.alarms,
+        ModuleAccents.alarm,
+      ),
+      _MoreItem(
+        AppFeature.lifeHabits,
+        Icons.check_circle_outline,
+        l10n.habits,
+        AppRoutes.habits,
+        ModuleAccents.habits,
+      ),
+    ]);
+    final wellness = visible([
+      _MoreItem(
+        AppFeature.wellnessMusic,
+        Icons.library_music_outlined,
+        l10n.music,
+        AppRoutes.music,
+        ModuleAccents.music,
+      ),
+    ]);
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navMore)),
       body: ListView(
@@ -23,58 +75,26 @@ class MoreScreen extends StatelessWidget {
           32,
         ),
         children: [
-          _MoreGroup(
-            title: l10n.moreGroupLife,
-            items: [
-              _MoreItem(
-                Icons.calendar_month_outlined,
-                l10n.navSchedule,
-                AppRoutes.schedule,
-                ModuleAccents.schedule,
-              ),
-              _MoreItem(
-                Icons.edit_note,
-                l10n.notes,
-                AppRoutes.notes,
-                ModuleAccents.notes,
-              ),
-              _MoreItem(
-                Icons.alarm,
-                l10n.alarms,
-                AppRoutes.alarms,
-                ModuleAccents.alarm,
-              ),
-              _MoreItem(
-                Icons.check_circle_outline,
-                l10n.habits,
-                AppRoutes.habits,
-                ModuleAccents.habits,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.cardGap),
-          _MoreGroup(
-            title: l10n.moreGroupWellness,
-            items: [
-              _MoreItem(
-                Icons.library_music_outlined,
-                l10n.music,
-                AppRoutes.music,
-                ModuleAccents.music,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.cardGap),
+          if (life.isNotEmpty) ...[
+            _MoreGroup(title: l10n.moreGroupLife, items: life),
+            const SizedBox(height: AppSpacing.cardGap),
+          ],
+          if (wellness.isNotEmpty) ...[
+            _MoreGroup(title: l10n.moreGroupWellness, items: wellness),
+            const SizedBox(height: AppSpacing.cardGap),
+          ],
           _MoreGroup(
             title: l10n.moreGroupApp,
             items: [
               _MoreItem(
+                null,
                 Icons.settings_outlined,
                 l10n.settings,
                 AppRoutes.settings,
                 ModuleAccents.settings,
               ),
               _MoreItem(
+                null,
                 Icons.info_outline,
                 l10n.about,
                 AppRoutes.about,
@@ -130,7 +150,8 @@ class _MoreGroup extends StatelessWidget {
 }
 
 class _MoreItem {
-  const _MoreItem(this.icon, this.label, this.route, this.accent);
+  const _MoreItem(this.feature, this.icon, this.label, this.route, this.accent);
+  final AppFeature? feature;
   final IconData icon;
   final String label;
   final String route;

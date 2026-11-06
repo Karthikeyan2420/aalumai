@@ -11,10 +11,23 @@ enum AccountType {
   bank,
   wallet,
   credit,
-  other;
+  other,
+
+  /// UPI and similar payment apps. Appended last so existing persisted indexes
+  /// keep their meaning.
+  upi;
 
   static AccountType fromIndex(int v) =>
       AccountType.values[v.clamp(0, AccountType.values.length - 1)];
+
+  String get label => switch (this) {
+    AccountType.cash => 'Cash',
+    AccountType.bank => 'Bank',
+    AccountType.wallet => 'Wallet',
+    AccountType.credit => 'Credit card',
+    AccountType.other => 'Other',
+    AccountType.upi => 'UPI',
+  };
 }
 
 enum TransactionType {
@@ -219,9 +232,9 @@ class FinanceRepository {
   }
 
   Future<void> archiveCategory(int id) async {
-    await (_db.update(_db.categories)..where((t) => t.id.equals(id))).write(
-      const CategoriesCompanion(isArchived: Value(true)),
-    );
+    await (_db.update(_db.categories)..where(
+      (t) => t.id.equals(id),
+    )).write(const CategoriesCompanion(isArchived: Value(true)));
   }
 
   // ---- Transactions -------------------------------------------------------
@@ -247,13 +260,11 @@ class FinanceRepository {
 
   /// Expense rows in [from, to] for aggregates (no row cap).
   Stream<List<Transaction>> watchExpensesBetween(DateTime from, DateTime to) =>
-      (_db.select(_db.transactions)
-            ..where(
-              (t) =>
-                  t.type.equals(TransactionType.expense.index) &
-                  t.date.isBetweenValues(from, to),
-            ))
-          .watch();
+      (_db.select(_db.transactions)..where(
+        (t) =>
+            t.type.equals(TransactionType.expense.index) &
+            t.date.isBetweenValues(from, to),
+      )).watch();
 
   /// Sum of expense amounts in paise for [from, to].
   Stream<int> watchExpenseTotalBetween(DateTime from, DateTime to) {
@@ -309,8 +320,8 @@ class FinanceRepository {
       (_db.delete(_db.transactions)..where((t) => t.id.equals(id))).go();
 
   Future<void> updateTransaction(Transaction transaction) async {
-    await (_db.update(_db.transactions)..where((t) => t.id.equals(transaction.id)))
-        .write(
+    await (_db.update(_db.transactions)
+      ..where((t) => t.id.equals(transaction.id))).write(
       TransactionsCompanion(
         accountId: Value(transaction.accountId),
         categoryId: Value(transaction.categoryId),
@@ -594,6 +605,14 @@ final transactionsProvider = StreamProvider<List<Transaction>>(
   (ref) => ref.watch(financeRepositoryProvider).watchTransactions(),
 );
 
+/// Transactions inside an arbitrary date range, used by the analysis dashboard.
+final transactionsBetweenProvider =
+    StreamProvider.family<List<Transaction>, ({DateTime from, DateTime to})>(
+      (ref, range) => ref
+          .watch(financeRepositoryProvider)
+          .watchTransactionsBetween(range.from, range.to),
+    );
+
 final totalBalanceProvider = StreamProvider<int>(
   (ref) => ref.watch(financeRepositoryProvider).watchTotalBalance(),
 );
@@ -636,6 +655,31 @@ List<CategorySpend> aggregateSpending({
   for (final t in transactions) {
     if (t.type != TransactionType.expense.index) continue;
     if (t.date.isBefore(from) || t.date.isAfter(to)) continue;
+    byCategory[t.categoryId] = (byCategory[t.categoryId] ?? 0) + t.amountPaise;
+  }
+  final list =
+      byCategory.entries.map((e) {
+          final key = e.key;
+          return CategorySpend(
+            label: key == null ? '—' : (categoryNames[key] ?? '—'),
+            amountPaise: e.value,
+          );
+        }).toList()
+        ..sort((a, b) => b.amountPaise.compareTo(a.amountPaise));
+  return list;
+}
+
+/// Groups transactions of [type] by category, largest first. Unlike
+/// [aggregateSpending] this is not tied to a calendar month, so it serves the
+/// analysis dashboard's selectable date ranges.
+List<CategorySpend> aggregateTransactionsByCategory({
+  required List<Transaction> transactions,
+  required Map<int, String> categoryNames,
+  required TransactionType type,
+}) {
+  final byCategory = <int?, int>{};
+  for (final t in transactions) {
+    if (t.type != type.index) continue;
     byCategory[t.categoryId] = (byCategory[t.categoryId] ?? 0) + t.amountPaise;
   }
   final list =

@@ -7,6 +7,7 @@ import '../../core/backgrounds/background_presets.dart';
 import '../../core/db/database.dart';
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
+import '../../core/permissions/app_permissions.dart';
 import '../../core/providers/providers.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
@@ -597,6 +598,7 @@ List<Widget> _moduleCards(
   final tracks = ref.watch(musicTracksProvider).valueOrNull ?? const [];
   final balance = ref.watch(totalBalanceProvider).valueOrNull;
   final alarm = ref.watch(nextAlarmProvider).valueOrNull;
+  final permissions = ref.watch(featurePermissionsProvider);
 
   final now = DateTime.now();
   final todayStart = DateTime(now.year, now.month, now.day);
@@ -618,67 +620,76 @@ List<Widget> _moduleCards(
   final openTasks = tasks.where((t) => !t.task.isCompleted).length;
 
   return [
-    ModuleCard(
-      module: DashboardModule.alarm,
-      title: l10n.alarms,
-      value:
-          alarm == null
-              ? l10n.none
-              : AlarmTime.format(alarm.hour, alarm.minute),
-      subtitle: l10n.nextAlarm,
-      onTap: () => context.push(AppRoutes.alarms),
-    ),
-    ModuleCard(
-      module: DashboardModule.schedule,
-      title: l10n.navSchedule,
-      value: '${todaysEvents.length}',
-      subtitle: l10n.todaysEvents,
-      onTap: () => context.push(AppRoutes.schedule),
-    ),
-    ModuleCard(
-      module: DashboardModule.tasks,
-      title: l10n.navTasks,
-      value: '$openTasks',
-      subtitle: l10n.dueToday,
-      onTap: () => context.push(AppRoutes.tasks),
-    ),
-    ModuleCard(
-      module: DashboardModule.fitness,
-      title: l10n.fitness,
-      value: weekMins > 0 ? '$weekMins min' : '—',
-      subtitle: l10n.workoutHistory,
-      onTap: () => context.push(AppRoutes.fitness),
-    ),
-    ModuleCard(
-      module: DashboardModule.habits,
-      title: l10n.habits,
-      value: '${habits.length}',
-      subtitle: l10n.today,
-      onTap: () => context.push(AppRoutes.habits),
-    ),
-    ModuleCard(
-      module: DashboardModule.notes,
-      title: l10n.notes,
-      value: '${notes.length}',
-      subtitle: l10n.notes,
-      onTap: () => context.push(AppRoutes.notes),
-    ),
-    ModuleCard(
-      module: DashboardModule.expenses,
-      title: l10n.expenses,
-      value: balance == null ? '—' : formatMoney(balance, locale),
-      subtitle: goals.isEmpty
-          ? l10n.totalBalance
-          : '${goals.length} · ${l10n.savingsGoals}',
-      onTap: () => context.push(AppRoutes.expenses),
-    ),
-    ModuleCard(
-      module: DashboardModule.music,
-      title: l10n.music,
-      value: '${tracks.length}',
-      subtitle: l10n.tracks,
-      onTap: () => context.push(AppRoutes.music),
-    ),
+    if (permissions.isVisible(AppFeature.lifeAlarms))
+      ModuleCard(
+        module: DashboardModule.alarm,
+        title: l10n.alarms,
+        value:
+            alarm == null
+                ? l10n.none
+                : AlarmTime.format(alarm.hour, alarm.minute),
+        subtitle: l10n.nextAlarm,
+        onTap: () => context.push(AppRoutes.alarms),
+      ),
+    if (permissions.isVisible(AppFeature.lifeSchedule))
+      ModuleCard(
+        module: DashboardModule.schedule,
+        title: l10n.navSchedule,
+        value: '${todaysEvents.length}',
+        subtitle: l10n.todaysEvents,
+        onTap: () => context.push(AppRoutes.schedule),
+      ),
+    if (permissions.isVisible(AppFeature.navTasks))
+      ModuleCard(
+        module: DashboardModule.tasks,
+        title: l10n.navTasks,
+        value: '$openTasks',
+        subtitle: l10n.dueToday,
+        onTap: () => context.push(AppRoutes.tasks),
+      ),
+    if (permissions.isVisible(AppFeature.navFitness))
+      ModuleCard(
+        module: DashboardModule.fitness,
+        title: l10n.fitness,
+        value: weekMins > 0 ? '$weekMins min' : '—',
+        subtitle: l10n.workoutHistory,
+        onTap: () => context.push(AppRoutes.fitness),
+      ),
+    if (permissions.isVisible(AppFeature.lifeHabits))
+      ModuleCard(
+        module: DashboardModule.habits,
+        title: l10n.habits,
+        value: '${habits.length}',
+        subtitle: l10n.today,
+        onTap: () => context.push(AppRoutes.habits),
+      ),
+    if (permissions.isVisible(AppFeature.lifeNotes))
+      ModuleCard(
+        module: DashboardModule.notes,
+        title: l10n.notes,
+        value: '${notes.length}',
+        subtitle: l10n.notes,
+        onTap: () => context.push(AppRoutes.notes),
+      ),
+    if (permissions.isVisible(AppFeature.navExpenses))
+      ModuleCard(
+        module: DashboardModule.expenses,
+        title: l10n.expenses,
+        value: balance == null ? '—' : formatMoney(balance, locale),
+        subtitle:
+            goals.isEmpty
+                ? l10n.totalBalance
+                : '${goals.length} · ${l10n.savingsGoals}',
+        onTap: () => context.push(AppRoutes.expenses),
+      ),
+    if (permissions.isVisible(AppFeature.wellnessMusic))
+      ModuleCard(
+        module: DashboardModule.music,
+        title: l10n.music,
+        value: '${tracks.length}',
+        subtitle: l10n.tracks,
+        onTap: () => context.push(AppRoutes.music),
+      ),
   ];
 }
 

@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/db/database.dart';
+import '../../core/localization/generated/app_localizations.dart';
 import '../../core/localization/l10n_extension.dart';
+import '../../core/permissions/app_permissions.dart';
 import '../../core/utils/money.dart';
 import '../../core/utils/recurrence.dart';
 import '../../core/theme/app_theme.dart';
@@ -16,26 +18,61 @@ import '../../core/widgets/dashboard_components.dart';
 import '../../core/widgets/module_scaffold.dart';
 import 'data/finance_repository.dart';
 import 'category_picker.dart';
+import 'expense_add_tab.dart';
+import 'expense_dashboard_tab.dart';
 import 'item_actions.dart';
 import 'savings_goals_ui.dart';
 import 'transaction_list_helpers.dart';
 import 'transaction_editor.dart';
 
-class ExpensesScreen extends ConsumerStatefulWidget {
+enum ExpenseTab {
+  overview(AppFeature.financeOverview),
+  dashboard(AppFeature.financeDashboard),
+  add(AppFeature.financeAdd),
+  budgets(AppFeature.financeBudgets),
+  debts(AppFeature.financeDebts),
+  savingsGoals(AppFeature.financeSavingsGoals);
+
+  const ExpenseTab(this.feature);
+
+  final AppFeature feature;
+}
+
+class ExpensesScreen extends ConsumerWidget {
   const ExpensesScreen({super.key});
 
   @override
-  ConsumerState<ExpensesScreen> createState() => _ExpensesScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final permissions = ref.watch(featurePermissionsProvider);
+    final tabs =
+        ExpenseTab.values
+            .where((tab) => permissions.isVisible(tab.feature))
+            .toList();
+    final effectiveTabs = tabs.isEmpty ? const [ExpenseTab.overview] : tabs;
+    return _ExpensesScaffold(
+      key: ValueKey(effectiveTabs.map((tab) => tab.name).join(',')),
+      tabs: effectiveTabs,
+    );
+  }
 }
 
-class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
+class _ExpensesScaffold extends ConsumerStatefulWidget {
+  const _ExpensesScaffold({super.key, required this.tabs});
+
+  final List<ExpenseTab> tabs;
+
+  @override
+  ConsumerState<_ExpensesScaffold> createState() => _ExpensesScaffoldState();
+}
+
+class _ExpensesScaffoldState extends ConsumerState<_ExpensesScaffold>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 4, vsync: this);
+    _tabs = TabController(length: widget.tabs.length, vsync: this);
     _tabs.addListener(() {
       if (!_tabs.indexIsChanging) setState(() {});
     });
@@ -47,12 +84,30 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
     super.dispose();
   }
 
+  String _tabLabel(AppLocalizations l10n, ExpenseTab tab) => switch (tab) {
+    ExpenseTab.overview => l10n.expense,
+    ExpenseTab.dashboard => l10n.dashboard,
+    ExpenseTab.add => l10n.add,
+    ExpenseTab.budgets => l10n.budgets,
+    ExpenseTab.debts => l10n.debts,
+    ExpenseTab.savingsGoals => l10n.savingsGoals,
+  };
+
+  Widget _tabView(ExpenseTab tab) => switch (tab) {
+    ExpenseTab.overview => const _TransactionsTab(),
+    ExpenseTab.dashboard => const ExpenseDashboardTab(),
+    ExpenseTab.add => const ExpenseAddTab(),
+    ExpenseTab.budgets => const _BudgetsTab(),
+    ExpenseTab.debts => const _DebtsTab(),
+    ExpenseTab.savingsGoals => const SavingsGoalsTab(),
+  };
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final balance = ref.watch(totalBalanceProvider);
     final locale = Localizations.localeOf(context).toString();
-    final onGoalsTab = _tabs.index == 3;
+    final activeTab = widget.tabs[_tabs.index.clamp(0, widget.tabs.length - 1)];
 
     return Scaffold(
       appBar: AppBar(
@@ -67,22 +122,28 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
         ],
         bottom: TabBar(
           controller: _tabs,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           tabs: [
-            Tab(text: l10n.expense),
-            Tab(text: l10n.budgets),
-            Tab(text: l10n.debts),
-            Tab(text: l10n.savingsGoals),
+            for (final tab in widget.tabs) Tab(text: _tabLabel(l10n, tab)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: onGoalsTab ? 'expensesGoalsAdd' : 'expensesAdd',
-        onPressed: () => onGoalsTab
-            ? showSavingsGoalEditor(context, ref)
-            : showTransactionEditor(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(onGoalsTab ? l10n.newGoal : l10n.addTransaction),
-      ),
+      floatingActionButton: switch (activeTab) {
+        ExpenseTab.savingsGoals => FloatingActionButton.extended(
+          heroTag: 'expensesGoalsAdd',
+          onPressed: () => showSavingsGoalEditor(context, ref),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.newGoal),
+        ),
+        ExpenseTab.add || ExpenseTab.dashboard => null,
+        _ => FloatingActionButton.extended(
+          heroTag: 'expensesAdd',
+          onPressed: () => showTransactionEditor(context, ref),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addTransaction),
+        ),
+      },
       body: Column(
         children: [
           Padding(
@@ -126,12 +187,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen>
           Expanded(
             child: TabBarView(
               controller: _tabs,
-              children: const [
-                _TransactionsTab(),
-                _BudgetsTab(),
-                _DebtsTab(),
-                SavingsGoalsTab(),
-              ],
+              children: [for (final tab in widget.tabs) _tabView(tab)],
             ),
           ),
         ],
@@ -270,45 +326,46 @@ class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
               ),
             ),
             Expanded(
-              child: monthList.isEmpty && due.isEmpty
-                  ? EmptyState(
-                      icon: Icons.receipt_long_outlined,
-                      message: l10n.emptyExpenses,
-                    )
-                  : ListView(
-                      padding: const EdgeInsets.only(bottom: 96),
-                      children: [
-                        if (due.isNotEmpty) _DueRecurringCard(rules: due),
-                        if (showChart)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                            child: SectionCard(
-                              title: l10n.spendingByCategory,
-                              icon: Icons.pie_chart_outline,
-                              child: SimpleBarChart(slices: slices),
+              child:
+                  monthList.isEmpty && due.isEmpty
+                      ? EmptyState(
+                        icon: Icons.receipt_long_outlined,
+                        message: l10n.emptyExpenses,
+                      )
+                      : ListView(
+                        padding: const EdgeInsets.only(bottom: 96),
+                        children: [
+                          if (due.isNotEmpty) _DueRecurringCard(rules: due),
+                          if (showChart)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                              child: SectionCard(
+                                title: l10n.spendingByCategory,
+                                icon: Icons.pie_chart_outline,
+                                child: SimpleBarChart(slices: slices),
+                              ),
                             ),
-                          ),
-                        for (final day in dayKeys) ...[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                            child: Text(
-                              daySectionLabel(context, day),
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700),
+                          for (final day in dayKeys) ...[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                              child: Text(
+                                daySectionLabel(context, day),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
                             ),
-                          ),
-                          for (final t in grouped[day]!)
-                            _transactionTile(
-                              context,
-                              ref,
-                              t,
-                              locale,
-                              categoryNames,
-                              accountNames,
-                            ),
+                            for (final t in grouped[day]!)
+                              _transactionTile(
+                                context,
+                                ref,
+                                t,
+                                locale,
+                                categoryNames,
+                                accountNames,
+                              ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
             ),
           ],
         );
@@ -359,11 +416,7 @@ class _TransactionsTabState extends ConsumerState<_TransactionsTab> {
                 () => showEditDeleteMenu(
                   context,
                   onEdit:
-                      () => showTransactionEditor(
-                        context,
-                        ref,
-                        transaction: t,
-                      ),
+                      () => showTransactionEditor(context, ref, transaction: t),
                   onDelete: () => _deleteWithUndo(t),
                 ),
           ),
@@ -417,7 +470,8 @@ class _BudgetsTab extends ConsumerWidget {
                               budget: b,
                               locale: locale,
                               onEdit:
-                                  () => showBudgetEditor(context, ref, budget: b),
+                                  () =>
+                                      showBudgetEditor(context, ref, budget: b),
                               onDelete: () async {
                                 final ok = await confirmDialog(
                                   context,
@@ -675,13 +729,16 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
                                 ),
                                 title: Text(a.name),
                                 subtitle: Text(
-                                  AccountType.fromIndex(a.type).name,
+                                  AccountType.fromIndex(a.type).label,
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      formatMoney(a.openingBalancePaise, locale),
+                                      formatMoney(
+                                        a.openingBalancePaise,
+                                        locale,
+                                      ),
                                     ),
                                     itemMoreButton(
                                       onPressed:
@@ -697,9 +754,10 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
                                               final repo = ref.read(
                                                 financeRepositoryProvider,
                                               );
-                                              if (await repo.accountHasTransactions(
-                                                a.id,
-                                              )) {
+                                              if (await repo
+                                                  .accountHasTransactions(
+                                                    a.id,
+                                                  )) {
                                                 if (context.mounted) {
                                                   ScaffoldMessenger.of(
                                                     context,
@@ -721,7 +779,9 @@ Future<void> showAccountsManager(BuildContext context, WidgetRef ref) async {
                                                 confirmLabel: l10n.delete,
                                               );
                                               if (!context.mounted) return;
-                                              if (ok) await repo.deleteAccount(a.id);
+                                              if (ok) {
+                                                await repo.deleteAccount(a.id);
+                                              }
                                             },
                                           ),
                                     ),
@@ -765,60 +825,54 @@ Future<void> showBudgetEditor(
         (dialogContext) => Consumer(
           builder:
               (context, ref, _) => StatefulBuilder(
-                builder:
-                    (context, setState) {
-                      final categories =
-                          ref.watch(categoriesProvider).valueOrNull ??
-                          const <Category>[];
-                      final expense =
-                          categories.where((c) => c.kind == 1).toList();
-                      return AlertDialog(
-                        title: Text(budget == null ? l10n.budgets : l10n.edit),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextField(
-                                controller: amountCtrl,
-                                autofocus: true,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                decoration: InputDecoration(
-                                  labelText: l10n.amount,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                l10n.category,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                              const SizedBox(height: 8),
-                              CategoryChipPicker(
-                                categories: expense,
-                                selectedId: categoryId,
-                                kind: CategoryKind.expense,
-                                noneLabel: l10n.all,
-                                onSelected:
-                                    (id) => setState(() => categoryId = id),
-                              ),
-                            ],
+                builder: (context, setState) {
+                  final categories =
+                      ref.watch(categoriesProvider).valueOrNull ??
+                      const <Category>[];
+                  final expense = categories.where((c) => c.kind == 1).toList();
+                  return AlertDialog(
+                    title: Text(budget == null ? l10n.budgets : l10n.edit),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: amountCtrl,
+                            autofocus: true,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(labelText: l10n.amount),
                           ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: Text(l10n.cancel),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.category,
+                            style: Theme.of(context).textTheme.labelLarge,
                           ),
-                          FilledButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: Text(l10n.save),
+                          const SizedBox(height: 8),
+                          CategoryChipPicker(
+                            categories: expense,
+                            selectedId: categoryId,
+                            kind: CategoryKind.expense,
+                            noneLabel: l10n.all,
+                            onSelected: (id) => setState(() => categoryId = id),
                           ),
                         ],
-                      );
-                    },
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(l10n.save),
+                      ),
+                    ],
+                  );
+                },
               ),
         ),
   );
@@ -834,10 +888,7 @@ Future<void> showBudgetEditor(
       );
     } else {
       await repo.updateBudget(
-        budget.copyWith(
-          categoryId: Value(categoryId),
-          amountPaise: paise,
-        ),
+        budget.copyWith(categoryId: Value(categoryId), amountPaise: paise),
       );
     }
   }
@@ -852,9 +903,7 @@ Future<void> showDebtEditor(
   final nameCtrl = TextEditingController(text: debt?.name ?? '');
   final amountCtrl = TextEditingController(
     text:
-        debt == null
-            ? ''
-            : Money.paiseToRupees(debt.principalPaise).toString(),
+        debt == null ? '' : Money.paiseToRupees(debt.principalPaise).toString(),
   );
   var type = debt?.type ?? 0;
   final saved = await showDialog<bool>(
@@ -1186,8 +1235,7 @@ Future<void> showRecurringEditor(
     return;
   }
   final amountCtrl = TextEditingController(
-    text:
-        rule == null ? '' : Money.paiseToRupees(rule.amountPaise).toString(),
+    text: rule == null ? '' : Money.paiseToRupees(rule.amountPaise).toString(),
   );
   final noteCtrl = TextEditingController(text: rule?.note ?? '');
   var type =
@@ -1216,8 +1264,10 @@ Future<void> showRecurringEditor(
                       categories
                           .where(
                             (c) =>
-                                (type == TransactionType.income && c.kind == 0) ||
-                                (type == TransactionType.expense && c.kind == 1),
+                                (type == TransactionType.income &&
+                                    c.kind == 0) ||
+                                (type == TransactionType.expense &&
+                                    c.kind == 1),
                           )
                           .toList();
                   return AlertDialog(
@@ -1249,16 +1299,17 @@ Future<void> showRecurringEditor(
                           TextField(
                             controller: amountCtrl,
                             autofocus: true,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             decoration: InputDecoration(labelText: l10n.amount),
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<int>(
                             value: accountId,
-                            decoration: InputDecoration(labelText: l10n.account),
+                            decoration: InputDecoration(
+                              labelText: l10n.account,
+                            ),
                             items: [
                               for (final a in accounts)
                                 DropdownMenuItem(
@@ -1267,7 +1318,8 @@ Future<void> showRecurringEditor(
                                 ),
                             ],
                             onChanged:
-                                (v) => setState(() => accountId = v ?? accountId),
+                                (v) =>
+                                    setState(() => accountId = v ?? accountId),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -1303,7 +1355,8 @@ Future<void> showRecurringEditor(
                                 ),
                             ],
                             onChanged:
-                                (v) => setState(() => frequency = v ?? frequency),
+                                (v) =>
+                                    setState(() => frequency = v ?? frequency),
                           ),
                           const SizedBox(height: 12),
                           ListTile(
